@@ -1,0 +1,115 @@
+Instructions for preparing inputs for the OpenFE public benchmark
+#################################################################
+
+Overview & Aims
+***************
+
+This document provides guidance on preparing the `Schrodinger benchmark files <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0/fep_benchmark_inputs/structure_inputs>`_ for use in the OpenFE 2024 public dataset industry benchmark.
+
+Whilst each partner organization will be responsible for preparing inputs using their own tooling, this guidance aims to provide a set of rules to standardize the process and ensure that scientifically equivalent simulation inputs are generated.
+
+This document will be continually updated based on feedback from benchmark partners. Please reach out should you have any questions or require additional information whilst preparing your inputs.
+
+Input preparation instructions
+******************************
+
+Input data source
+=================
+
+All input data are sourced from the `v2.0 release of the Schrodinger free energy benchmark <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_. Specifically, input PDB, SDF and edges CSV files can be found under the relevant `structure input <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0/fep_benchmark_inputs/structure_inputs>`_ sub-folder.
+
+For your convenience, a snapshot of these inputs have been placed under the OpenFE Public Benchmark repository. We recommend that you clone this repository and use those input files.
+
+Extracting cofactors
+====================
+
+In its benchmark inputs, Schrodinger places cofactor molecules within the PDB file. Currently OpenFE cannot parse such inputs as small molecules are expected as separate inputs.
+
+Should your input PDB have cofactors, please extract these from the PDB and store them within an SDF file named “cofactors.sdf”. You may be required to manually assign and/or correct bond orders such that they represent the expected state of the molecules and the SDF files are readable by RDKit.
+
+.. note::
+   Waters and ions do not need to be extracted from the PDB file.
+
+Capping proteins
+================
+
+Capping protein depends on how the protein’s termini are handled in the Schrodinger provided PDB files.
+
+If the termini has either a neutral proton caps, e.g. NH2 or C(=O)H, or ACE/NME caps:
+Assign ACE and/or NME caps to the termini
+Note: in some cases Schrodinger / Maestro may call the NME cap NMA, if this happen, the cap should be renamed to NME
+
+If the termini has charged termini, e.g. COO- or NH3+:
+Keep the termini in its charged state
+Note: cases where this is observed, e.g. JNK1, there appears to be the possibility of an interaction between the perturbed ligand and the termini. Keeping the termini charged should retain the intended interaction.
+
+.. note::
+   Some tools, e.g. Pymol, are known to erroneously place caps out of order with the protein chain or TER cards between the protein chain and the cap. Please ensure that the caps appear in order (i.e. before or after the relevant termini residue), and that there are no TER cards between the termini residue and the cap.
+
+Non canonical amino acids (PTMs)
+================================
+
+Some of the input structures are known to have non-canonical amino acids, specifically TPO, PTR, or TYS residues. The OpenFE team has reviewed all such cases and the amino acid was found to be far from the binding site.
+
+As the OpenFE software cannot easily handle PTMs at this stage, **these residues should be modified back to their canonical alternative**. Tools such as Pymol offer the ability to mutate residues in this manner.
+
+Protonating inputs
+==================
+
+All files in the Schrodinger input files are considered to be in their intended protonation state. No additional protonation steps should be carried out.
+
+.. note::
+   1. Care should be taken that any processing steps do not alter the protonation state. For example, PyMol is known to change histidines from HID to HIE during capping.
+
+   2. To ensure that protonation states were not altered, please ensure that the prepared PDB file has the same number of protein atoms outside of capping groups.
+
+Setting residue names
+=====================
+
+Where possible, residue should be assigned PDB-compliant names.
+
+*Example 1: Waters named SPC (e.g. in the case of Thrombin in the JACS set), should be renamed to HOH.*
+
+*Example 2: Capping groups named NMA should be renamed to NME (e.g. in the case of PTP1B in the JACS set).*
+
+Fixing hydrogen atom names
+==========================
+
+In some cases, hydrogen names may need to be manually altered to match expected, i.e. PDB compliant names.
+
+These exact cases can be difficult to identify, running the validation script (see below), will help identify these. Please reach out to the OpenFE team should you encounter any unknown hydrogen names.
+
+*Example 1: GLY termini hydrogens being named 3HA and HA instead of HA3 and HA2.*
+
+*Example 2: HIS (in the HID state) hydrogens being named 1HD, 2HD, and 1HE instead of HD1, HD2, and HE1.*
+
+Validating prepared files
+=========================
+
+To ensure that prepared files can be run using OpenFE, a short MD simulation validation script has been provided: <insert location of the script>. In an environment with OpenFE 1.0 installed, please run this script by calling:
+
+.. code-block:: python
+
+   # If you don’t have cofactors
+   python validate-inputs --pdb protein.pdb
+
+   # If you have cofactors
+   python validate-inputs --pdb protein.pdb --cofactors cofactors.sdf
+
+
+If the script outputs “SIMULATION COMPLETE”, then your inputs are suitable for use with OpenFE. If they do not, then there is likely an issue with the input file. Please report the error message emitted when contacting the OpenFE team for advice on how to fix any issues.
+
+.. note::
+   This script runs a very short simulation, it is recommended that it is executed on a machine with a CUDA-enabled GPU.
+
+Submitting prepared input files
+===============================
+
+All prepared inputs should be submitted to the OpenFE Public Benchmark github repository. This should be done via Pull Request, with a folder for each prepared system including the protein PDB, ligand SDF, relevant edges CSV, and if available cofactor SDF file. A short bullet point summary of any remediation steps, including any software used, should also be included as a markdown file.
+
+If necessary, you may email the OpenFE team with this information and the Pull Request will be opened on your behalf.
+
+Once the Pull Request is opened, the OpenFE team will carry out a minimal review of the contents, including a short validation that the alchemical transformations will work. If all checks pass, the Pull Request will be merged and you should be ready to start the next step in the benchmarking process (setting up the alchemical network).
+
+
+
