@@ -10,7 +10,7 @@ This page provides guidance on preparing the `Schrodinger benchmark files <https
 
 Whilst each partner organization will be responsible for preparing inputs using their own tooling, this guidance aims to provide a set of rules to standardize the process and ensure that scientifically equivalent simulation inputs are generated.
 
-This page will be continually updated based on feedback from benchmark partners. Please :ref:`reach out<get-in-touch>` should you have any questions or require additional information whilst preparing your inputs.
+This page will be continually updated based on feedback from benchmark partners. Please :ref:`reach out <get-in-touch>` should you have any questions or require additional information whilst preparing your inputs.
 
 Input preparation instructions
 ******************************
@@ -18,7 +18,7 @@ Input preparation instructions
 Input data source
 =================
 
-All input data are sourced from the `v2.0 release of the Schrodinger free energy benchmark <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
+All input data are sourced from the `v2.0 release of the Schrodinger binding free energy benchmarks <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
 
 For your convenience, a snapshot of these inputs have been placed under the OpenFE Public Benchmark repository.
 Specifically, input PDB, SDF and edges CSV files can be found under the relevant `original structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/inputs/original_structures>`_ sub-folder.
@@ -47,7 +47,8 @@ Whether or not proteins have to be capped depends on how the protein’s termini
 2. If the termini are charged, e.g. COO- or NH3+:
     * Keep the termini in their charged state
 .. note::
-   Cases where this is observed, e.g. JNK1, there appears to be the possibility of an interaction between the perturbed ligand and the termini. Keeping the termini charged should retain the intended interaction.
+   In cases where this is observed, e.g. JNK1, there is a possibility that interactions between the perturbed ligand and the termini may form.
+   Keeping the termini charged should retain the intended interaction.
 
 .. note::
    Some tools, e.g. Pymol, are known to erroneously place caps out of order with the protein chain or TER cards between the protein chain and the cap. Please ensure that the caps appear in order (i.e. before or after the relevant termini residue), and that there are no TER cards between the termini residue and the cap.
@@ -55,9 +56,11 @@ Whether or not proteins have to be capped depends on how the protein’s termini
 Non canonical amino acids (PTMs)
 ================================
 
-Some of the input structures are known to have non-canonical amino acids, specifically TPO, PTR, or TYS residues. The OpenFE team has reviewed all such cases and the amino acid was found to be far from the binding site.
+Some of the input structures have non-canonical amino acids, specifically TPO, PTR, or TYS residues.
+The OpenFE team has reviewed all such cases and the amino acids were found to be far from the binding site.
 
-As the OpenFE software cannot easily handle PTMs at this stage, **these residues should be modified back to their canonical alternative**. Tools such as Pymol offer the ability to mutate residues in this manner.
+As the OpenFE software cannot easily handle PTMs at this stage, **these residues should be modified back to their canonical alternative**.
+Tools such as Pymol offer the ability to mutate residues in this manner.
 
 Protonating inputs
 ==================
@@ -99,10 +102,10 @@ In an environment with OpenFE 1.0 installed, please run this script by calling:
 .. code-block:: python
 
    # If you don’t have cofactors
-   python validate-inputs --pdb protein.pdb
+   python input_validation --pdb protein.pdb
 
    # If you have cofactors
-   python validate-inputs --pdb protein.pdb --cofactors cofactors.sdf
+   python input_validation --pdb protein.pdb --cofactors cofactors.sdf
 
 
 If the script outputs “SIMULATION COMPLETE”, then your inputs are suitable for use with OpenFE. If they do not, then there is likely an issue with the input file. Please report the error message emitted when contacting the OpenFE team for advice on how to fix any issues.
