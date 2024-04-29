@@ -1,6 +1,11 @@
 OpenFE 2024 Public Dataset Industry Benchmarking Repository
 ===========================================================
 
+
 Welcome, this page is still under construction!
 
-Munchlax is the best pokemon
+.. toctree::
+   :maxdepth: 1
+   :caption: Table of Contents
+
+   input_preparation
