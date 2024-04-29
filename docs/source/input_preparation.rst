@@ -18,7 +18,7 @@ Input data source
 
 All input data are sourced from the `v2.0 release of the Schrodinger free energy benchmark <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_. Specifically, input PDB, SDF and edges CSV files can be found under the relevant `structure input <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0/fep_benchmark_inputs/structure_inputs>`_ sub-folder.
 
-For your convenience, a snapshot of these inputs have been placed under the OpenFE Public Benchmark repository. We recommend that you clone this repository and use those input files.
+For your convenience, a `snapshot of these inputs <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/inputs/original_structures>`_ have been placed under the OpenFE Public Benchmark repository. We recommend that you clone this repository and use those input files.
 
 Extracting cofactors
 ====================
@@ -33,15 +33,17 @@ Should your input PDB have cofactors, please extract these from the PDB and stor
 Capping proteins
 ================
 
-Capping protein depends on how the protein’s termini are handled in the Schrodinger provided PDB files.
+Whether or not proteins have to be capped depends on how the protein’s termini are handled in the Schrodinger provided PDB files.
 
-If the termini has either a neutral proton caps, e.g. NH2 or C(=O)H, or ACE/NME caps:
-Assign ACE and/or NME caps to the termini
-Note: in some cases Schrodinger / Maestro may call the NME cap NMA, if this happen, the cap should be renamed to NME
+1. If the termini are neutral, e.g. NH2 or C(=O)H, or have ACE/NME caps:
+    * Assign ACE and/or NME caps to the termini
+.. note::
+   In some cases Schrodinger / Maestro may call the NME cap NMA, if this happen, the cap should be renamed to NME.
 
-If the termini has charged termini, e.g. COO- or NH3+:
-Keep the termini in its charged state
-Note: cases where this is observed, e.g. JNK1, there appears to be the possibility of an interaction between the perturbed ligand and the termini. Keeping the termini charged should retain the intended interaction.
+2. If the termini are charged, e.g. COO- or NH3+:
+    * Keep the termini in their charged state
+.. note::
+   Cases where this is observed, e.g. JNK1, there appears to be the possibility of an interaction between the perturbed ligand and the termini. Keeping the termini charged should retain the intended interaction.
 
 .. note::
    Some tools, e.g. Pymol, are known to erroneously place caps out of order with the protein chain or TER cards between the protein chain and the cap. Please ensure that the caps appear in order (i.e. before or after the relevant termini residue), and that there are no TER cards between the termini residue and the cap.
