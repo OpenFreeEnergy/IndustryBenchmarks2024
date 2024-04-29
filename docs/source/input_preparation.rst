@@ -1,14 +1,16 @@
+.. _input-preparation:
+
 Instructions for preparing inputs for the OpenFE public benchmark
 #################################################################
 
 Overview & Aims
 ***************
 
-This document provides guidance on preparing the `Schrodinger benchmark files <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0/fep_benchmark_inputs/structure_inputs>`_ for use in the OpenFE 2024 public dataset industry benchmark.
+This page provides guidance on preparing the `Schrodinger benchmark files <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0/fep_benchmark_inputs/structure_inputs>`_ for use in the OpenFE 2024 public dataset industry benchmark.
 
 Whilst each partner organization will be responsible for preparing inputs using their own tooling, this guidance aims to provide a set of rules to standardize the process and ensure that scientifically equivalent simulation inputs are generated.
 
-This document will be continually updated based on feedback from benchmark partners. Please reach out should you have any questions or require additional information whilst preparing your inputs.
+This page will be continually updated based on feedback from benchmark partners. Please reach out (:ref:`get-in-touch`) should you have any questions or require additional information whilst preparing your inputs.
 
 Input preparation instructions
 ******************************
@@ -16,9 +18,11 @@ Input preparation instructions
 Input data source
 =================
 
-All input data are sourced from the `v2.0 release of the Schrodinger free energy benchmark <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_. Specifically, input PDB, SDF and edges CSV files can be found under the relevant `structure input <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0/fep_benchmark_inputs/structure_inputs>`_ sub-folder.
+All input data are sourced from the `v2.0 release of the Schrodinger free energy benchmark <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
 
-For your convenience, a `snapshot of these inputs <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/inputs/original_structures>`_ have been placed under the OpenFE Public Benchmark repository. We recommend that you clone this repository and use those input files.
+For your convenience, a snapshot of these inputs have been placed under the OpenFE Public Benchmark repository.
+Specifically, input PDB, SDF and edges CSV files can be found under the relevant `original structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/inputs/original_structures>`_ sub-folder.
+We recommend that you clone this repository and use those input files.
 
 Extracting cofactors
 ====================
@@ -88,7 +92,9 @@ These exact cases can be difficult to identify, running the validation script (s
 Validating prepared files
 =========================
 
-To ensure that prepared files can be run using OpenFE, a short MD simulation validation script has been provided: <insert location of the script>. In an environment with OpenFE 1.0 installed, please run this script by calling:
+To ensure that prepared files can be run using OpenFE, a short MD simulation validation script has been provided under
+`utils/input_validation.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/utils/onput_validation.py>`_.
+In an environment with OpenFE 1.0 installed, please run this script by calling:
 
 .. code-block:: python
 
@@ -107,7 +113,10 @@ If the script outputs “SIMULATION COMPLETE”, then your inputs are suitable f
 Submitting prepared input files
 ===============================
 
-All prepared inputs should be submitted to the OpenFE Public Benchmark github repository. This should be done via Pull Request, with a folder for each prepared system including the protein PDB, ligand SDF, relevant edges CSV, and if available cofactor SDF file. A short bullet point summary of any remediation steps, including any software used, should also be included as a markdown file.
+All prepared inputs should be submitted to the OpenFE Public Benchmark github repository.
+This should be done via Pull Request, with a folder for each prepared system including the protein PDB, ligand SDF, relevant edges CSV, and if available cofactor SDF file.
+A short bullet point summary of any remediation steps, including any software used, should also be included as a markdown file.
+Further details can be found in the :ref:`contributing-inputs` page.
 
 If necessary, you may email the OpenFE team with this information and the Pull Request will be opened on your behalf.
 
