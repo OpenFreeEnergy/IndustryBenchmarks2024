@@ -84,7 +84,7 @@ def run_inputs(pdb, cofactors):
     # Store there in a components dictionary
     components_dict = {
         'protein': prot,
-        'sovlent': solv,
+        'solvent': solv,
     }
 
     # If we have cofactors, populate them and store them based on
