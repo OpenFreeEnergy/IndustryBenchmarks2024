@@ -10,7 +10,7 @@ This page provides guidance on preparing the `Schrodinger benchmark files <https
 
 Whilst each partner organization will be responsible for preparing inputs using their own tooling, this guidance aims to provide a set of rules to standardize the process and ensure that scientifically equivalent simulation inputs are generated.
 
-This page will be continually updated based on feedback from benchmark partners. Please reach out (:ref:`get-in-touch`) should you have any questions or require additional information whilst preparing your inputs.
+This page will be continually updated based on feedback from benchmark partners. Please :ref:`reach out<get-in-touch>` should you have any questions or require additional information whilst preparing your inputs.
 
 Input preparation instructions
 ******************************
@@ -29,7 +29,7 @@ Extracting cofactors
 
 In its benchmark inputs, Schrodinger places cofactor molecules within the PDB file. Currently OpenFE cannot parse such inputs as small molecules are expected as separate inputs.
 
-Should your input PDB have cofactors, please extract these from the PDB and store them within an SDF file named “cofactors.sdf”. You may be required to manually assign and/or correct bond orders such that they represent the expected state of the molecules and the SDF files are readable by RDKit.
+Should your input PDB have cofactors, please extract these from the PDB and store them within an SDF file named ``cofactors.sdf``. You may be required to manually assign and/or correct bond orders such that they represent the expected state of the molecules and the SDF files are readable by RDKit.
 
 .. note::
    Waters and ions do not need to be extracted from the PDB file.
@@ -72,7 +72,7 @@ All files in the Schrodinger input files are considered to be in their intended 
 Setting residue names
 =====================
 
-Where possible, residue should be assigned PDB-compliant names.
+Where possible, residues should be assigned PDB-compliant names.
 
 *Example 1: Waters named SPC (e.g. in the case of Thrombin in the JACS set), should be renamed to HOH.*
 
@@ -81,7 +81,7 @@ Where possible, residue should be assigned PDB-compliant names.
 Fixing hydrogen atom names
 ==========================
 
-In some cases, hydrogen names may need to be manually altered to match expected, i.e. PDB compliant names.
+In some cases, hydrogen names may need to be manually altered to match expected, i.e. PDB compliant, names.
 
 These exact cases can be difficult to identify, running the validation script (see below), will help identify these. Please reach out to the OpenFE team should you encounter any unknown hydrogen names.
 
@@ -113,7 +113,8 @@ If the script outputs “SIMULATION COMPLETE”, then your inputs are suitable f
 Submitting prepared input files
 ===============================
 
-All prepared inputs should be submitted to the OpenFE Public Benchmark github repository.
+All prepared inputs should be submitted to the OpenFE Public Benchmark github repository, more specifically to the
+`prepared_structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/inputs/prepared_structures>`_ subfolder.
 This should be done via Pull Request, with a folder for each prepared system including the protein PDB, ligand SDF, relevant edges CSV, and if available cofactor SDF file.
 A short bullet point summary of any remediation steps, including any software used, should also be included as a markdown file.
 Further details can be found in the :ref:`contributing-inputs` page.
