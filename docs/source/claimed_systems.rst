@@ -185,7 +185,7 @@ Benchmarking Systems
    * - **Janssen BACE**
      -
      - BACE1 (4 sets)
-   * - OPLS stress set
+   * - **OPLS stress set**
      -
      - BACE1 (5 sets)
    * -
