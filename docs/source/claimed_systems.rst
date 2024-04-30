@@ -1,11 +1,15 @@
 Benchmarking Systems
 ####################
 
-.. list-table:: Title
+Here, we provide the full list of benchmarking systems from the `Schrodinger binding free energy benchmarks <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
+The claimed systems are the datasets that have been picked by our industrial partners to be prepared and run, while the unclaimed systems will not be included in the benchmarking effort.
+We will update this list if more systems are being claimed.
+
+.. list-table:: List of benchmarking systems
    :widths: 40 30 30
    :header-rows: 1
 
-   * - Set
+   * -
      - Claimed
      - Unclaimed
    * - **JACS set**
@@ -55,7 +59,7 @@ Benchmarking Systems
      -
    * - **Fragments**
      - LigA
-     - HSP90 (2x)
+     - HSP90 (2 sets)
    * -
      - JAK2
      - P38
