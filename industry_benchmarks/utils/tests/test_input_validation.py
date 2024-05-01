@@ -51,5 +51,5 @@ class TestScript:
         runner = click.testing.CliRunner()
         with runner.isolated_filesystem():
             result = runner.invoke(main, ['--pdb', bad_protein])
-            assert result.exit_code == 0
-            assert "SIMULATION COMPLETE" in result.output
+            assert result.exit_code == 1
+            assert "SIMULATION COMPLETE" not in result.output
