@@ -21,7 +21,7 @@ Input data source
 All input data are sourced from the `v2.0 release of the Schrodinger binding free energy benchmarks <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
 
 For your convenience, a snapshot of these inputs have been placed under the OpenFE Public Benchmark repository.
-Specifically, input PDB, SDF and edges CSV files can be found under the relevant `original structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/inputs/original_structures>`_ sub-folder.
+Specifically, input PDB, SDF and edges CSV files can be found under the relevant `original structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/inputs/original_structures>`_ sub-folder.
 We recommend that you clone this repository and use those input files.
 
 Extracting cofactors
@@ -96,7 +96,7 @@ Validating prepared files
 =========================
 
 To ensure that prepared files can be run using OpenFE, a short MD simulation validation script has been provided under
-`utils/input_validation.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/utils/onput_validation.py>`_.
+`utils/input_validation.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/onput_validation.py>`_.
 In an environment with OpenFE 1.0 installed, please run this script by calling:
 
 .. code-block:: python
@@ -117,7 +117,7 @@ Submitting prepared input files
 ===============================
 
 All prepared inputs should be submitted to the OpenFE Public Benchmark github repository, more specifically to the
-`prepared_structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/inputs/prepared_structures>`_ subfolder.
+`prepared_structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/inputs/prepared_structures>`_ subfolder.
 This should be done via Pull Request, with a folder for each prepared system including the protein PDB, ligand SDF, relevant edges CSV, and if available cofactor SDF file.
 A short bullet point summary of any remediation steps, including any software used, should also be included as a markdown file.
 Further details can be found in the :ref:`contributing-inputs` page.
