@@ -5,7 +5,9 @@ Contributing inputs
 
 This page will walk you through the process of working with this Github repository and uploading your prepared input files.
 
-**1. Clone the github repository**
+**1. Clone the GitHub repository**
+
+You can clone this repository, meaning making a local copy of the repository, to make it easier to add new files and push changes back to the remote repository on GitHub.com.
 
 .. code-block:: bash
 
@@ -13,6 +15,8 @@ This page will walk you through the process of working with this Github reposito
 
 
 **2. Create and work off of a remote branch**
+
+You can create a remote branch that will allow you to make changes to the repository (e.g. adding new files) without the changes immediately affecting the main reporitory.
 
 .. code-block:: bash
 
@@ -24,7 +28,7 @@ Now you can add your prepared files under the ``industry_benchmarks/inputs/prepa
 
 **3. Push the prepared input files to the Github repository**
 
-Once the preparation is completed, you can upload the files onto Github:
+Once the preparation is completed, you can upload the files onto GitHub.com:
 
 .. code-block:: bash
 
@@ -38,12 +42,9 @@ Once the preparation is completed, you can upload the files onto Github:
 
 **4. Create a Pull Request**
 
-In a next step, you can create a Pull Request on Github.
-
-ToDo:
-      Add pictures of how it would look like
-
-      Add link to PR template for input file submission
-
+In a next step, you can create a Pull Request on GitHub. A Pull Request (PR) is a proposal to merge the changes from your remote branch into another branch, e.g. into the main codebase.
+We created a PR template for you where you can tick off the checklist to ensure that all steps have been completed.
+To create the PR go to the GitHub repository. After pushing the remote branch (step 3) there should now be a note that a new branch (with the name you had given it) has recently been pushed.
+Next, please click on the green button that says "Compare & pull request". Now, you will be able to create the PR from the PR template provided.
 
 
