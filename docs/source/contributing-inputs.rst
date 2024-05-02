@@ -39,6 +39,16 @@ Once the preparation is completed, you can upload the files onto GitHub.com:
    # Push the commit to GitHub
    git push --set-upstream origin <my_remote_branch>
 
+All files will be deposited within the directory ``inputs/prepared_structures`` following the directory structure:
+``inputs/prepared_structures/<set_name>/<system_name>``.
+
+Following files will need to be added to the respective directory for each system (based on the ``template directory``):
+
+* ``PREPARATION_DETAILS.md``: Filled in system preparation details
+* ``protein.pdb``: PDB file with the protein, including crystallographic waters and metals
+* ``cofactors.sdf``: Cofactors that were moved from the original PDB file to this file
+* ``ligands.sdf``: Ligand SDF
+* ``edges.csv``: Edges CSV file
 
 **4. Create a Pull Request**
 
