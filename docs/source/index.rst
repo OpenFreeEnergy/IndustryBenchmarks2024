@@ -9,4 +9,5 @@ Welcome, this page is still under construction!
    :caption: Table of Contents
 
    input_preparation
+   claimed_systems
    phase_1_4_instructions
