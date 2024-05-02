@@ -17,12 +17,12 @@ done the following:
 For each submitted directory:
 
 * [ ] filled in system preparation details in the `PREPARATION_DETAILS.md` file
-* [ ] added a PDB file with the protein named `<system>_protein.pdb`
+* [ ] added a PDB file with the protein named `protein.pdb`
 * [ ] removed any cofactors from the PDB file and placed them in `cofactors.sdf`
 * [ ] kept cystallographic waters and metals in the PDB file
 * [ ] tested the PDB and, if available, cofactors.sdf file using the [input validation script][input_validation]
-* [ ] copied over the ligands SDF file
-* [ ] copied over the edges CSV file
+* [ ] copied over the ligands SDF file to a file named `ligands.sdf`
+* [ ] copied over the edges CSV file to a file named `edges.csv`
 
 <!--
 Here please add a summary of what changes you have made
