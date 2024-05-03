@@ -9,7 +9,7 @@ Getting in touch
 Opening Issues
 ==============
 
-We encourage partners to ask questions and report any issues via the `Issue Tracker <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/issues>`.
+We encourage partners to ask questions and report any issues via the `Issue Tracker <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/issues>`_.
 
 Members of the OpenFE team will periodically triage issues and respond as soon as possible!
 
