@@ -60,7 +60,6 @@ We thank the OpenFE industry partners for their participation, guidance, and fun
 .. toctree::
    :maxdepth: 4
    :caption: Table of Contents
-   :numbered:
    :hidden:
 
    ./public/overview
