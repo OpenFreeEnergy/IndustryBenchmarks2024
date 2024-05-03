@@ -19,7 +19,8 @@ from the `2023 large scale study by Ross et al. <https://www.nature.com/articles
 
 
 .. figure:: public_overview.png
-   :scale: 50%
+   :scale: 100%
+   :align: center
    :alt: Figure 1 - Overview of Public Dataset Benchmark process.
 
     Figure 1: Overview of Public Dataset Benchmark process.
@@ -87,6 +88,13 @@ Depending on the software used to prepare the inputs, the resulting files may ne
 A list of instructions and conditions for preparing inputs are provided :ref:`here <input_preparation>`.
 Updates will be made to these instructions based on feedback by benchmark partners.
 
+
+.. toctree::
+   :maxdepth: 1
+
+   input_preparation
+
+
 Depositing inputs
 =================
 
@@ -101,8 +109,15 @@ This will allow the OpenFE team to:
 Please see the :ref:`contributing inputs instructions <contributing-inputs>` for more details on this process.
 
 
+.. toctree::
+   :maxdepth: 1
+
+   contributing_inputs
+
+
 Phase 2: Running Simulations
 ****************************
+
 
 .. note::
    Details for phase 2 of the public dataset benchmarks are still being finalised. These will be updated as soon as possible!
@@ -120,6 +135,7 @@ Simulation Planning: LOMAP networks
 ===================================
 
 *Details to be published very soon!*
+
 
 Simulation execution
 ====================
@@ -149,19 +165,20 @@ Industry partners will be expected to keep simulation outputs for the duration o
 
 We estimate a requirement of **5 GB per alchemical transformation** edge.
 
-Phase 3: Results Analysis and Gathering
-***************************************
+
+Phase 3: Data Analysis
+**********************
+
+
+.. note::
+   Details for phase 3 of the public dataset benchmarks are still being finalised. These will be updated as soon as possible!
+
 
 In this phase, relevant simulation results will be gathered from industry partners.
 
-Timeline
-========
+**Start date:** *Early September 2024*
+**End date:** *End of October 2024*
 
-**Expected start date.**
-Gathering of simulation results is expected to begin as soon as possible, but no later than the start of **September 2024**.
-
-**Expected completion date.**
-We expect partners to complete this phase by the end of **October 2024**.
 
 Gathering of results
 ====================
@@ -177,61 +194,51 @@ This script will:
 * Gather additional simulation information (optional)
    * Additional simulation metrics, relevant for the OpenFE 2024 scoring data project, may be gathered.
 
-Industry partners will be expected to submit this information back to OpenFE for analysis. Please note that all data will be collected in a human readable format in order to allow industry partners the ability to review the data ahead of submission back to the OpenFE team.
-
-**Estimated development cost**
-
-Development of the necessary analysis scripts and their documentation is expected to take **2 FTE weeks**.
+Industry partners will be expected to submit this information back to OpenFE for
+analysis. Please note that all data will be collected in a human readable format
+in order to allow industry partners the ability to review the data ahead of submission
+back to the OpenFE team.
 
 Analysis of results
 ===================
 
 **Analysis of individual systems**
 
-Initial analysis of results for each system will be carried out by each industry benchmark partner with the help of the OpenFE development team. Should any issues be identified, additional work in data gathering and/or simulations may be required.
+Initial analysis of results for each system will be carried out by each industry benchmark partner
+with the help of the OpenFE development team.
 
 **Analysis of all results**
 
-A final analysis of all simulation results will be conducted by the OpenFE development team with help from volunteering industry board and technical advisory committee members.
+A final analysis of all simulation results will be conducted by the OpenFE development team with
+help from volunteering industry board and technical advisory committee members.
 
-**Time investment**
-
-We estimate this task to require an estimated **2 FTE months** of OpenFE developer time.
-
-This includes:
-
-1. The development of specialized scripts to analyze perturbation networks containing multiple copies of the same ligand in different conformational and protonation states.
-2. Time spent with industry partners investigating non-ideal simulation results
-3. Time spent gathering results and creating appropriate meta analyses and plots
 
 Phase 4: Paper writing
 **********************
 
-Timeline
-========
 
-**Expected start date.**
-Drafting of the manuscript is expected to start in **November 2024**.
+.. note::
+   Details for phase 3 of the public dataset benchmarks are still being finalised. These will be updated as soon as possible!
 
-**Expected completion date.**
-We expect partners to review the manuscript in **December 2024**.
+
+**Start date:** *Early November 2024*
+**End date:** *December 2024*
+
 
 Drafting the manuscript
 =======================
 
-Once all results have been gathered, the OpenFE team alongside volunteer members of the OpenFE board and technical advisory committee will draft a manuscript for open access publication at a relevant journal.
+Once all results have been gathered, the OpenFE team alongside volunteer members of
+the OpenFE board and technical advisory committee will draft a manuscript for open access
+publication at a relevant journal.
 
 Review of manuscript and authorship
 ===================================
 
-All authors will be expected to review and approve the manuscript prior to journal submission. We anticipate doing this in a two round process, the first round where authors are invited to comment on the manuscript, followed by a second one for legal review by each partner organization.
+All authors will be expected to review and approve the manuscript prior to journal submission.
+We anticipate doing this in a two round process, the first round where authors are invited
+to comment on the manuscript, followed by a second one for legal review by each partner organization.
 
-Authorship will be offered to all those involved in the benchmarking process and inclusion will be left to the discretion of each organization.
-
-
-
-
-
-
-
+Authorship will be offered to all those involved in the benchmarking process and inclusion will be
+left to the discretion of each organization.
 
