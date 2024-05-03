@@ -1,7 +1,9 @@
-.. _phase_1_4_instruction:
+.. _private_overview:
 
-Instructions for the OpenFE 2024 Public Benchmark
-#################################################
+**************************
+Private Dataset Benchmarks
+**************************
+
 
 This page outlines the plans and the instructions for the four phases of the public dataset portion of the 2024 OpenFE Industry Benchmark study.
 The work outlined here will be undertaken by either participating industry members or the OpenFE team.

@@ -1,9 +1,8 @@
 .. _public_overview:
 
 *************************
-Public Benchmark Overview
+Public Dataset Benchmarks
 *************************
-
 
 
 This page outlines the plans and the instructions for the four phases of the public dataset portion of the 2024 OpenFE Industry Benchmark study.
