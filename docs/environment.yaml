@@ -5,4 +5,4 @@ dependencies:
 - python=3.10
 - sphinx
 - pip:
-  - git+https://github.com/OpenFreeEnergy/ofe-sphinx-theme@main
+  - sphinx_rtd_theme
