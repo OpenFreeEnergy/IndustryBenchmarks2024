@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Industry Benchmark 2024'
+project = 'OpenFE Industry Benchmark 2024'
 copyright = '2024, The OpenFE Development Team'
 author = 'The OpenFE Development Team'
 
