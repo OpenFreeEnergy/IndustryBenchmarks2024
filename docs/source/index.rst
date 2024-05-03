@@ -34,23 +34,14 @@ Public Dataset Benchmarks
 =========================
 
 
-Updates
-~~~~~~~
-
-*3rd May 2024:*
-
-:ref:`Phase 1 <public_phase1>` of the :ref:`Public Dataset Benchmarks <public_overview>` is now live!
-
-Deadline: TBA
+**Deadline:** TBA
 
 
-Getting Started
-~~~~~~~~~~~~~~~
+*3rd May 2024: :ref:`Phase 1 <public_phase1>` of the :ref:`Public Dataset Benchmarks <public_overview>` is now live!*
+
 
 To get started with this project please look have a look at the :ref:`public dataset benchmarks overview <public_overview>`
 and our :ref:`getting started <public_getting_started>` instructions.
-
-Further instructions for each phase of the benchmark can be found in the side bar.
 
 
 Private Dataset Benchmarks
