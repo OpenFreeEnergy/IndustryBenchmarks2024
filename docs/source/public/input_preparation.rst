@@ -1,16 +1,34 @@
 .. _input-preparation:
 
+*****************************************************************
 Instructions for preparing inputs for the OpenFE public benchmark
-#################################################################
+*****************************************************************
 
 Overview & Aims
 ***************
 
-This page provides guidance on preparing the `Schrodinger benchmark files <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0/fep_benchmark_inputs/structure_inputs>`_ for use in the OpenFE 2024 public dataset industry benchmark.
+This page provides guidance on preparing the `Schrodinger benchmark files <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0/fep_benchmark_inputs/structure_inputs>`_
+for use in the OpenFE 2024 public dataset industry benchmark.
 
-Whilst each partner organization will be responsible for preparing inputs using their own tooling, this guidance aims to provide a set of rules to standardize the process and ensure that scientifically equivalent simulation inputs are generated.
+Whilst each partner organization will be responsible for preparing inputs
+using their own tooling, this guidance aims to provide a set of rules to
+standardize the process and ensure that scientifically equivalent simulation inputs are generated.
 
-This page will be continually updated based on feedback from benchmark partners. Please :ref:`reach out <get-in-touch>` should you have any questions or require additional information whilst preparing your inputs.
+This page will be continually updated based on feedback from benchmark partners.
+Please :ref:`reach out <get_in_touch>` should you have any questions or
+require additional information whilst preparing your inputs.
+
+
+Checklist
+*********
+
+By the end of these instructions you should have:
+
+* A PDB file containing the system protein, crystallographic waters and ions (named `protein.pdb`)
+* An SDF file containing the ligands being mutated (named `ligands.sdf`)
+* A CSV file containing the original FEP+ perturbation network (named `edges.csv`)
+* (Optional) An SDF file containing any system cofactors (named `cofactors.sdf`)
+
 
 Input preparation instructions
 ******************************
@@ -20,16 +38,23 @@ Input data source
 
 All input data are sourced from the `v2.0 release of the Schrodinger binding free energy benchmarks <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
 
-For your convenience, a snapshot of these inputs have been placed under the OpenFE Public Benchmark repository.
-Specifically, input PDB, SDF and edges CSV files can be found under the relevant `original structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/inputs/original_structures>`_ sub-folder.
+For your convenience, a snapshot of these inputs have been placed under the
+OpenFE Public Benchmark repository. Specifically, input PDB, SDF and edges
+CSV files can be found under the relevant `original structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/structure_inputs/original_structures>`_
+sub-folder.
+
 We recommend that you clone this repository and use those input files.
 
 Extracting cofactors
 ====================
 
-In its benchmark inputs, Schrodinger places cofactor molecules within the PDB file. Currently OpenFE cannot parse such inputs as small molecules are expected as separate inputs.
+In its benchmark inputs, Schrodinger places cofactor molecules within the PDB file.
+Currently OpenFE cannot parse such inputs as small molecules are expected as separate inputs.
 
-Should your input PDB have cofactors, please extract these from the PDB and store them within an SDF file named ``cofactors.sdf``. You may be required to manually assign and/or correct bond orders such that they represent the expected state of the molecules and the SDF files are readable by RDKit.
+Should your input PDB have cofactors, please extract these from the PDB and store them
+within an SDF file named ``cofactors.sdf``. You may be required to manually assign and/or
+correct bond orders such that they represent the expected state of the molecules and the
+SDF files are readable by RDKit.
 
 .. note::
    Waters and ions do not need to be extracted from the PDB file.
@@ -37,7 +62,8 @@ Should your input PDB have cofactors, please extract these from the PDB and stor
 Capping proteins
 ================
 
-Whether or not proteins have to be capped depends on how the protein’s termini are handled in the Schrodinger provided PDB files.
+Whether or not proteins have to be capped depends on how the protein’s termini are handled
+in the Schrodinger provided PDB files.
 
 1. If the termini are neutral, e.g. NH2 or C(=O)H, or have ACE/NME caps:
     * Assign ACE and/or NME caps to the termini
@@ -65,7 +91,8 @@ Tools such as Pymol offer the ability to mutate residues in this manner.
 Protonating inputs
 ==================
 
-All files in the Schrodinger input files are considered to be in their intended protonation state. No additional protonation steps should be carried out.
+All files in the Schrodinger input files are considered to be in their intended protonation
+state. No additional protonation steps should be carried out.
 
 .. note::
    1. Care should be taken that any processing steps do not alter the protonation state. For example, PyMol is known to change histidines from HID to HIE during capping.
@@ -125,6 +152,3 @@ Further details can be found in the :ref:`contributing-inputs` page.
 If necessary, you may email the OpenFE team with this information and the Pull Request will be opened on your behalf.
 
 Once the Pull Request is opened, the OpenFE team will carry out a minimal review of the contents, including a short validation that the alchemical transformations will work. If all checks pass, the Pull Request will be merged and you should be ready to start the next step in the benchmarking process (setting up the alchemical network).
-
-
-

@@ -12,7 +12,7 @@ done the following:
 -->
 
 * [ ] created a directory for each system based on the [template directory][templates]
-* [ ] named each directory with the pattern `<set_name>_<system_name>`
+* [ ] named and placed the directory with the following pattern: `input_structures/prepared_structures/<set_name>/<system_name>`
 
 For each submitted directory:
 

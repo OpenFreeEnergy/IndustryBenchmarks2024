@@ -9,12 +9,12 @@ This page outlines the plans and instructions for the private dataset benchmarki
 
 
 .. note::
-   Plan for the Private Dataset Benchmarks are still being formulated.
+   Plans for the Private Dataset Benchmarks are still being formulated.
    More details will be provided soon!
 
 
 Overview
-========
+********
 
 The Private Dataset Benchmark focuses on validating the `OpenFE toolkit <https://docs.openfree.energy/en/stable/>`_
 using blinded internal datasets from each industry partner. The aim of this study is to evaluate how well the OpenFE toolkit

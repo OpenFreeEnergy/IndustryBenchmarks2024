@@ -5,7 +5,8 @@ Benchmarking Systems
 
 Here, we provide the full list of benchmarking systems from the `Schrodinger binding free energy benchmarks <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
 The claimed systems are the datasets that have been picked by our industrial partners to be prepared and run, while the unclaimed systems will not be included in the benchmarking effort. If you are interested in running any of these unclaimed systems, please get in touch with the OpenFE team.
-We will update this list if more systems are being claimed.
+
+We will update this list as more systems are being claimed.
 
 .. list-table:: List of benchmarking systems
    :widths: 40 30 30

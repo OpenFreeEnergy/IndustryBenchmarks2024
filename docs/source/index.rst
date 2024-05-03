@@ -22,7 +22,7 @@ More details about getting involved, or different portions of this project can b
 
 
 Getting Involved
-================
+****************
 
 
 The industry benchmark project is open to all OpenFE industry partners. If
@@ -31,7 +31,7 @@ for more information.
 
 
 Public Dataset Benchmarks
-=========================
+*************************
 
 
 **Deadline:** TBA
@@ -45,16 +45,16 @@ and our :ref:`getting started <public_getting_started>` instructions.
 
 
 Private Dataset Benchmarks
-==========================
+**************************
 
 The private dataset benchmarking initiative has not be launched yet. Further
 information will be made available as soon as possible!
 
 
 Acknowledgements
-================
+****************
 
-We thank the OpenFE industry partners for sustained funding and guidance in this initiative.
+We thank the OpenFE industry partners for their participation, guidance, and funding in this initiative.
 
 
 .. toctree::
