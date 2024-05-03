@@ -64,10 +64,5 @@ We thank the OpenFE industry partners for sustained funding and guidance in this
    :hidden:
 
    ./overviews/overview
-   ./public/getting_started
-   ./public/phase1
-   ./public/phase2
-   ./public/phase3
-   ./public/phase4
    ./private/overview
    get_in_touch
