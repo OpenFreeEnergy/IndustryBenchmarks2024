@@ -23,8 +23,8 @@ from the `2023 large scale study by Ross et al. <https://www.nature.com/articles
    :align: center
    :alt: Figure 1 - Overview of Public Dataset Benchmark process.
 
-    Figure 1: Overview of Public Dataset Benchmark process.
 
+*Figure 1: Overview of Public Dataset Benchmark process.*
 
 As outlined in Figure 1, the public benchmark will be split into four phases:
 
@@ -43,6 +43,7 @@ In this phase, benchmark input structures will be prepared by industry partners 
 
 
 **Start date:** *Early May 2024*
+
 **End date:** *Early June 2024*
 
 
@@ -126,6 +127,7 @@ Phase 2: Running Simulations
 In this phase, industry partners will run alchemical transformations for their allocated systems on their HPC resources.
 
 **Start date:** *Early June 2024*
+
 **End date:** *End of August 2024*
 
 Please note that we expect the private dataset industry benchmark to start alongside this phase.
@@ -154,7 +156,7 @@ The following compute resources will be required:
 Industry partners are expected to have the following GPU hardware:
 
 * Approximately 24 GPU hours per triplicate repeat of each standard transformation
-   * Up to ??? GPU days for net charge transformations
+   * Up to 15 GPU days for net charge transformations
 * CUDA 10.2 or above
 * Non-exclusive compute mode
 * Assignment of a single GPU ID per openfe quickrun execution (i.e. by setting CUDA_VISIBLE_DEVICEs if necessary)
@@ -177,6 +179,7 @@ Phase 3: Data Analysis
 In this phase, relevant simulation results will be gathered from industry partners.
 
 **Start date:** *Early September 2024*
+
 **End date:** *End of October 2024*
 
 
@@ -222,6 +225,7 @@ Phase 4: Paper writing
 
 
 **Start date:** *Early November 2024*
+
 **End date:** *December 2024*
 
 
