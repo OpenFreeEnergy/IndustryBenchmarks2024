@@ -5,13 +5,25 @@ Public Dataset Benchmarks
 *************************
 
 
-This page outlines the plans and the instructions for the four phases of the public dataset portion of the 2024 OpenFE Industry Benchmark study.
-The work outlined here will be undertaken by either participating industry members or the OpenFE team.
+This page outlines the plans and the instructions for the public dataset portion of the 2024 OpenFE Industry Benchmark study.
+
 
 Overview
 ********
 
-TODO: Add Figure from Irfan
+
+The Public Benmarking Study concentrates on validating the use of the `OpenFE Toolkit <https://docs.openfree.energy/en/stable/>`_
+on publicly available protein-ligand binding datasets. Specifically we concentrate
+on re-calculating the `Schrodinger public binding free energy benchmark set <https://github.com/schrodinger/public_binding_free_energy_benchmark>`_
+from the `2023 large scale study by Ross et al. <https://www.nature.com/articles/s42004-023-01019-9>`_.
+
+
+.. figure:: public_overview.png
+   :scale: 50%
+   :alt: Figure 1 - Overview of Public Dataset Benchmark process.
+
+    Figure 1: Overview of Public Dataset Benchmark process.
+
 
 As outlined in Figure 1, the public benchmark will be split into four phases:
 
@@ -22,27 +34,41 @@ As outlined in Figure 1, the public benchmark will be split into four phases:
 
 At each stage of the process, the OpenFE team will provide necessary inputs and support to all participating members.
 
-Phase 1: Benchmark inputs
+
+Phase 1: Preparing Inputs
 *************************
 
-In this phase, benchmark input structures will be prepared by industry partners.
+In this phase, benchmark input structures will be prepared by industry partners for use with the OpenFE toolkit.
 
-Timeline
-========
 
-**Expected start date.**
-Industry partners are expected to start work in preparing inputs by the **end of April 2024**.
+**Start date:** *Early May 2024*
+**End date:** *Early June 2024*
 
-**Expected completion date.**
-We expect partners to complete this phase by the **end of May 2024**.
-Please note that industry partners do not need to wait on others to finish this task before they carry on with phase 2.
+
+Allocation Benchmark Systems
+============================
+
+Each participating industry partner will be expected to select one or more system for benchmarking.
+
+Please see the :ref:`benchmark system overview <benchmark_systems>` for a list of all systems and which
+of these have already been allocated.
+
+At a very minimum, we aim to simulate these entirety of the following three datasets:
+* JACS
+* Fragments
+* Merck
+
+Please :ref:`get in touch <get_in_touch>` with the OpenFE team should you wish to select
+any new systems or if you wish to be reminded of which systems you have been allocated.
+
 
 Input Data Source
 =================
 
-Input structures, perturbation networks, and FEP+ results will be taken from the `v2.0 release of the Schrodinger 2023 Public Benchmark set <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
+Input structures, perturbation networks, and FEP+ results are be taken from the `v2.0 release of the Schrodinger 2023 Public Benchmark set <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
 
-This dataset accompanies the 2023 manuscript `“The maximal and current accuracy of rigorous protein-ligand binding free energy calculations” <https://www.nature.com/articles/s42004-023-01019-9>`_ by Ross et al.
+For convenience, a `snapshot of these inputs <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/input_structures/original_structures>`_ have been provided in the OpenFE 2024 benchmark repository.
+
 
 Remediation of inputs
 =====================

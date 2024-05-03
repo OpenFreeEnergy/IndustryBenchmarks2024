@@ -1,3 +1,5 @@
+.. _benchmark_systems:
+
 Benchmarking Systems
 ####################
 
