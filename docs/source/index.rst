@@ -63,6 +63,6 @@ We thank the OpenFE industry partners for sustained funding and guidance in this
    :numbered:
    :hidden:
 
-   ./overviews/overview
+   ./public/overview
    ./private/overview
-   get_in_touch
+   get-in-touch
