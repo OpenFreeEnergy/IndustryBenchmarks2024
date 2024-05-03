@@ -73,7 +73,7 @@ For convenience, a `snapshot of these inputs <https://github.com/OpenFreeEnergy/
 Remediation of inputs
 =====================
 
-Whilst Schrodinger’s team has kindly provided all simulation inputs to their benchmarks, they unfortunately cannot be directly used with various different open source tools, including those employed by OpenFE. To resolve this, industry partners will need to remediate these inputs as necessary.
+Input structures will need to be adapted in order to be used with the OpenFE toolkit.
 
 Nominally input remediation will involve:
 
@@ -97,34 +97,42 @@ This will allow the OpenFE team to:
 2. Check-in with industry partners and gather feedback on the the input preparation experience
 3. Allow for the OpenFE team to help with any unanticipated issues
 
+
+Please see the :ref:`contributing inputs instructions <contributing-inputs>` for more details on this process.
+
+
 Phase 2: Running Simulations
 ****************************
 
-In this phase, industry partners will run alchemical transformations on their HPC resources.
+.. note::
+   Details for phase 2 of the public dataset benchmarks are still being finalised. These will be updated as soon as possible!
 
-Timeline
-========
 
-**Expected start date.**
-Industry partners are expected to start simulations by the **end of May 2024**.
+In this phase, industry partners will run alchemical transformations for their allocated systems on their HPC resources.
 
-**Expected completion date.**
-We expect partners to complete this phase by the **end of August 2024**.
+**Start date:** *Early June 2024*
+**End date:** *End of August 2024*
+
 Please note that we expect the private dataset industry benchmark to start alongside this phase.
+
 
 Simulation Planning: LOMAP networks
 ===================================
 
-To be added after edited in the planning document
+*Details to be published very soon!*
 
 Simulation execution
 ====================
 
-All planned simulations will be run by industry partners on their own clusters using OpenFE execution tooling, i.e. through the `quickrun method <https://docs.openfree.energy/en/latest/guide/execution/quickrun_execution.html>`_.
+All planned simulations will be run by industry partners on their own clusters using OpenFE execution tooling,
+i.e. through the `quickrun method <https://docs.openfree.energy/en/latest/guide/execution/quickrun_execution.html>`_.
 
-**Expected compute requirements**
+
+Compute Requirements
+====================
 
 The following compute resources will be required:
+
 **GPU Hardware**
 
 Industry partners are expected to have the following GPU hardware:
