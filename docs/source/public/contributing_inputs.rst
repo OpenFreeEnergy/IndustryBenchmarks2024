@@ -30,11 +30,11 @@ Detailed Instructions
 
 **1. Fork the GitHub repository**
 
-You can first fork the GitHub repository, making the changes then in the forked repository and later propose the changes to the upstream repository (OpenFreeEnergy/IndustryBenchmarks2024).
-In the OpenFreeEnergy/IndustryBenchmarks2024 repository in the top-right corner of the page, click **Fork**.
-Under "Owner", select an owner for the forked repository (likely yourself).
-The repository name can stay as given, IndustryBenchmarks2024.
-Finally, click **Create Fork**.
+First, you can create a fork of the GitHub repository. You will then make the changes (adding the files) first in the forked repository and afterwards propose the changes to the upstream repository (OpenFreeEnergy/IndustryBenchmarks2024).
+
+* In the OpenFreeEnergy/IndustryBenchmarks2024 repository in the top-right corner of the page, click **Fork**.
+* Under "Owner", select an owner for the forked repository (likely yourself). The repository name can stay as given, IndustryBenchmarks2024.
+* Click **Create Fork**.
 
 **2. Clone the forked GitHub repository**
 
