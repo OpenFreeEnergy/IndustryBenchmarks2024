@@ -86,6 +86,10 @@ Following files will need to be added to the respective directory for each syste
 
 In a next step, you can create a Pull Request on GitHub. A Pull Request (PR) is a proposal to merge the changes from your remote branch into another branch, e.g. into the main codebase.
 We created a PR template for you where you can tick off the checklist to ensure that all steps have been completed.
-To create the PR go to the GitHub repository. After pushing the remote branch (step 3) there should now be a note that a new branch (with the name you had given it) has recently been pushed.
-Next, please click on the green button that says "Compare & pull request". In the "base repository" dropdown menu, select the upstream repository (``OpenFreeEnergy/IndustryBenchmarks2024``) and the "base branch" ``main``. Now, you will be able to create the PR from the PR template provided.
+To create the PR:
+
+* Go to your fork of the GitHub repository. After pushing the remote branch (step 3) there should now be a note that a new branch (with the name you had given it) has recently been pushed.
+* Click on the green button that says "Compare & pull request". 
+* In the "base repository" dropdown menu, select the upstream repository (``OpenFreeEnergy/IndustryBenchmarks2024``) and the "base branch" ``main``.
+* Create the PR from the PR template provided, giving the PR a meaningful title and description.
 
