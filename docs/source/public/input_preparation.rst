@@ -123,16 +123,16 @@ Validating prepared files
 =========================
 
 To ensure that prepared files can be run using OpenFE, a short MD simulation validation script has been provided under
-`utils/input_validation.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/onput_validation.py>`_.
+`utils/input_validation.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/input_validation.py>`_.
 In an environment with OpenFE 1.0 installed, please run this script by calling:
 
 .. code-block:: python
 
    # If you don’t have cofactors
-   python input_validation --pdb protein.pdb
+   python input_validation.py --pdb protein.pdb
 
    # If you have cofactors
-   python input_validation --pdb protein.pdb --cofactors cofactors.sdf
+   python input_validation.py --pdb protein.pdb --cofactors cofactors.sdf
 
 
 If the script outputs “SIMULATION COMPLETE”, then your inputs are suitable for use with OpenFE. If they do not, then there is likely an issue with the input file. Please report the error message emitted when contacting the OpenFE team for advice on how to fix any issues.
