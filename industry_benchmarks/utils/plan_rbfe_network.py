@@ -3,6 +3,7 @@ import click
 import pathlib
 import logging
 import os
+from functools import partial
 from openff.units import unit
 import openfe
 from openfe.protocols.openmm_rfe.equil_rfe_methods import RelativeHybridTopologyProtocol
@@ -47,7 +48,9 @@ def gen_ligand_network(smcs):
       The Lomap generated LigandNetwork.
     """
     mapper = kartograf.KartografAtomMapper(atom_map_hydrogens=True)
-    scorer = openfe.lomap_scorers.default_lomap_score
+    # TODO: Change this after LOMAP PR gets merged
+    # scorer = openfe.lomap_scorers.default_lomap_score
+    scorer = partial(openfe.lomap_scorers.default_lomap_score, charge_changes_score=0.1)
     ligand_network = openfe.ligand_network_planning.generate_lomap_network(
         molecules=smcs, mappers=mapper, scorer=scorer)
     return ligand_network
@@ -161,6 +164,7 @@ def run_inputs(ligands, pdb, cofactors, output):
     # Generate the partial charges
     logger.info("Generating partial charges for ligands")
     smcs = [gen_charges(smc) for smc in smcs]
+
     # Create ligand network
     ligand_network = gen_ligand_network(smcs)
 
@@ -178,7 +182,7 @@ def run_inputs(ligands, pdb, cofactors, output):
         # Get different settings depending on whether the transformation
         # involves a change in net charge
         charge_difference = get_alchemical_charge_difference(mapping)
-        if abs(charge_difference) > 0:
+        if abs(charge_difference) > 1e-3:
             rfe_settings = get_settings_charge_changes()
         else:
             rfe_settings = get_settings()
