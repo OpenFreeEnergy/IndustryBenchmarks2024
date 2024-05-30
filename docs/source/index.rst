@@ -37,6 +37,10 @@ Public Dataset Benchmarks
 **Deadline:** TBA
 
 
+*3rd May 2024 :ref:`Phase 1 <public_phase1>` of the :ref:`Public Dataset Benchmarks <public_overview>` is now live!*
+
+*3rd May 2024: of the :ref:`Public Dataset Benchmarks <public_overview>` is now live!*
+
 *3rd May 2024: :ref:`Phase 1 <public_phase1>` of the :ref:`Public Dataset Benchmarks <public_overview>` is now live!*
 
 
