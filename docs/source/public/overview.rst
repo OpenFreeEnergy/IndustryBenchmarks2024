@@ -36,6 +36,8 @@ As outlined in Figure 1, the public benchmark will be split into four phases:
 At each stage of the process, the OpenFE team will provide necessary inputs and support to all participating members.
 
 
+.. _public_phase1:
+
 Phase 1: Preparing Inputs
 *************************
 
