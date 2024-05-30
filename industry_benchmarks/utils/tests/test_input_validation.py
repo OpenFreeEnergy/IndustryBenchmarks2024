@@ -17,6 +17,12 @@ def bad_protein():
 
 
 @pytest.fixture
+def protein_with_ptm():
+    with resources.files('utils.tests.data.cdk2_inputs') as d:
+        yield str(d / 'protein.pdb')
+
+
+@pytest.fixture
 def cofactors():
     with resources.files('utils.tests.data.bace_inputs') as d:
         yield str(d / 'cofactors.sdf')
@@ -53,3 +59,11 @@ class TestScript:
             result = runner.invoke(main, ['--pdb', bad_protein])
             assert result.exit_code == 1
             assert "SIMULATION COMPLETE" not in result.output
+
+    def test_ptm_protein_fail(self, protein_with_ptm):
+        runner = click.testing.CliRunner()
+        with runner.isolated_filesystem():
+            result = runner.invoke(main, ['--pdb', protein_with_ptm])
+            assert result.exit_code == 1
+            assert "SIMULATION COMPLETE" not in result.output
+
