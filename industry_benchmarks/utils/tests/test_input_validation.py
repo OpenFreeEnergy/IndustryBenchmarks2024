@@ -66,4 +66,3 @@ class TestScript:
             result = runner.invoke(main, ['--pdb', protein_with_ptm])
             assert result.exit_code == 1
             assert "SIMULATION COMPLETE" not in result.output
-
