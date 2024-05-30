@@ -48,7 +48,7 @@ where ``Owner`` is the name of the owner that was selected in step 1.
 
 **3. Create and work off of a remote branch**
 
-You can create a remote branch that will allow you to make changes to the repository (e.g. adding new files) without the changes immediately affecting the main reporitory.
+You can create a remote branch that will allow you to make changes to the repository (e.g. adding new files) without the changes immediately affecting the main branch.
 
 .. code-block:: bash
 
