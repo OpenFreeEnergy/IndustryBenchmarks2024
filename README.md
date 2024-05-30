@@ -35,10 +35,10 @@ for more information.
 **Deadline:** TBA
 
 
-*3rd May 2024: [Phase 1] (https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#phase-1-preparing-inputs) of the [Public Dataset Benchmarks](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#) is now live!*
+*3rd May 2024: [Phase 1](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#phase-1-preparing-inputs) of the [Public Dataset Benchmarks](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#) is now live!*
 
 
-To get started with this project please look have a look at the [public dataset benchmarks overview](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#)
+To get started with this project please have a look at the [public dataset benchmarks overview](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#)
 and our [getting started](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#phase-1-preparing-inputs) instructions.
 
 
