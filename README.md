@@ -25,7 +25,7 @@ More details about getting involved, or different portions of this project can b
 
 
 The industry benchmark project is open to all OpenFE industry partners. If
-you wish to participate, please get in touch with the OpenFE team
+you wish to participate, please [get in touch](https://industrybenchmarks2024.readthedocs.io/en/latest/get-in-touch.html) with the OpenFE team
 for more information.
 
 
