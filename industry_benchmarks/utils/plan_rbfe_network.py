@@ -204,7 +204,7 @@ def run_inputs(ligands, pdb, cofactors, output):
             rfe_settings = get_settings_charge_changes()
         else:
             rfe_settings = get_settings()
-
+        print(rfe_settings)
         for leg in ['solvent', 'complex']:
             # use the solvent and protein created above
             sysA_dict = {'ligand': mapping.componentA,
@@ -230,7 +230,7 @@ def run_inputs(ligands, pdb, cofactors, output):
                     f"{mapping.componentB.name}")
 
             rbfe_protocol = RelativeHybridTopologyProtocol(settings=rfe_settings)
-
+            print(rbfe_protocol)
             transformation = openfe.Transformation(
                 stateA=sysA,
                 stateB=sysB,
@@ -238,6 +238,7 @@ def run_inputs(ligands, pdb, cofactors, output):
                 protocol=rbfe_protocol,
                 name=name
             )
+            print(transformation)
             transformation.dump(output / f"{transformation.name}.json")
 
 
