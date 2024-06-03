@@ -2,6 +2,7 @@ import string
 import click
 import pathlib
 import logging
+import warnings
 import os
 from functools import partial
 from openff.units import unit
@@ -53,6 +54,11 @@ def gen_ligand_network(smcs):
     scorer = partial(openfe.lomap_scorers.default_lomap_score, charge_changes_score=0.1)
     ligand_network = openfe.ligand_network_planning.generate_lomap_network(
         molecules=smcs, mappers=mapper, scorer=scorer)
+    # Raise an error if the network is not connected
+    if ligand_network.is_connected() == False:
+        errormsg = ('Error encountered when creating the ligand network. The network'
+                    ' is unconnected.')
+        raise ValueError(errormsg)
     return ligand_network
 
 
@@ -153,7 +159,7 @@ def run_inputs(ligands, pdb, cofactors, output):
       A Path to an SDF file containing the system's cofactors.
     output: pathlib.Path
       A Path to a directory where the transformation json files
-      will be stored into.
+      and ligand network graphml file will be stored into.
     """
     # Create the output directory
     if not os.path.isdir(output):
@@ -167,6 +173,10 @@ def run_inputs(ligands, pdb, cofactors, output):
 
     # Create ligand network
     ligand_network = gen_ligand_network(smcs)
+    
+    # Store the ligand network as a graphml file
+    with open(output / "ligand_network.graphml", mode='w') as f:
+        f.write(ligand_network.to_graphml())
 
     # Create the solvent and protein components
     solv = openfe.SolventComponent()
@@ -183,6 +193,14 @@ def run_inputs(ligands, pdb, cofactors, output):
         # involves a change in net charge
         charge_difference = get_alchemical_charge_difference(mapping)
         if abs(charge_difference) > 1e-3:
+            # Raise a warning that a charge changing transformation is included
+            # in the network
+            wmsg = ("Charge changing transformation between ligands "
+                    f"{mapping.componentA.name} and {mapping.componentB.name}. "
+                    "A more expensive protocol with 22 lambda windows, sampled "
+                    "for 20 ns each, will be used here.")
+            warnings.warn(wmsg)
+            # Get settings for charge changing transformations
             rfe_settings = get_settings_charge_changes()
         else:
             rfe_settings = get_settings()
