@@ -140,6 +140,25 @@ If the script outputs “SIMULATION COMPLETE”, then your inputs are suitable f
 .. note::
    This script runs a very short simulation, it is recommended that it is executed on a machine with a CUDA-enabled GPU.
 
+Preparing the ligand file
+=========================
+
+For the ligand inputs, the Schrodinger public binding free energy benchmark set includes multiple binding modes (e.g. different rotamers) 
+and protonation states for some of the ligands. For this current study, we will only consider a single conformation and protonation state of the ligands. 
+Here, we will be using the binding mode and protonation state that was predicted to be most potent by FEP+.
+
+If the dataset contains ligands in multiple conformations or protonation states, the more favorable state should be identified and the less favorable state removed from the input ``ligands.sdf`` file.
+
+** Assessing the more potent binding mode or protonation state** 
+The FEP+ edge predictions can be found `here <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/main/21_4_results/edge_predictions>`. 
+
+Example: JNK1 (JACS set)
+* `Table of edge predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/edge_predictions/jacs_set/jnk1_manual_flips_out.csv>`
+* For all edges that connect different binding modes of the same ligand, the experimental ddG values have a value of 0.0 kcal/mol. 
+* The calculated ddG value between the first edge (ligand *18637-1* and its alternate binding mode *18637-1 flip*) is 2.54 kcal/mol. 
+* This means that the original binding mode (*18637-1*) is predicted to be more favorable than the flipped binding mode (*18637-1 flip*). 
+* In this case we would remove ligand *18637-1 flip* from the dataset.
+
 Submitting prepared input files
 ===============================
 
