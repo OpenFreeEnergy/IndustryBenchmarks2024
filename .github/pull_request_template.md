@@ -22,7 +22,6 @@ For each submitted directory:
 * [ ] kept cystallographic waters and metals in the PDB file
 * [ ] tested the PDB and, if available, cofactors.sdf file using the [input validation script][input_validation]
 * [ ] copied over the ligands SDF file to a file named `ligands.sdf` and removed any dublicate binding modes or protonation states, keeping the more favorable state
-* [ ] copied over the edges CSV file to a file named `edges.csv`
 
 <!--
 Here please add a summary of what changes you have made

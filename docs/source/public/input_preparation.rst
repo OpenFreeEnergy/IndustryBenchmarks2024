@@ -26,7 +26,6 @@ By the end of these instructions you should have:
 
 * A PDB file containing the system protein, crystallographic waters and ions (named `protein.pdb`)
 * An SDF file containing the ligands being mutated (named `ligands.sdf`)
-* A CSV file containing the original FEP+ perturbation network (named `edges.csv`)
 * (Optional) An SDF file containing any system cofactors (named `cofactors.sdf`)
 
 
@@ -169,7 +168,7 @@ Submitting prepared input files
 
 All prepared inputs should be submitted to the OpenFE Public Benchmark github repository, more specifically to the
 `prepared_structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/inputs/prepared_structures>`_ subfolder.
-This should be done via Pull Request, with a folder for each prepared system including the protein PDB, ligand SDF, relevant edges CSV, and if available cofactor SDF file.
+This should be done via Pull Request, with a folder for each prepared system including the protein PDB, ligand SDF, and if available cofactor SDF file.
 A short bullet point summary of any remediation steps, including any software used, should also be included as a markdown file.
 Further details can be found in the :ref:`contributing-inputs` page.
 
