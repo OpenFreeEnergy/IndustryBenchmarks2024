@@ -11,6 +11,7 @@ from openfe.protocols import openmm_rfe
 from ..plan_rbfe_network import run_inputs as main
 from ..plan_rbfe_network import get_settings_charge_changes
 
+
 @pytest.fixture
 def ligands():
     with resources.files('utils.tests.data.eg5_inputs') as d:
@@ -34,7 +35,6 @@ def output():
     return pathlib.Path('utils.tests.data.eg5_inputs.input_jsons')
 
 
-
 class TestScript:
     def test_invoke(self):
         runner = click.testing.CliRunner()
@@ -42,7 +42,6 @@ class TestScript:
             result = runner.invoke(main, ["--help"])
             assert result.exit_code == 0
             assert "Usage: run-inputs" in result.output
-
 
     def test_run_inputs(self, ligands, protein, cofactors, output):
         runner = click.testing.CliRunner()
@@ -54,9 +53,9 @@ class TestScript:
                     ['--ligands', ligands, '--pdb', protein,
                      '--cofactors', cofactors, '--output', output]
                 )
-           
+ 
                 with open(output / "ligand_network.graphml") as f:
-                    graphml = f.read() 
+                    graphml = f.read()
                 ligand_network = LigandNetwork.from_graphml(graphml)
                 for edge in ligand_network.edges:
                     assert edge.componentA.to_openff().partial_charges is not None
@@ -65,7 +64,7 @@ class TestScript:
                 assert os.path.exists(str(output))
                 # Check if the output files are created
                 assert len(output_files) == 6
-                
+ 
                 # Check that we have 4 json files with charge change settings, 2 with default settings
                 charge_change_json = []
                 default_json = []
@@ -79,7 +78,4 @@ class TestScript:
                         default_json.append(f)
                 assert len(charge_change_json) == 4
                 assert len(default_json) == 2
-
-
-
 

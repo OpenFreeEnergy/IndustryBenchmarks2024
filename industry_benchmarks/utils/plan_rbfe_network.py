@@ -55,7 +55,7 @@ def gen_ligand_network(smcs):
     ligand_network = openfe.ligand_network_planning.generate_lomap_network(
         molecules=smcs, mappers=mapper, scorer=scorer)
     # Raise an error if the network is not connected
-    if ligand_network.is_connected() == False:
+    if ligand_network.is_connected() is False:
         errormsg = ('Error encountered when creating the ligand network. The network'
                     ' is unconnected.')
         raise ValueError(errormsg)
@@ -173,7 +173,7 @@ def run_inputs(ligands, pdb, cofactors, output):
 
     # Create ligand network
     ligand_network = gen_ligand_network(smcs)
-    
+
     # Store the ligand network as a graphml file
     with open(output / "ligand_network.graphml", mode='w') as f:
         f.write(ligand_network.to_graphml())
