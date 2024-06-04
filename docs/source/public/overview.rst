@@ -138,8 +138,29 @@ Please note that we expect the private dataset industry benchmark to start along
 Simulation Planning: LOMAP networks
 ===================================
 
-*Details to be published very soon!*
+The planning and setup of the network of RBFE calculations is carried out using the planning script provided under 
+`utils/plan_rbfe_network.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/plan_rbfe_network.py>`_.
 
+This script will carry out the following steps:
+
+* Load in the ligands and compute partial charges using AM1BCC
+* Create a network of transformations using the Kartograf atom mapper, LOMAP scorer, and LOMAP network generator
+* Assigning settings to the transformations that are different depending on whether the ligand transformation involves a change in net charge
+   * non charge changing transformations: 11 lambda windows, 5 ns production run per lambda window
+   * charge changing transformations: 22 lambda windows, 20 ns production run per lambda window
+* Creating the ``AlchemicalTransformation``s and saving them to disc as json files
+
+In an environment with OpenFE 1.0 installed, please run this script by calling:
+
+.. code-block:: python
+
+   # If you don’t have cofactors
+   python plan_rbfe_network.py --pdb protein.pdb --ligands ligands.sdf --output input_jsons
+
+   # If you have cofactors
+   python plan_rbfe_network.py --pdb protein.pdb --ligands ligands.sdf --cofactors cofactors.sdf --output input_jsons
+
+Since the partial charge assignment can be slow, we recommend putting the commands in a bash script and executing it on a HPC resource. 
 
 Simulation execution
 ====================
