@@ -1,6 +1,4 @@
 .. _public_overview:
-
-*************************
 Public Dataset Benchmarks
 *************************
 
@@ -160,7 +158,11 @@ In an environment with OpenFE 1.0 installed, please run this script by calling:
    # If you have cofactors
    python plan_rbfe_network.py --pdb protein.pdb --ligands ligands.sdf --cofactors cofactors.sdf --output input_jsons
 
-Since the partial charge assignment can be slow, we recommend putting the commands in a bash script and executing it on a HPC resource. 
+This command will create a folder (named ``input_jsons`` as specified in the ``--output`` flag) that contains a separate ``.json`` file for the solvent and complex legs 
+for every edge in the network. The folder also contains a ``ligand_network.graphml`` file that contains a serialized version of the ``LigandNetwork``.
+
+.. note::
+   Since the partial charge assignment can be slow, we recommend putting the planning command in a bash script and executing it on an HPC resource. 
 
 Simulation execution
 ====================
