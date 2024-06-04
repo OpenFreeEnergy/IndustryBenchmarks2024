@@ -143,7 +143,7 @@ Preparing the ligand file
 =========================
 
 For some datasets, the Schrodinger public binding free energy benchmark set includes multiple binding modes (e.g. different rotamers) 
-and protonation states for some of the ligands. For this current study, we will only consider a single conformation and protonation state of the ligands. 
+and protonation states for some of the ligands. For this current study, we will only consider a single conformation and protonation state for each of the ligands. 
 Here, we will be using the binding mode and protonation state that was predicted to be most potent by FEP+.
 
 If the dataset contains ligands in multiple conformations or protonation states, the more favorable state should be identified (by looking at the results deposited by Schrodinger) and the less favorable state should be removed from the input ``ligands.sdf`` file.
