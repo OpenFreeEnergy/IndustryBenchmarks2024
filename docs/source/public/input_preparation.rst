@@ -156,9 +156,9 @@ Edges that were run between different states of the same ligand have an experime
 If for a transformation between two different states of a ligand, V1 and V2, the calculated ddG value is greater than zero, V2 is less favorable and should therefore be removed from the ``ligands.sdf``.
 If the calculated ddG has a negative value, V2 is more favorable and V1 should be removed from the ``ligands.sdf`` file.
 
-Example: JNK1 (JACS set)
+**Example: JNK1 (JACS set)**
 
-* `Table of edge predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/edge_predictions/jacs_set/jnk1_manual_flips_out.csv>`_
+* Opening the `Table of edge predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/edge_predictions/jacs_set/jnk1_manual_flips_out.csv>`_
 * For all edges that connect different binding modes of the same ligand, the experimental ddG values have a value of 0.0 kcal/mol. 
 * The calculated ddG value between the first edge (ligand *18637-1* and its alternate binding mode *18637-1 flip*) is 2.54 kcal/mol. 
 * This means that the original binding mode (*18637-1*) is predicted to be more favorable than the flipped binding mode (*18637-1 flip*). 
