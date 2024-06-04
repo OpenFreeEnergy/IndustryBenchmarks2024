@@ -53,12 +53,13 @@ class TestScript:
                     ['--ligands', ligands, '--pdb', protein,
                      '--cofactors', cofactors, '--output', output]
                 )
-                # Read in the LigandNetwork 
+                # Read in the LigandNetwork, check that ligands have partial charges 
                 with open(output / "ligand_network.graphml") as f:
                     graphml = f.read()
                 ligand_network = LigandNetwork.from_graphml(graphml)
                 for edge in ligand_network.edges:
                     assert edge.componentA.to_openff().partial_charges is not None
+                    assert edge.componentB.to_openff().partial_charges is not None
                 assert result.exit_code == 0
                 assert os.path.exists(str(output))
                 # Create a list of all .json files
