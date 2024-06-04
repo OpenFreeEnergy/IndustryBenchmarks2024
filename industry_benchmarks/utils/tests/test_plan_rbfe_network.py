@@ -65,7 +65,8 @@ class TestScript:
                 # Check if the output files are created
                 assert len(output_files) == 6
  
-                # Check that we have 4 json files with charge change settings, 2 with default settings
+                # Check that we have 4 json files with charge change settings, 
+                # 2 json files with default settings
                 charge_change_json = []
                 default_json = []
                 for f in output_files:
@@ -78,4 +79,3 @@ class TestScript:
                         default_json.append(f)
                 assert len(charge_change_json) == 4
                 assert len(default_json) == 2
-
