@@ -58,6 +58,7 @@ Please see the :ref:`benchmark system overview <benchmark_systems>` for a list o
 of these have already been allocated.
 
 At a very minimum, we aim to simulate these entirety of the following three datasets:
+
 * JACS
 * Fragments
 * Merck
@@ -69,9 +70,9 @@ any new systems or if you wish to be reminded of which systems you have been all
 Input Data Source
 =================
 
-Input structures, perturbation networks, and FEP+ results are be taken from the `v2.0 release of the Schrodinger 2023 Public Benchmark set <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
+Input structures, perturbation networks, and FEP+ results are taken from the `v2.0 release of the Schrodinger 2023 Public Benchmark set <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/v2.0>`_.
 
-For convenience, a `snapshot of these inputs <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/input_structures/original_structures>`_ have been provided in the OpenFE 2024 benchmark repository.
+For convenience, a `snapshot of these inputs <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/input_structures/original_structures>`_ has been provided in the OpenFE 2024 benchmark repository.
 
 
 Remediation of inputs
@@ -85,6 +86,7 @@ Nominally input remediation will involve:
 * Fixing capping groups on terminal residues
 * Mutating any non-canonical amino acids
 * Addressing any issues with residue and atom names
+* Removing alternate ligand conformations or protonation states
 
 Depending on the software used to prepare the inputs, the resulting files may need to be stripped of extraneous or sensitive metadata.
 
