@@ -148,7 +148,7 @@ This script will carry out the following steps:
 * Assigning settings to the transformations that are different depending on whether the ligand transformation involves a change in net charge
    * non charge changing transformations: 11 lambda windows, 5 ns production run per lambda window
    * charge changing transformations: 22 lambda windows, 20 ns production run per lambda window
-* Creating the ``AlchemicalTransformation``s and saving them to disc as json files
+* Creating the ``AlchemicalTransformation``\ s and saving them to disc as json files
 
 In an environment with OpenFE 1.0 installed, please run this script by calling:
 
