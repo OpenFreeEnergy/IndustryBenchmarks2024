@@ -174,7 +174,7 @@ You can find additional information and examples on how to run simulations of th
 
 Here is an example of a very simple script that will create and submit a separate job script for every alchemical transformation (for the simplest SLURM use case):
 
-.. code-block:: python
+.. code-block:: bash
 
    for file in network_setup/*.json; do
      relpath=${file:14}  # strip off "network_setup/"
