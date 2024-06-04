@@ -147,12 +147,12 @@ For some datasets, the Schrodinger public binding free energy benchmark set incl
 and protonation states for some of the ligands. For this current study, we will only consider a single conformation and protonation state of the ligands. 
 Here, we will be using the binding mode and protonation state that was predicted to be most potent by FEP+.
 
-If the dataset contains ligands in multiple conformations or protonation states, the more favorable state should be identified and the less favorable state removed from the input ``ligands.sdf`` file.
+If the dataset contains ligands in multiple conformations or protonation states, the more favorable state should be identified (by looking at the results deposited by Schrodinger) and the less favorable state should be removed from the input ``ligands.sdf`` file.
 
 **Assessing the more potent binding mode or protonation state** 
 
 The FEP+ edge predictions can be found `here <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/main/21_4_results/edge_predictions>`_. 
-Edges that were run between different states of the same ligand can be identified with having an experimental ddG value of 0.0 kcal/mol. 
+Edges that were run between different states of the same ligand have an experimental ddG value of 0.0 kcal/mol. 
 If for a transformation between two different states of a ligand, V1 and V2, the calculated ddG value is greater than zero, V2 is less favorable and should therefore be removed from the ``ligands.sdf``.
 If the calculated ddG has a negative value, V2 is more favorable and V1 should be removed from the ``ligands.sdf`` file.
 
