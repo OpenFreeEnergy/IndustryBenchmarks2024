@@ -143,7 +143,7 @@ If the script outputs “SIMULATION COMPLETE”, then your inputs are suitable f
 Preparing the ligand file
 =========================
 
-For the ligand inputs, the Schrodinger public binding free energy benchmark set includes multiple binding modes (e.g. different rotamers) 
+For some datasets, the Schrodinger public binding free energy benchmark set includes multiple binding modes (e.g. different rotamers) 
 and protonation states for some of the ligands. For this current study, we will only consider a single conformation and protonation state of the ligands. 
 Here, we will be using the binding mode and protonation state that was predicted to be most potent by FEP+.
 
@@ -152,6 +152,9 @@ If the dataset contains ligands in multiple conformations or protonation states,
 **Assessing the more potent binding mode or protonation state** 
 
 The FEP+ edge predictions can be found `here <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/main/21_4_results/edge_predictions>`_. 
+Edges that were run between different states of the same ligand can be identified with having an experimental ddG value of 0.0 kcal/mol. 
+If for a transformation between two different states of a ligand, V1 and V2, the calculated ddG value is greater than zero, V2 is less favorable and should therefore be removed from the ``ligands.sdf``.
+If the calculated ddG has a negative value, V2 is more favorable and V1 should be removed from the ``ligands.sdf`` file.
 
 Example: JNK1 (JACS set)
 
@@ -159,7 +162,7 @@ Example: JNK1 (JACS set)
 * For all edges that connect different binding modes of the same ligand, the experimental ddG values have a value of 0.0 kcal/mol. 
 * The calculated ddG value between the first edge (ligand *18637-1* and its alternate binding mode *18637-1 flip*) is 2.54 kcal/mol. 
 * This means that the original binding mode (*18637-1*) is predicted to be more favorable than the flipped binding mode (*18637-1 flip*). 
-* In this case we would remove ligand *18637-1 flip* from the dataset.
+* In this case we would remove ligand *18637-1 flip* from the ``ligands.sdf`` file.
 
 Submitting prepared input files
 ===============================
