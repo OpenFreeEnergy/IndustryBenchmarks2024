@@ -163,7 +163,7 @@ This command will create a folder (named ``network_setup`` as specified using th
 for every edge in the network. The folder also contains a ``ligand_network.graphml`` file that is a serialized version of the ``LigandNetwork``.
 
 .. note::
-   Since the partial charge assignment can be slow, we recommend putting the planning command in a bash script and executing it on an HPC resource. 
+   Since the partial charge assignment can be slow, we recommend putting the planning command in a bash script and executing it on a high performance workstation or HPC resource. 
 
 Simulation execution
 ====================
