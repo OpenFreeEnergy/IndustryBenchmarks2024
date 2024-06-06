@@ -1,6 +1,7 @@
+import MDAnalysis as mda
 import pytest
 from importlib import resources
-from ..cleanup_traj import extract_data
+from ..traj_cleanup import extract_data
 import numpy as np
 
 
@@ -17,14 +18,26 @@ def checkpoint():
 
 
 @pytest.fixture
+def pdb():
+    with resources.files('utils.tests.data.example_traj') as d:
+        yield d / 'hybrid_system.pdb'
+
+
+@pytest.fixture
 def outfile():
     with resources.files('utils.tests.data.example_traj') as d:
         yield d / 'data.npz'
 
 
-def test_extract_data(simulation, checkpoint, outfile):
-    extract_data(simulation, checkpoint, outfile)
+@pytest.fixture
+def out_traj():
+    with resources.files('utils.tests.data.example_traj') as d:
+        yield d / 'out'
 
+
+def test_extract_data(simulation, checkpoint, pdb, outfile, out_traj):
+
+    extract_data(simulation, checkpoint, pdb, outfile, out_traj)
     data = np.load(outfile)
     u_ln = data['u_ln']
     N_l = data['N_l']
@@ -40,3 +53,9 @@ def test_extract_data(simulation, checkpoint, outfile):
     # Check that replicate state indices are of length N*L
     assert len(replicas_state_indices) == 11
     assert [len(r) == N_l[0] for r in replicas_state_indices]
+
+    # Check output trajectories
+    for i in range(11):
+        u = mda.Universe(pdb, f'{out_traj}_{i}.xtc')
+        # Check that we saved 20 frames
+        assert len(u.trajectory) == 20

@@ -1,0 +1,48 @@
+MODEL        0
+ATOM      1  H1x UNK A   0       0.074  -0.971  -1.487  1.00  0.50           H  
+ATOM      2  C1x UNK A   0       0.126   0.052  -1.096  1.00  0.50           C  
+ATOM      3  H2x UNK A   0       1.102   0.491  -1.297  1.00  0.25           H  
+ATOM      4  H3x UNK A   0      -0.008  -0.017  -0.010  1.00  0.50           H  
+ATOM      5  C2x UNK A   0      -0.987   0.900  -1.705  1.00  0.50           C  
+ATOM      6  H4x UNK A   0      -0.961   1.910  -1.281  1.00  0.50           H  
+ATOM      7  H5x UNK A   0      -0.849   0.972  -2.790  1.00  0.50           H  
+ATOM      8  C3x UNK A   0      -2.367   0.321  -1.448  1.00  0.50           C  
+ATOM      9  O1x UNK A   0      -2.550  -0.704  -0.794  1.00  0.50           O  
+ATOM     10  C4x UNK A   0      -3.525   1.078  -2.045  1.00  0.50           C  
+ATOM     11  H6x UNK A   0      -3.202   1.588  -2.957  1.00  0.50           H  
+ATOM     12  H7x UNK A   0      -3.882   1.824  -1.330  1.00  0.50           H  
+ATOM     13  C5x UNK A   0      -4.879   0.493  -1.725  1.00  0.25           C  
+ATOM     14  H8x UNK A   0      -5.691   1.077  -2.171  1.00  0.25           H  
+ATOM     15  H9x UNK A   0      -5.045   0.460  -0.643  1.00  0.25           H  
+ATOM     16 H10x UNK A   0      -4.940  -0.529  -2.111  1.00  0.25           H  
+ATOM     17  H2x UNK A   0      -4.328   0.381  -2.295  1.00  0.75           H  
+ATOM     18  C5x UNK A   0       1.498   0.634  -1.395  1.00  0.75           C  
+ATOM     19  H8x UNK A   0       2.289   0.019  -0.954  1.00  0.75           H  
+ATOM     20  H9x UNK A   0       1.589   1.649  -0.996  1.00  0.75           H  
+ATOM     21 H10x UNK A   0       1.663   0.677  -2.476  1.00  0.75           H  
+TER      22      UNK A   0
+ENDMDL
+CONECT    1    2
+CONECT    2    1    3    4
+CONECT    2   18
+CONECT    3    2
+CONECT    4    2
+CONECT    5    2    6    7    8
+CONECT    6    5
+CONECT    7    5
+CONECT    8    5    9   10
+CONECT    9    8
+CONECT   10    8   11   12
+CONECT   10   17
+CONECT   11   10
+CONECT   12   10
+CONECT   13   10   14   15   16
+CONECT   14   13
+CONECT   15   13
+CONECT   16   13
+CONECT   17   10
+CONECT   18    2   19   20   21
+CONECT   19   18
+CONECT   20   18
+CONECT   21   18
+END

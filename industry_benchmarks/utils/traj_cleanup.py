@@ -1,6 +1,8 @@
 import pathlib
 from openmmtools import multistate
 import numpy as np
+import MDAnalysis as mda
+from openfe_analysis import FEReader
 
 
 def compute_mbar_energies(analyzer):
@@ -25,7 +27,17 @@ def get_replica_state_indices(analyzer):
     return replicas_state_indices
 
 
-def extract_data(simulation, checkpoint, outfile):
+def subsample_traj(simulation, hybrid_system_pdb, lambda_windows, outfile):
+    for i in range(0, lambda_windows):
+        u = mda.Universe(hybrid_system_pdb, simulation,
+                         format=FEReader, state_id=i)
+        skip = round(len(u.trajectory) / 20)
+        with mda.Writer(f'{outfile}_{i}.xtc', n_atoms=len(u.atoms)) as w:
+            for ts in u.trajectory[::skip]:
+                w.write(u.atoms)
+
+
+def extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj='out'):
     """
     Extract the MBAR-ready energy matrix and replica state indices.
 
@@ -35,16 +47,28 @@ def extract_data(simulation, checkpoint, outfile):
         Path to the simulation `.nc` file
     checkpoint: pathlib.Path
         Path to the checkpoint `.chk` file
+    hybrid_pdb: pathlib.Path
+        Path to the `.pdb` file of the hybrid system
     outfile: pathlib.Path
         Path to the output `.npz` file
+    out_traj: pathlib.Path
+        Path to the output `.xtc` files. A separate file is created for every
+        lambda window. The state number is appended to the filename. Default: 'out'
     """
+    if not simulation.is_file() or not checkpoint.is_file():
+        errmsg = "Either the simulation or checkpoint file could not be found"
+        raise ValueError(errmsg)
 
     reporter = multistate.MultiStateReporter(
         storage=simulation.as_posix(),
         open_mode='r',
         checkpoint_storage=checkpoint.as_posix()
     )
+
     analyzer = multistate.MultiStateSamplerAnalyzer(reporter)
     u_ln, N_l = compute_mbar_energies(analyzer)
     replicas_state_indices = get_replica_state_indices(analyzer)
     np.savez(outfile, u_ln=u_ln, N_l=N_l, replicas_state_indices=replicas_state_indices)
+
+    lambda_windows = len(replicas_state_indices)
+    subsample_traj(simulation, hybrid_pdb, lambda_windows, out_traj)

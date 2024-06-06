@@ -1,2 +1,2 @@
 from . import input_validation
-from . import cleanup_traj
+from . import traj_cleanup
