@@ -172,7 +172,7 @@ All planned simulations will be run by industry partners on their own clusters u
 i.e. through the `quickrun method <https://docs.openfree.energy/en/latest/guide/execution/quickrun_execution.html>`_.
 You can find additional information and examples on how to run simulations of the entire network in the "Running the simulations" section of our `CLI tutorial <https://docs.openfree.energy/en/latest/tutorials/rbfe_cli_tutorial.html>`_.
 
-Here is an example of a very simple script that will create and submit a separate job script for every alchemical transformation (for the simplest SLURM use case):
+Here is an example of a very simple script that will create and submit a separate job script (`*.job` named file) for every alchemical transformation (for the simplest SLURM use case):
 
 .. code-block:: bash
 
