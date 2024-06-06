@@ -18,7 +18,13 @@ def bad_protein():
 
 @pytest.fixture
 def protein_with_ptm():
-    with resources.files('utils.tests.data.cdk2_inputs') as d:
+    with resources.files('utils.tests.data.thrombin_inputs') as d:
+        yield str(d / 'protein_TYS.pdb')
+
+
+@pytest.fixture
+def protein_convert_ptm():
+    with resources.files('utils.tests.data.thrombin_inputs') as d:
         yield str(d / 'protein.pdb')
 
 
@@ -64,5 +70,14 @@ class TestScript:
         runner = click.testing.CliRunner()
         with runner.isolated_filesystem():
             result = runner.invoke(main, ['--pdb', protein_with_ptm])
+            print(result)
             assert result.exit_code == 1
             assert "SIMULATION COMPLETE" not in result.output
+
+    def test_revert_ptm_protein_pass(self, protein_convert_ptm):
+        runner = click.testing.CliRunner()
+        with runner.isolated_filesystem():
+            result = runner.invoke(main, ['--pdb', protein_convert_ptm])
+            print(result)
+            assert result.exit_code == 0
+            assert "SIMULATION COMPLETE" in result.output
