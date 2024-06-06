@@ -1,7 +1,5 @@
-from pymbar import MBAR
 import pathlib
 from openmmtools import multistate
-from openfe.protocols.openmm_utils.multistate_analysis import MultistateEquilFEAnalysis
 import numpy as np
 
 
@@ -50,19 +48,3 @@ def extract_data(simulation, checkpoint, outfile):
     u_ln, N_l = compute_mbar_energies(analyzer)
     replicas_state_indices = get_replica_state_indices(analyzer)
     np.savez(outfile, u_ln=u_ln, N_l=N_l, replicas_state_indices=replicas_state_indices)
-    print(len(u_ln))
-    print(N_l)
-    for i in u_ln:
-        print(len(i))
-
-# simulation = pathlib.Path('tests/data/example_traj/simulation.nc')
-# checkpoint = pathlib.Path('tests/data/example_traj/checkpoint.chk')
-#
-# storage = simulation.resolve()
-# checkpoint = checkpoint.resolve().relative_to(storage.parent)
-#
-# outfile = 'test.npz'
-# extract_data(simulation, checkpoint, outfile)
-#
-# data = np.load(outfile)
-# print(data['replicas_state_indices'])
