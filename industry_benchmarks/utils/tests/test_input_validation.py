@@ -70,14 +70,12 @@ class TestScript:
         runner = click.testing.CliRunner()
         with runner.isolated_filesystem():
             result = runner.invoke(main, ['--pdb', protein_with_ptm])
-            print(result)
             assert result.exit_code == 1
             assert "SIMULATION COMPLETE" not in result.output
 
-    def test_revert_ptm_protein_pass(self, protein_convert_ptm):
+    def test_convert_ptm_protein(self, protein_convert_ptm):
         runner = click.testing.CliRunner()
         with runner.isolated_filesystem():
             result = runner.invoke(main, ['--pdb', protein_convert_ptm])
-            print(result)
             assert result.exit_code == 0
             assert "SIMULATION COMPLETE" in result.output
