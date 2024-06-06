@@ -141,7 +141,7 @@ The setup of the relative binding free energy network is carried out using the p
 
 This script will carry out the following steps:
 
-* Loading the ligands, protein, and (if present) cofactors
+* Loading the ligands, protein, and (if provided) cofactors
 * Computing partial charges for ligands and cofactors using antechamber AM1BCC
 * Creating a network of ligand transformations using the Kartograf atom mapper, LOMAP scorer, and LOMAP network generator
 * Assigning settings to the transformations. Settings differ depending on whether the ligand transformation involves a change in net charge
