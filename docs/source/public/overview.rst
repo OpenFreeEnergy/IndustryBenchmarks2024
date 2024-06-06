@@ -151,7 +151,7 @@ This script will carry out the following steps:
 
 In an environment with OpenFE 1.0 installed, please run this script by calling:
 
-.. code-block:: python
+.. code-block:: bash
 
    # If you don’t have cofactors
    python plan_rbfe_network.py --pdb protein.pdb --ligands ligands.sdf --output network_setup
