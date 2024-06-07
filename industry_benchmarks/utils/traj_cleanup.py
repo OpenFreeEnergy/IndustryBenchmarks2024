@@ -32,7 +32,8 @@ def subsample_traj(simulation, hybrid_system_pdb, lambda_windows, outfile):
         u = mda.Universe(hybrid_system_pdb, simulation,
                          format=FEReader, state_id=i)
         skip = round(len(u.trajectory) / 20)
-        with mda.Writer(f'{outfile}_{i}.xtc', n_atoms=len(u.atoms)) as w:
+        out_traj = pathlib.Path(f'{outfile}_{i}.xtc')
+        with mda.Writer(str(out_traj), n_atoms=len(u.atoms)) as w:
             for ts in u.trajectory[::skip]:
                 w.write(u.atoms)
 
