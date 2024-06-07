@@ -55,7 +55,7 @@ def gen_ligand_network(smcs):
     ligand_network = openfe.ligand_network_planning.generate_lomap_network(
         molecules=smcs, mappers=mapper, scorer=scorer)
     # Raise an error if the network is not connected
-    if ligand_network.is_connected() is False:
+    if not ligand_network.is_connected():
         errormsg = ('Error encountered when creating the ligand network. The network'
                     ' is unconnected.')
         raise ValueError(errormsg)
