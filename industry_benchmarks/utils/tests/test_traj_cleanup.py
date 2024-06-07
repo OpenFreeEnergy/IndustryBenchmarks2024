@@ -1,3 +1,5 @@
+import pathlib
+
 import MDAnalysis as mda
 import pytest
 from importlib import resources
@@ -29,19 +31,20 @@ def outfile():
         yield d / 'data.npz'
 
 
-@pytest.fixture
-def out_traj():
-    with resources.files('utils.tests.data.example_traj') as d:
-        yield d / 'out'
+def test_extract_data(simulation, checkpoint, pdb, outfile, tmp_path):
+    out_traj = tmp_path / 'out'
+    out_npz = tmp_path / 'test.npz'
 
-
-def test_extract_data(simulation, checkpoint, pdb, outfile, out_traj):
-
-    extract_data(simulation, checkpoint, pdb, outfile, out_traj)
-    data = np.load(outfile)
-    u_ln = data['u_ln']
-    N_l = data['N_l']
-    replicas_state_indices = data['replicas_state_indices']
+    extract_data(simulation, checkpoint, pdb, out_npz, out_traj)
+    # Check that a .npz file was written out
+    assert out_npz.is_file()
+    # Check that the output is the same as the stored data
+    test_output = np.load(tmp_path / 'test.npz')
+    stored_output = np.load(outfile)
+    assert list(stored_output) == list(test_output)
+    u_ln = test_output['u_ln']
+    N_l = test_output['N_l']
+    replicas_state_indices = test_output['replicas_state_indices']
     # u_ln array should have a length of 11 (number of lambda windows)
     assert len(u_ln) == 11
     # N_l array should have a length of 11 (number of lambda windows)
@@ -56,6 +59,9 @@ def test_extract_data(simulation, checkpoint, pdb, outfile, out_traj):
 
     # Check output trajectories
     for i in range(11):
-        u = mda.Universe(pdb, f'{out_traj}_{i}.xtc')
+        # Check that trajectory files exist
+        traj = pathlib.Path(f'{out_traj}_{i}.xtc')
+        assert traj.is_file()
+        u = mda.Universe(pdb, traj)
         # Check that we saved 20 frames
         assert len(u.trajectory) == 20
