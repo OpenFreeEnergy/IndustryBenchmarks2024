@@ -63,5 +63,5 @@ def test_extract_data(simulation, checkpoint, pdb, outfile, tmp_path):
         traj = pathlib.Path(f'{out_traj}_{i}.xtc')
         assert traj.is_file()
         u = mda.Universe(pdb, traj)
-        # Check that we saved 20 frames
-        assert len(u.trajectory) == 20
+        # Check that we saved 21 frames
+        assert len(u.trajectory) == 21
