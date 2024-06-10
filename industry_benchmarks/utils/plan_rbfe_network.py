@@ -24,8 +24,8 @@ amber_rdkit = ToolkitRegistry([RDKitToolkitWrapper(), AmberToolsToolkitWrapper()
 
 def gen_charges(smc):
     """
-        Generate AM1BCC partial charges for a SmallMoleculeComponent using
-        the input conformer and antechamber as backend.
+    Generate AM1BCC partial charges for a SmallMoleculeComponent using
+    the input conformer and antechamber as backend.
     """
     offmol = smc.to_openff()
     with toolkit_registry_manager(amber_rdkit):
