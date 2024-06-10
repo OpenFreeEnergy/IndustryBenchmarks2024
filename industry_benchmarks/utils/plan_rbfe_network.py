@@ -10,6 +10,11 @@ import openfe
 from openfe.protocols.openmm_rfe.equil_rfe_methods import RelativeHybridTopologyProtocol
 from rdkit import Chem
 import kartograf
+from kartograf.filters import (
+    filter_ringbreak_changes,
+    filter_ringsize_changes,
+    filter_whole_rings_only,
+)
 from openff.toolkit import (
     RDKitToolkitWrapper, AmberToolsToolkitWrapper
 )
@@ -51,7 +56,15 @@ def gen_ligand_network(smcs):
     openfe.LigandNetwork
       The Lomap generated LigandNetwork.
     """
-    mapper = kartograf.KartografAtomMapper(atom_map_hydrogens=True)
+    mapping_filters = [
+        filter_ringbreak_changes,  # default
+        filter_ringsize_changes,  # default
+        filter_whole_rings_only,  # default
+    ]
+    mapper = kartograf.KartografAtomMapper(
+        atom_map_hydrogens=True,
+        additional_mapping_filter_functions=mapping_filters,
+    )
     # TODO: Change this after LOMAP PR gets merged
     # scorer = openfe.lomap_scorers.default_lomap_score
     scorer = partial(openfe.lomap_scorers.default_lomap_score, charge_changes_score=0.1)
