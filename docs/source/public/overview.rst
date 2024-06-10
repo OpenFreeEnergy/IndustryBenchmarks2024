@@ -1,6 +1,4 @@
 .. _public_overview:
-
-*************************
 Public Dataset Benchmarks
 *************************
 
@@ -35,6 +33,8 @@ As outlined in Figure 1, the public benchmark will be split into four phases:
 
 At each stage of the process, the OpenFE team will provide necessary inputs and support to all participating members.
 
+
+.. _public_phase1:
 
 Phase 1: Preparing Inputs
 *************************
@@ -136,15 +136,54 @@ Please note that we expect the private dataset industry benchmark to start along
 Simulation Planning: LOMAP networks
 ===================================
 
-*Details to be published very soon!*
+The setup of the relative binding free energy network is carried out using the planning script provided under 
+`utils/plan_rbfe_network.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/plan_rbfe_network.py>`_.
 
+This script will carry out the following steps:
+
+* Loading the ligands, protein, and (if provided) cofactors
+* Computing partial charges for ligands and cofactors using antechamber AM1BCC
+* Creating a network of ligand transformations using the Kartograf atom mapper, LOMAP scorer, and LOMAP network generator
+* Assigning settings to the transformations. Settings differ depending on whether the ligand transformation involves a change in net charge
+   * non charge changing transformations: 11 lambda windows, 5 ns production run per lambda window
+   * charge changing transformations: 22 lambda windows, 20 ns production run per lambda window
+* Creating the ``AlchemicalTransformation``\ s for solvent and complex legs and saving them to disc as json files
+
+In an environment with OpenFE 1.0 installed, please run this script by calling:
+
+.. code-block:: bash
+
+   # If you don’t have cofactors
+   python plan_rbfe_network.py --pdb protein.pdb --ligands ligands.sdf --output network_setup
+
+   # If you have cofactors
+   python plan_rbfe_network.py --pdb protein.pdb --ligands ligands.sdf --cofactors cofactors.sdf --output network_setup
+
+This command will create a folder (named ``network_setup`` as specified using the ``--output`` flag) that contains a separate ``.json`` file for the solvent and complex legs 
+for every edge in the network. The folder also contains a ``ligand_network.graphml`` file that is a serialized version of the ``LigandNetwork``.
+
+.. note::
+   Since the partial charge assignment can be slow, we recommend putting the planning command in a bash script and executing it on a high performance workstation or HPC resource. 
 
 Simulation execution
 ====================
 
 All planned simulations will be run by industry partners on their own clusters using OpenFE execution tooling,
 i.e. through the `quickrun method <https://docs.openfree.energy/en/latest/guide/execution/quickrun_execution.html>`_.
+You can find additional information and examples on how to run simulations of the entire network in the "Running the simulations" section of our `CLI tutorial <https://docs.openfree.energy/en/latest/tutorials/rbfe_cli_tutorial.html>`_.
 
+Here is an example of a very simple script that will create and submit a separate job script (`*.job` named file) for every alchemical transformation (for the simplest SLURM use case):
+
+.. code-block:: bash
+
+   for file in network_setup/*.json; do
+     relpath=${file:14}  # strip off "network_setup/"
+     dirpath=${relpath%.*}  # strip off final ".json"
+     jobpath="network_setup/${dirpath}.job"
+     cmd="openfe quickrun $file -o results/$relpath -d results/$dirpath"
+     echo -e "#!/usr/bin/env bash\n${cmd}" > $jobpath
+     sbatch $jobpath
+   done
 
 Compute Requirements
 ====================

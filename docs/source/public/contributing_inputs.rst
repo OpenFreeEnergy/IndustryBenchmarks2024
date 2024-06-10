@@ -28,18 +28,27 @@ For each submitted directory:
 Detailed Instructions
 *********************
 
-**1. Clone the GitHub repository**
+**1. Fork the GitHub repository**
 
-You can clone this repository, meaning making a local copy of the repository, to make it easier to add new files and push changes back to the remote repository on GitHub.com.
+First, you can create a fork of the GitHub repository. You will then make the changes (adding the files) first in the forked repository and afterwards propose the changes to the upstream repository (`OpenFreeEnergy/IndustryBenchmarks2024`).
+
+* In the `OpenFreeEnergy/IndustryBenchmarks2024` repository in the top-right corner of the page, click **Fork**.
+* Under "Owner", select an owner for the forked repository (likely yourself). The repository name can stay as given, `IndustryBenchmarks2024`.
+* Click **Create Fork**.
+
+**2. Clone the forked GitHub repository**
+
+You can clone the fork created in step 1, meaning making a local copy of the repository, to make it easier to add new files and push changes back to the remote repository on GitHub.com.
 
 .. code-block:: bash
 
-   git clone https://github.com/OpenFreeEnergy/IndustryBenchmarks2024.git
+   git clone https://github.com/Owner/IndustryBenchmarks2024.git
 
+where ``Owner`` is the name of the owner that was selected in step 1.
 
-**2. Create and work off of a remote branch**
+**3. Create and work off of a remote branch**
 
-You can create a remote branch that will allow you to make changes to the repository (e.g. adding new files) without the changes immediately affecting the main reporitory.
+You can create a remote branch that will allow you to make changes to the repository (e.g. adding new files) without the changes immediately affecting the main branch.
 
 .. code-block:: bash
 
@@ -49,7 +58,7 @@ Where ``my_remote_branch`` is the name for you remote branch, e.g. ``prepare_sys
 
 Now you can add your prepared files under the ``industry_benchmarks/input_structures/prepared_structures`` subfolder.
 
-**3. Push the prepared input files to the Github repository**
+**4. Push the prepared input files to the Github repository**
 
 Once the preparation is completed, you can upload the files onto GitHub.com:
 
@@ -73,10 +82,14 @@ Following files will need to be added to the respective directory for each syste
 * ``ligands.sdf``: Ligand SDF
 * ``edges.csv``: Edges CSV file
 
-**4. Create a Pull Request**
+**5. Create a Pull Request into the upstream repository**
 
 In a next step, you can create a Pull Request on GitHub. A Pull Request (PR) is a proposal to merge the changes from your remote branch into another branch, e.g. into the main codebase.
 We created a PR template for you where you can tick off the checklist to ensure that all steps have been completed.
-To create the PR go to the GitHub repository. After pushing the remote branch (step 3) there should now be a note that a new branch (with the name you had given it) has recently been pushed.
-Next, please click on the green button that says "Compare & pull request". Now, you will be able to create the PR from the PR template provided.
+To create the PR:
+
+* Go to your fork of the GitHub repository. After pushing the remote branch (step 3) there should now be a note that a new branch (with the name you had given it) has recently been pushed.
+* Click on the green button that says "Compare & pull request". 
+* In the "base repository" dropdown menu, select the upstream repository (``OpenFreeEnergy/IndustryBenchmarks2024``) and the "base branch" ``main``.
+* Create the PR from the PR template provided, giving the PR a meaningful title and description.
 
