@@ -146,22 +146,46 @@ For some datasets, the Schrodinger public binding free energy benchmark set incl
 and protonation states for some of the ligands. For this current study, we will only consider a single conformation and protonation state for each of the ligands. 
 Here, we will be using the binding mode and protonation state that was predicted to be most potent by FEP+.
 
-If the dataset contains ligands in multiple conformations or protonation states, the more favorable state should be identified (by looking at the results deposited by Schrodinger) and the less favorable state should be removed from the input ``ligands.sdf`` file.
+If the dataset contains ligands in multiple conformations or protonation states, the state that contributes the most to binding should be identified (by looking at the results deposited by Schrodinger) and the less favorable state should be removed from the input ``ligands.sdf`` file.
 
-**Assessing the more potent binding mode or protonation state** 
+The FEP+ ligand predictions can be found `here <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/main/21_4_results/ligand_predictions>`_.
 
-The FEP+ edge predictions can be found `here <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/main/21_4_results/edge_predictions>`_. 
-Edges that were run between different states of the same ligand have an experimental ddG value of 0.0 kcal/mol. 
-If for a transformation between two different states of a ligand, V1 and V2, the calculated ddG value is greater than zero, V2 is less favorable and should therefore be removed from the ``ligands.sdf``.
-If the calculated ddG has a negative value, V2 is more favorable and V1 should be removed from the ``ligands.sdf`` file.
+In the following, we will go into the details on how to extract the necessary information for ligands with multiple binding modes, multiple protonation states, and multiple stereo isomers.
 
-**Example: JNK1 (JACS set)**
+**1. Multiple binding modes**
 
-* Opening the `Table of edge predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/edge_predictions/jacs_set/jnk1_manual_flips_out.csv>`_
-* For all edges that connect different binding modes of the same ligand, the experimental ddG values have a value of 0.0 kcal/mol. 
-* The calculated ddG value between the first edge (ligand *18637-1* and its alternate binding mode *18637-1 flip*) is 2.54 kcal/mol. 
-* This means that the original binding mode (*18637-1*) is predicted to be more favorable than the flipped binding mode (*18637-1 flip*). 
-* In this case we would remove ligand *18637-1 flip* from the ``ligands.sdf`` file.
+For ligands that were run in multiple binding modes, the table of FEP+ ligand predictions reports only the binding mode
+that was calculated to contribute more to binding.
+
+*Example: JNK1 (JACS set)*
+
+* Opening the `Table of ligand predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/ligand_predictions/jacs_set/jnk1_manual_flips_symbmcorr_out.csv>`_
+* The table shows the experimental and calculated binding free energy for 21 ligands, while there had been 38 nodes in the FEP+ network
+* Remove all ligands from the ``ligands.sdf`` file that are not listed in this table
+* e.g. ``18637-1`` is present in the table but not ``18637-1 flip``, therefore we would remove ``18637-1 flip``
+* It may also be helpful to look at the `Table of edge predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/edge_predictions/jacs_set/jnk1_manual_flips_out.csv>`_
+  to identify the ligand pairs for which multiple binding modes had been used
+* e.g. first edge between ligand ``18637-1`` and its alternate binding mode ``18637-1 flip``
+
+**2. Multiple protonation states**
+
+For ligands for which multiple protonation states were included in the ligand network,
+the table of FEP+ ligand predictions reports calculated binding free energies from all states.
+The values include a pka correction.
+
+**3. Multiple stereo isomers**
+
+For ligands where multiple stereo isomers where included in the ligand network,
+the table of FEP+ ligand predictions reports results from both stereo isomers.
+In this case we will keep the stereo isomer with the more negative calculated binding free energy and remove the other stereo isomer from the ``ligands.sdf`` file.
+
+*Example: MUP-1 (fragments dataset)*
+
+* Opening the `Table of ligands predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/ligand_predictions/fragments/frag_mup1_out.csv>`_
+* For ligand ``SBT`` there are results from two stereo isomers, ``SBT_R`` and ``SBT_S``
+* The calculated binding free energy of ligand ``SBT_S`` is more negative than for ligand ``SBT_R`` (-9.14 vs. -8.77 kcal/mol)
+* In this case we would remove ligand ``SBT_R`` from the ``ligands.sdf`` file
+
 
 Submitting prepared input files
 ===============================
