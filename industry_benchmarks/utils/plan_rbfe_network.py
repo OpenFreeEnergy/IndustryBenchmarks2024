@@ -29,7 +29,10 @@ def gen_charges(smc):
     """
     offmol = smc.to_openff()
     with toolkit_registry_manager(amber_rdkit):
-        offmol.assign_partial_charges(partial_charge_method="am1bcc")
+        offmol.assign_partial_charges(
+            partial_charge_method="am1bcc",
+            use_conformers=offmol.conformers
+        )
     return openfe.SmallMoleculeComponent.from_openff(offmol)
 
 
