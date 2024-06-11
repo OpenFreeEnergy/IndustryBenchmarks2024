@@ -62,6 +62,7 @@ We thank the OpenFE industry partners for their participation, guidance, and fun
    :caption: Table of Contents
    :hidden:
 
+   ./installation
    ./public/overview
    ./private/overview
    get-in-touch
