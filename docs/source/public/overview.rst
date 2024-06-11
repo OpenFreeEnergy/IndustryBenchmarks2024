@@ -188,7 +188,7 @@ Here is an example of a very simple script that will create and submit a separat
      done 
    done
 
-Please reach out to us if you have any questions on how to adapt this script to your internal needs and we'd be happy to assist you in that.
+Please reach out to the openfe team if you have any questions on how to adapt this script to your internal needs, we would be happy to assist with this.
 
 Compute Requirements
 ====================
