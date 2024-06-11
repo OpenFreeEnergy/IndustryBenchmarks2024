@@ -180,9 +180,10 @@ Here is an example of a very simple script that will create and submit a separat
      relpath=${file:14}  # strip off "network_setup/"
      dirpath=${relpath%.*}  # strip off final ".json"
      jobpath="network_setup/${dirpath}.job"
-     cmd="openfe quickrun $file -o results/$relpath -d results/$dirpath"
-     echo -e "#!/usr/bin/env bash\n${cmd}" > $jobpath
-     sbatch $jobpath
+     for repeat in {0..2}; do
+         cmd="openfe quickrun $file -o results_{repeat}/$relpath -d results_{repeat}/$dirpath"
+         echo -e "#!/usr/bin/env bash\n${cmd}" > $jobpath
+         sbatch $jobpath
    done
 
 Compute Requirements
