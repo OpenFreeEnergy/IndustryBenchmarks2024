@@ -144,7 +144,7 @@ Preparing the ligand file
 
 For some datasets, the Schrodinger public binding free energy benchmark set includes multiple binding modes (e.g. different rotamers) 
 and protonation states for some of the ligands. For this current study, we will only consider a single conformation and protonation state for each of the ligands. 
-Here, we will be using the binding mode and protonation state that was predicted to be most potent by FEP+.
+Here, we will be using the binding mode and protonation state that, according to the FEP+ result, contributes the most to the binding free energy.
 
 If the dataset contains ligands in multiple conformations or protonation states, the state that contributes the most to binding should be identified (by looking at the results deposited by Schrodinger) and the less favorable state should be removed from the input ``ligands.sdf`` file.
 
@@ -160,7 +160,7 @@ that was calculated to contribute more to binding.
 *Example: JNK1 (JACS set)*
 
 * Opening the `Table of ligand predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/ligand_predictions/jacs_set/jnk1_manual_flips_symbmcorr_out.csv>`_
-* The table shows the experimental and calculated binding free energy for 21 ligands, while there had been 38 nodes in the FEP+ network
+* The table shows the experimental and calculated binding free energies for 21 ligands, while there had been 38 nodes in the FEP+ network
 * Remove all ligands from the ``ligands.sdf`` file that are not listed in this table
 * e.g. ``18637-1`` is present in the table but not ``18637-1 flip``, therefore we would remove ``18637-1 flip``
 * It may also be helpful to look at the `Table of edge predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/edge_predictions/jacs_set/jnk1_manual_flips_out.csv>`_
