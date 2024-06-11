@@ -1,5 +1,5 @@
-Installation
-************
+OpenFE Installation
+*******************
 
 The page has information for installing ``openfe``, and testing that your ``openfe`` installation is working.
 For this benchmarking study, everyone will be using a specific OpenFE release, version v1.0.1.
