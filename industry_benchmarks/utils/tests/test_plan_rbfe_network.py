@@ -73,6 +73,8 @@ class TestScript:
                 for f in output_files:
                     d = json.load(open(f, 'r'), cls=JSON_HANDLER.decoder)
                     protocol = openmm_rfe.RelativeHybridTopologyProtocol.from_dict(d['protocol'])
+                    # Check that only a single repeat is specified in the settings
+                    assert protocol.settings.protocol_repeats == 1
                     lambda_windows = protocol.settings.lambda_settings.lambda_windows
                     if lambda_windows == 22:
                         charge_change_json.append(f)

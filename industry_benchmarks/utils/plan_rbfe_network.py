@@ -114,6 +114,8 @@ def get_settings():
     settings.engine_settings.compute_platform = "CUDA"
     # Should we use this new OpenFF version or the default?
     settings.forcefield_settings.small_molecule_forcefield = 'openff-2.2.0'
+    # Only run one repeat per input json file
+    settings.protocol_repeats = 1
     return settings
 
 
@@ -133,6 +135,8 @@ def get_settings_charge_changes():
     settings.simulation_settings.production_length = 20 * unit.nanosecond
     settings.simulation_settings.n_replicas = 22
     settings.lambda_settings.lambda_windows = 22
+    # Only run one repeat per input json file
+    settings.protocol_repeats = 1
     return settings
 
 
