@@ -31,8 +31,8 @@ The single file installer contains all of the dependencies required for ``openfe
 Both ``conda`` and ``mamba`` are also available in the environment created by the single file installer and can be used to install additional packages.
 The installer can be installed in batch mode or interactively  ::
 
-  $ chmod +x ./OpenFEforge-Linux-x86_64.sh # Make installer executable
-  $ ./OpenFEforge-Linux-x86_64.sh # Run the installer
+  $ chmod +x ./OpenFEforge-1.0.1-Linux-x86_64.sh # Make installer executable
+  $ ./OpenFEforge-1.0.1-Linux-x86_64.sh # Run the installer
 
 After the installer completes, close and reopen your shell.
 To check if your path is setup correctly, run ``which python`` your output should look something like this ::
@@ -66,7 +66,7 @@ The `conda-lock` file for OpenFE version v1.0.1 can be downloaded with ::
 
 Create a conda environment from the lock file and activate it::
 
-  $ conda-lock install -n openfe conda-lock-openfe.yml
+  $ conda-lock install -n openfe conda-lock-openfe-1.0.1.yml
   $ conda activate openfe
 
 For additional details, please visit the `Installation page <https://docs.openfree.energy/en/latest/installation.html>`_ in the OpenFE documentation.
