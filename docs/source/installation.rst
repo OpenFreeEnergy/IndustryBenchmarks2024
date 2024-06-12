@@ -54,6 +54,10 @@ For additional details, please visit the `Installation page <https://docs.openfr
 Single file installer
 =====================
 
+.. warning::
+
+   The single file installer may modify your ``.bashrc`` in a way that requires manual intervention to access your previous ``conda`` installation 
+
 .. _releases on GitHub: https://github.com/OpenFreeEnergy/openfe/releases
 
 Single file installers are available for x86_64 Linux and MacOS.
