@@ -1,4 +1,5 @@
 .. _public_overview:
+*************************
 Public Dataset Benchmarks
 *************************
 
@@ -93,7 +94,7 @@ Updates will be made to these instructions based on feedback by benchmark partne
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    input_preparation
 
@@ -113,7 +114,7 @@ Please see the :ref:`contributing inputs instructions <contributing-inputs>` for
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    contributing_inputs
 
