@@ -174,6 +174,7 @@ Simulation execution
 All planned simulations will be run by industry partners on their own clusters using OpenFE execution tooling,
 i.e. through the `quickrun method <https://docs.openfree.energy/en/latest/guide/execution/quickrun_execution.html>`_.
 You can find additional information and examples on how to run simulations of the entire network in the "Running the simulations" section of our `CLI tutorial <https://docs.openfree.energy/en/latest/tutorials/rbfe_cli_tutorial.html>`_.
+In this study, we will use a slightly modified approach to our CLI Tutorial, allowing for execution of a single task per HPC job.
 
 Here is an example of a very simple script that will create and submit a separate job script (`*.job` named file) for every alchemical transformation (for the simplest SLURM use case):
 
@@ -183,10 +184,14 @@ Here is an example of a very simple script that will create and submit a separat
      relpath=${file:14}  # strip off "network_setup/"
      dirpath=${relpath%.*}  # strip off final ".json"
      jobpath="network_setup/${dirpath}.job"
-     cmd="openfe quickrun $file -o results/$relpath -d results/$dirpath"
-     echo -e "#!/usr/bin/env bash\n${cmd}" > $jobpath
-     sbatch $jobpath
+     for repeat in {0..2}; do
+       cmd="openfe quickrun $file -o results_{repeat}/$relpath -d results_{repeat}/$dirpath"
+       echo -e "#!/usr/bin/env bash\n${cmd}" > $jobpath
+       sbatch $jobpath
+     done 
    done
+
+Please reach out to the openfe team if you have any questions on how to adapt this script to your internal needs, we would be happy to assist with this.
 
 Compute Requirements
 ====================
