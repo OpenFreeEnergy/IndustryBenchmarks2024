@@ -173,7 +173,7 @@ the table of FEP+ ligand predictions reports calculated binding free energies fr
 The values include a pka correction as decribed in work by `Oliveira et al <https://pubs.acs.org/doi/10.1021/acs.jctc.8b00826>`_.
 For this study we will be using a single protonation state per ligand, choosing the protonation state that had been used in the original studies by `Schindler et al. (Merck set) <https://pubs.acs.org/doi/10.1021/acs.jcim.0c00900>`_, `Chen et al. (charge annihilation set) <https://pubs.acs.org/doi/10.1021/acs.jctc.8b00825>`_, and `Cappel et al. (MCS docking set) <https://pubs.acs.org/doi/10.1021/acs.jcim.9b01118>`_.
 
-From the systems picked by industry partners, following systems have ligands in multiple protonation states:
+From the systems picked by industry partners, as of writing these instructions, the following systems have ligands in multiple protonation states:
 
 * Merck set: EG5, TNKS2
 * MCS docking set: HNE
