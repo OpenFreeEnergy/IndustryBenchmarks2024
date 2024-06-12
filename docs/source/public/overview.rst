@@ -42,9 +42,9 @@ Phase 1: Preparing Inputs
 In this phase, benchmark input structures will be prepared by industry partners for use with the OpenFE toolkit.
 
 
-**Start date:** *Early May 2024*
+**Start date:** *Mid June 2024*
 
-**End date:** *Early June 2024*
+**End date:** *Mid July 2024*
 
 
 Allocation Benchmark Systems
@@ -119,14 +119,9 @@ Please see the :ref:`contributing inputs instructions <contributing-inputs>` for
 Phase 2: Running Simulations
 ****************************
 
-
-.. note::
-   Details for phase 2 of the public dataset benchmarks are still being finalised. These will be updated as soon as possible!
-
-
 In this phase, industry partners will run alchemical transformations for their allocated systems on their HPC resources.
 
-**Start date:** *Early June 2024*
+**Start date:** *Early July 2024*
 
 **End date:** *End of August 2024*
 
