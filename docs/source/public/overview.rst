@@ -93,7 +93,7 @@ Updates will be made to these instructions based on feedback by benchmark partne
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    input_preparation
 
@@ -113,7 +113,7 @@ Please see the :ref:`contributing inputs instructions <contributing-inputs>` for
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    contributing_inputs
 
