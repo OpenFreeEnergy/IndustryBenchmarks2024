@@ -179,7 +179,7 @@ From the systems picked by industry partners, following systems have ligands in 
 * MCS docking set: HNE
 * Charge annihilation set: JNK1, EGFR, DLK, JAK1, TYK2, ITK, CDK2
 
-If you picked one of these systems, please reach out to us with any questions about which protonation to use!
+If you picked one of these systems, please reach out to us with any questions regarding the protonation state assignment!
  
 
 **3. Multiple stereo isomers**
