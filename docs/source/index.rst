@@ -34,14 +34,13 @@ Public Dataset Benchmarks
 *************************
 
 
-**Deadline:** TBA
+**Simulation Completion Deadline:** September 2024
 
 
 13th June 2024: :ref:`Phase 1 <public_phase1>` of the :ref:`Public Dataset Benchmarks <public_overview>` is now live!
 
 
-To get started with this project please have a look at the :ref:`public dataset benchmarks overview <public_overview>`
-and our :ref:`getting started <public_getting_started>` instructions.
+To get started with this project please have a look at the :ref:`public dataset benchmarks overview <public_overview>` for instructions on how to get started.
 
 
 Private Dataset Benchmarks
