@@ -21,6 +21,9 @@ from openff.toolkit import (
 from openff.toolkit.utils.toolkit_registry import (
     toolkit_registry_manager, ToolkitRegistry
 )
+import gufe
+from gufe import tokenization
+
 
 logger = logging.getLogger(__name__)
 
@@ -162,7 +165,7 @@ def get_settings_charge_changes():
 @click.option(
     '--output',
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
-    default=None,
+    default=Path('alchemicalNetwork'),
     help="Directory name in which to store the transformation json files",
 )
 def run_inputs(ligands, pdb, cofactors, output):
@@ -181,9 +184,9 @@ def run_inputs(ligands, pdb, cofactors, output):
       A Path to a directory where the transformation json files
       and ligand network graphml file will be stored into.
     """
-    # Create the output directory
-    if not os.path.isdir(output):
-        os.mkdir(output)
+    # Create the output directory -- default to cwd if None
+    output.mkdir(exist_ok=True, parents=True)
+    
     # Create the small molecule components of the ligands
     rdmols = [mol for mol in Chem.SDMolSupplier(str(ligands), removeHs=False)]
     smcs = [openfe.SmallMoleculeComponent.from_rdkit(mol) for mol in rdmols]
@@ -207,7 +210,8 @@ def run_inputs(ligands, pdb, cofactors, output):
         cofactors_smc = [gen_charges(openfe.SmallMoleculeComponent(m))
                          for m in Chem.SDMolSupplier(str(cofactors), removeHs=False)]
 
-    # Create the AlchemicalTransformations, and storing them to disk
+    # Create the AlchemicalTransformations, and storing them to an AlchemicalNetwork
+    transformations = []
     for mapping in ligand_network.edges:
         # Get different settings depending on whether the transformation
         # involves a change in net charge
@@ -256,7 +260,24 @@ def run_inputs(ligands, pdb, cofactors, output):
                 protocol=rbfe_protocol,
                 name=name
             )
-            transformation.dump(output / f"{transformation.name}.json")
+            transformations.append(transformation)
+
+    # Create the alchemical network and write it to disk
+    alchemical_network = openfe.AlchemicalNetwork(transformations)
+    alchemical_network_json_fp = output / "alchemical_network.json"
+    json.dump(
+        alchemical_network.to_dict(),
+        alchemical_network_json_fp.open(mode="w"),
+        cls=tokenization.JSON_HANDLER.encoder
+    )
+
+    # Write out each transformation
+    # Create a subdirectory for the transformations
+    transforms_dir = pathlib.Path(output / "transformations")
+    transforms_dir.mkdir(exist_ok=True, parents=True)
+
+    for transform in alchemical_network.edges:
+        transform.dump(transforms_dir / f"{transform.name}.json")
 
 
 if __name__ == "__main__":
