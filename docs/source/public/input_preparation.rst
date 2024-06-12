@@ -26,7 +26,6 @@ By the end of these instructions you should have:
 
 * A PDB file containing the system protein, crystallographic waters and ions (named `protein.pdb`)
 * An SDF file containing the ligands being mutated (named `ligands.sdf`)
-* A CSV file containing the original FEP+ perturbation network (named `edges.csv`)
 * (Optional) An SDF file containing any system cofactors (named `cofactors.sdf`)
 
 
@@ -140,12 +139,69 @@ If the script outputs “SIMULATION COMPLETE”, then your inputs are suitable f
 .. note::
    This script runs a very short simulation, it is recommended that it is executed on a machine with a CUDA-enabled GPU.
 
+Preparing the ligand file
+=========================
+
+For some datasets, the Schrodinger public binding free energy benchmark set includes multiple binding modes (e.g. different rotamers) 
+and protonation states of ligands. For this current study, we will only consider a single conformation and protonation state for each of the ligands. 
+
+If the dataset contains ligands in multiple conformations or protonation states, the state that likely contributes the most to binding should be identified (by looking at previous results) and the less favorable state should be removed from the input ``ligands.sdf`` file.
+
+The FEP+ ligand predictions can be found `here <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/main/21_4_results/ligand_predictions>`_.
+
+In the following, we will go into the details on how to extract the necessary information for ligands with multiple binding modes, multiple protonation states, and multiple stereo isomers.
+
+**1. Multiple binding modes**
+
+For ligands that were run in multiple binding modes, the table of FEP+ ligand predictions reports only the binding mode
+that was calculated to contribute more to binding.
+
+*Example: JNK1 (JACS set)*
+
+* Opening the `Table of ligand predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/ligand_predictions/jacs_set/jnk1_manual_flips_symbmcorr_out.csv>`_
+* The table shows the experimental and calculated binding free energies for 21 ligands, while there had been 38 nodes in the FEP+ network
+* Remove all ligands from the ``ligands.sdf`` file that are not listed in this table
+* e.g. ``18637-1`` is present in the table but not ``18637-1 flip``, therefore we would remove ``18637-1 flip``
+* It may also be helpful to look at the `Table of edge predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/edge_predictions/jacs_set/jnk1_manual_flips_out.csv>`_
+  to identify the ligand pairs for which multiple binding modes had been used
+* e.g. first edge between ligand ``18637-1`` and its alternate binding mode ``18637-1 flip``
+
+**2. Multiple protonation states**
+
+For ligands for which multiple protonation states were included in the ligand network,
+the table of FEP+ ligand predictions reports calculated binding free energies from all states.
+The values include a pka correction as decribed in work by `Oliveira et al <https://pubs.acs.org/doi/10.1021/acs.jctc.8b00826>`_.
+For this study we will be using a single protonation state per ligand, choosing the protonation state that had been used in the original studies by `Schindler et al. (Merck set) <https://pubs.acs.org/doi/10.1021/acs.jcim.0c00900>`_, `Chen et al. (charge annihilation set) <https://pubs.acs.org/doi/10.1021/acs.jctc.8b00825>`_, and `Cappel et al. (MCS docking set) <https://pubs.acs.org/doi/10.1021/acs.jcim.9b01118>`_.
+
+From the systems picked by industry partners, as of writing these instructions, the following systems have ligands in multiple protonation states:
+
+* Merck set: EG5, TNKS2
+* MCS docking set: HNE
+* Charge annihilation set: JNK1, EGFR, DLK, JAK1, TYK2, ITK, CDK2
+
+If you picked one of these systems, please reach out to us with any questions regarding the protonation state assignment!
+ 
+
+**3. Multiple stereo isomers**
+
+For ligands where multiple stereo isomers where included in the ligand network,
+the table of FEP+ ligand predictions reports results from both stereo isomers.
+In this case we will keep the stereo isomer with the more negative calculated binding free energy and remove the other stereo isomer from the ``ligands.sdf`` file.
+
+*Example: MUP-1 (fragments dataset)*
+
+* Opening the `Table of ligands predictions <https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/ligand_predictions/fragments/frag_mup1_out.csv>`_
+* For ligand ``SBT`` there are results from two stereo isomers, ``SBT_R`` and ``SBT_S``
+* The calculated binding free energy of ligand ``SBT_S`` is more negative than for ligand ``SBT_R`` (-9.14 vs. -8.77 kcal/mol)
+* In this case we would remove ligand ``SBT_R`` from the ``ligands.sdf`` file
+
+
 Submitting prepared input files
 ===============================
 
 All prepared inputs should be submitted to the OpenFE Public Benchmark github repository, more specifically to the
 `prepared_structures <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/inputs/prepared_structures>`_ subfolder.
-This should be done via Pull Request, with a folder for each prepared system including the protein PDB, ligand SDF, relevant edges CSV, and if available cofactor SDF file.
+This should be done via Pull Request, with a folder for each prepared system including the protein PDB, ligand SDF, and if available cofactor SDF file.
 A short bullet point summary of any remediation steps, including any software used, should also be included as a markdown file.
 Further details can be found in the :ref:`contributing-inputs` page.
 

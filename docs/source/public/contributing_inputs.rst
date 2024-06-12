@@ -21,8 +21,7 @@ For each submitted directory:
 * removed any cofactors from the PDB file and placed them in `cofactors.sdf`
 * kept cystallographic waters and metals in the PDB file
 * tested the PDB and, if available, cofactors.sdf file using the [input validation script][input_validation]
-* copied over the ligands SDF file to a file named `ligands.sdf`
-* copied over the edges CSV file to a file named `edges.csv`
+* copied over the ligands SDF file to a file named `ligands.sdf` and removed alternate ligand conformations or protonation states
 
 
 Detailed Instructions
@@ -80,7 +79,6 @@ Following files will need to be added to the respective directory for each syste
 * ``protein.pdb``: PDB file with the protein, including crystallographic waters and metals
 * ``cofactors.sdf``: Cofactors that were moved from the original PDB file to this file
 * ``ligands.sdf``: Ligand SDF
-* ``edges.csv``: Edges CSV file
 
 **5. Create a Pull Request into the upstream repository**
 
