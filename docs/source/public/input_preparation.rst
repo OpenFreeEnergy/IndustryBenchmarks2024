@@ -144,9 +144,8 @@ Preparing the ligand file
 
 For some datasets, the Schrodinger public binding free energy benchmark set includes multiple binding modes (e.g. different rotamers) 
 and protonation states of ligands. For this current study, we will only consider a single conformation and protonation state for each of the ligands. 
-Here, we will be using the binding mode and protonation state that, according to the FEP+ result, contributes the most to the binding free energy.
 
-If the dataset contains ligands in multiple conformations or protonation states, the state that contributes the most to binding should be identified (by looking at the results deposited by Schrodinger) and the less favorable state should be removed from the input ``ligands.sdf`` file.
+If the dataset contains ligands in multiple conformations or protonation states, the state that likely contributes the most to binding should be identified (by looking at previous results) and the less favorable state should be removed from the input ``ligands.sdf`` file.
 
 The FEP+ ligand predictions can be found `here <https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/main/21_4_results/ligand_predictions>`_.
 
@@ -172,7 +171,7 @@ that was calculated to contribute more to binding.
 For ligands for which multiple protonation states were included in the ligand network,
 the table of FEP+ ligand predictions reports calculated binding free energies from all states.
 The values include a pka correction as decribed in work by `Oliveira et al <https://pubs.acs.org/doi/10.1021/acs.jctc.8b00826>`_.
-For this study we will be using a single protonation state per ligand, choosing the protonation state that had been used in the original studies by `Schindler et al. (Merck set) <https://pubs.acs.org/doi/10.1021/acs.jcim.0c00900>`_, `Chen et al. (charge annihilation set) <https://pubs.acs.org/doi/10.1021/acs.jctc.8b00825>_, and `Cappel et al. (MCS docking set) <https://pubs.acs.org/doi/10.1021/acs.jcim.9b01118>`_.
+For this study we will be using a single protonation state per ligand, choosing the protonation state that had been used in the original studies by `Schindler et al. (Merck set) <https://pubs.acs.org/doi/10.1021/acs.jcim.0c00900>`_, `Chen et al. (charge annihilation set) <https://pubs.acs.org/doi/10.1021/acs.jctc.8b00825>`_, and `Cappel et al. (MCS docking set) <https://pubs.acs.org/doi/10.1021/acs.jcim.9b01118>`_.
 
 From the systems picked by industry partners, following systems have ligands in multiple protonation states:
 
