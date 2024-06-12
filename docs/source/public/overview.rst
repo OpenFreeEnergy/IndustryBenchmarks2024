@@ -252,7 +252,7 @@ It will include:
   * PNGs from structural analysis
   * XTC coordinate trajectories for each lambda window containing 21 evenly spaced frames
 
-The data will be kept around by each partners for further processing should it be necessary as part of the manuscript writing process.
+The data will be kept around by each partner for further processing should it be necessary as part of the manuscript writing process.
 
 
 Phase 3: Data Analysis
