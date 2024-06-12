@@ -95,6 +95,7 @@ Updates will be made to these instructions based on feedback by benchmark partne
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    input_preparation
 
@@ -115,6 +116,7 @@ Please see the :ref:`contributing inputs instructions <contributing-inputs>` for
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    contributing_inputs
 
@@ -162,6 +164,7 @@ for every edge in the network. The folder also contains a ``ligand_network.graph
 
 .. note::
    Since the partial charge assignment can be slow, we recommend putting the planning command in a bash script and executing it on a high performance workstation or HPC resource. 
+
 
 Simulation execution
 ====================
