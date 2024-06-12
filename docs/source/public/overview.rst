@@ -85,7 +85,7 @@ Nominally input remediation will involve:
 * Fixing capping groups on terminal residues
 * Mutating any non-canonical amino acids
 * Addressing any issues with residue and atom names
-* Removing alternate ligand conformations or protonation states
+* Removing alternate ligand conformational or protonation states
 
 Depending on the software used to prepare the inputs, the resulting files may need to be stripped of extraneous or sensitive metadata.
 
