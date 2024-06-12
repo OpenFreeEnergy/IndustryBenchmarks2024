@@ -85,7 +85,7 @@ Nominally input remediation will involve:
 * Fixing capping groups on terminal residues
 * Mutating any non-canonical amino acids
 * Addressing any issues with residue and atom names
-* Removing alternate ligand conformations or protonation states
+* Removing alternate ligand conformational or protonation states
 
 Depending on the software used to prepare the inputs, the resulting files may need to be stripped of extraneous or sensitive metadata.
 
@@ -95,6 +95,7 @@ Updates will be made to these instructions based on feedback by benchmark partne
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    input_preparation
 
@@ -115,6 +116,7 @@ Please see the :ref:`contributing inputs instructions <contributing-inputs>` for
 
 .. toctree::
    :maxdepth: 1
+   :hidden:
 
    contributing_inputs
 
@@ -160,8 +162,9 @@ In an environment with OpenFE 1.0 installed, please run this script by calling:
 This command will create a folder (named ``network_setup`` as specified using the ``--output`` flag) that contains a separate ``.json`` file for the solvent and complex legs 
 for every edge in the network. The folder also contains a ``ligand_network.graphml`` file that is a serialized version of the ``LigandNetwork``.
 
-.. note::
+.. warning::
    Since the partial charge assignment can be slow, we recommend putting the planning command in a bash script and executing it on a high performance workstation or HPC resource. 
+
 
 Simulation execution
 ====================
@@ -188,26 +191,68 @@ Here is an example of a very simple script that will create and submit a separat
 
 Please reach out to the openfe team if you have any questions on how to adapt this script to your internal needs, we would be happy to assist with this.
 
+
+Simulation Cleanup
+==================
+
+.. _post-simulation cleanup:
+
+.. warning::
+   The simulation cleanup script is not yet available. Please retain all generated data for now. See the `data storage requirements`_ for more information.
+
+
+A post-simulation cleanup script will be made available by the OpenFE team to reduce the amount of data you need to store after your simulations.
+
+
 Compute Requirements
 ====================
 
-The following compute resources will be required:
+To run the benchmark simulations following **GPU hardware** will be required:
 
-**GPU Hardware**
+* An NVIDIA GPU (CUDA 10.2 or above compatible)
+  * In non-exclusive compute mode
+* A single GPU ID assigned per `openfe quickrun` execution
+  * e.g. by setting `CUDA_VISIBLE_DEVICE` if necessary
+* Estimated **standard** transformation compute time:
+  * Approximately 8-12 GPU hours per complex transformation repeat
+  * Approximately 1-2 GPU hours per solvent transformation repeat
+* Estimated **net charge** transformation compute time:
+  * Approximately 4-7 GPU days per complex transformation repeat
+  * Approximately 8-12 GPU hours per solvent transformation repeat
 
-Industry partners are expected to have the following GPU hardware:
 
-* Approximately 24 GPU hours per triplicate repeat of each standard transformation
-   * Up to 15 GPU days for net charge transformations
-* CUDA 10.2 or above
-* Non-exclusive compute mode
-* Assignment of a single GPU ID per openfe quickrun execution (i.e. by setting CUDA_VISIBLE_DEVICEs if necessary)
+Data Storage Requirements
+=========================
 
-**Data storage**
+.. _data storage requirements:
 
-Industry partners will be expected to keep simulation outputs for the duration of the study, in case the data needs to be post-processed during the publication stage.
+.. warning::
+   You will need to keep any temporary data until the `post-simulation cleanup`_ script is made available.
 
-We estimate a requirement of **5 GB per alchemical transformation** edge.
+
+**Temporary data:**
+
+*Retention time:* until the `post-simulation cleanup`_ script is applied to your data.
+*Estimated storage costs:*
+  * Standard simulations: **5-10 GB** per triplicate repeat cycle
+  * Net charge transformation: **40-80 GB** per triplicate repeat cycle
+
+This data contains the full simulation outputs, including large netcdf trajectories with 1 ps snapshots of the coordinates and energies. A cleanup script will be provided to extract relevant long-term data from these outputs.
+
+**Long term data:**
+
+*Retention time:* until the benchmark manuscript is accepted for publication.
+*Estimated storage costs:* **sub 500 mb** per triplicate repeat cycle.
+
+This long term data will be extracted from above-mentioned temporary data using the `post-simulation cleanup`_ script.
+
+It will include:
+  * Reduced potential arrays for free energy analysis
+  * OpenFE output JSON files
+  * PNGs from structural analysis
+  * XTC coordinate trajectories for each lambda window containing 21 evenly spaced frames
+
+The data will be kept around by each partner for further processing should it be necessary as part of the manuscript writing process.
 
 
 Phase 3: Data Analysis
