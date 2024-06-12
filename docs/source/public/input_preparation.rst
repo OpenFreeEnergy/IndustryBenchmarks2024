@@ -171,7 +171,17 @@ that was calculated to contribute more to binding.
 
 For ligands for which multiple protonation states were included in the ligand network,
 the table of FEP+ ligand predictions reports calculated binding free energies from all states.
-The values include a pka correction.
+The values include a pka correction as decribed in work by `Oliveira et al <https://pubs.acs.org/doi/10.1021/acs.jctc.8b00826>`_.
+For this study we will be using a single protonation state per ligand, choosing the protonation state that had been used in the original studies by `Schindler et al. (Merck set) <https://pubs.acs.org/doi/10.1021/acs.jcim.0c00900>`_, `Chen et al. (charge annihilation set) <https://pubs.acs.org/doi/10.1021/acs.jctc.8b00825>_, and `Cappel et al. (MCS docking set) <https://pubs.acs.org/doi/10.1021/acs.jcim.9b01118>`_.
+
+From the systems picked by industry partners, following systems have ligands in multiple protonation states:
+
+* Merck set: EG5, TNKS2
+* MCS docking set: HNE
+* Charge annihilation set: JNK1, EGFR, DLK, JAK1, TYK2, ITK, CDK2
+
+If you picked one of these systems, please reach out to us with any questions about which protonation to use!
+ 
 
 **3. Multiple stereo isomers**
 
