@@ -20,7 +20,7 @@ Should you wish to communicate with the team privately, please get in touch via 
 Discussions
 ===========
 
-Discussions for the industry benchmarks will be held over the OpenFE slack #consortium-advisory-board channel.
+Discussions for the industry benchmarks will be held over the OpenFE slack #industry-benchmarking channel.
 
 
 Getting Involved

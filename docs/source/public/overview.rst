@@ -35,6 +35,23 @@ As outlined in Figure 1, the public benchmark will be split into four phases:
 At each stage of the process, the OpenFE team will provide necessary inputs and support to all participating members.
 
 
+Before you start
+****************
+
+.. warning::
+   Please do not run benchmarks with pre-existing installations of OpenFE.
+   You should look at our specific :ref:`benchmark openfe install instructions <installation>`
+   for how to set up openfe.
+
+
+Before starting you should :ref:`install openfe <installation>` on any local machine you will use
+to prepare the benchmark systems and any HPC systems you will be running simulations on.
+
+Please note that a very specific install of `openfe` and its dependencies is required in
+order to reduce any variance introduced by new software releases throughout the length
+of the study.
+
+
 .. _public_phase1:
 
 Phase 1: Preparing Inputs
@@ -89,7 +106,7 @@ Nominally input remediation will involve:
 
 Depending on the software used to prepare the inputs, the resulting files may need to be stripped of extraneous or sensitive metadata.
 
-A list of instructions and conditions for preparing inputs are provided :ref:`here <input_preparation>`.
+A list of instructions and conditions for preparing inputs are provided :ref:`here <input-preparation>`.
 Updates will be made to these instructions based on feedback by benchmark partners.
 
 
@@ -104,7 +121,7 @@ Depositing inputs
 =================
 
 All remediated inputs will be deposited in the `OpenFE 2024 benchmark repository <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_.
-This will allow the OpenFE team to:
+Doing this will involve a lightweight review process by the OpenFE team, which will allow them to:
 
 1. Gather preparation conditions to be included in relevant publications
 2. Check-in with industry partners and gather feedback on the the input preparation experience
@@ -123,6 +140,11 @@ Please see the :ref:`contributing inputs instructions <contributing-inputs>` for
 
 Phase 2: Running Simulations
 ****************************
+
+
+.. warning::
+   Please do not start Phase 2 until your prepared benchmark inputs have been approved by the OpenFE team.
+
 
 In this phase, industry partners will run alchemical transformations for their allocated systems on their HPC resources.
 
@@ -145,8 +167,8 @@ This script will carry out the following steps:
 * Computing partial charges for ligands and cofactors using antechamber AM1BCC
 * Creating a network of ligand transformations using the Kartograf atom mapper, LOMAP scorer, and LOMAP network generator
 * Assigning settings to the transformations. Settings differ depending on whether the ligand transformation involves a change in net charge
-   * non charge changing transformations: 11 lambda windows, 5 ns production run per lambda window
-   * charge changing transformations: 22 lambda windows, 20 ns production run per lambda window
+   * Non charge changing transformations: 11 lambda windows, 5 ns production run per lambda window
+   * Charge changing transformations: 22 lambda windows, 20 ns production run per lambda window
 * Creating the ``AlchemicalTransformation``\ s for solvent and complex legs and saving them to disc as json files
 
 In an environment with OpenFE 1.0 installed, please run this script by calling:
@@ -214,15 +236,15 @@ Compute Requirements
 To run the benchmark simulations following **GPU hardware** will be required:
 
 * An NVIDIA GPU (CUDA 10.2 or above compatible)
-  * In non-exclusive compute mode
+    * In non-exclusive compute mode
 * A single GPU ID assigned per `openfe quickrun` execution
-  * e.g. by setting `CUDA_VISIBLE_DEVICE` if necessary
+    * e.g. by setting `CUDA_VISIBLE_DEVICE` if necessary
 * Estimated **standard** transformation compute time:
-  * Approximately 8-12 GPU hours per complex transformation repeat
-  * Approximately 1-2 GPU hours per solvent transformation repeat
+    * Approximately 8-12 GPU hours per complex transformation repeat
+    * Approximately 1-2 GPU hours per solvent transformation repeat
 * Estimated **net charge** transformation compute time:
-  * Approximately 4-7 GPU days per complex transformation repeat
-  * Approximately 8-12 GPU hours per solvent transformation repeat
+    * Approximately 4-7 GPU days per complex transformation repeat
+    * Approximately 8-12 GPU hours per solvent transformation repeat
 
 
 Data Storage Requirements
