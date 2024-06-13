@@ -6,6 +6,10 @@ for file in network_setup/transformations/*.json; do
   jobpath="network_setup/${dirpath}.job"
   for repeat in {0..2}; do
     cmd="openfe quickrun $file -o results_${repeat}/$relpath -d results_${repeat}/$dirpath"
+    if [ -f results_${repeat}/${relpath}.json ]; then
+		echo skipping ${relpath} because result exits
+		continue
+	fi
     echo -e "#!/usr/bin/env bash\n${cmd}" > $jobpath
     cat $jobpath
   done
