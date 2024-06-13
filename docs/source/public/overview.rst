@@ -178,14 +178,18 @@ Here is an example of a very simple script that will create and submit a separat
 
 .. code-block:: bash
 
-   for file in network_setup/*.json; do
-     relpath=${file:14}  # strip off "network_setup/"
+   for file in network_setup/transformations/*.json; do
+     relpath=${file:30}  # strip off "network_setup/"
      dirpath=${relpath%.*}  # strip off final ".json"
-     jobpath="network_setup/${dirpath}.job"
+     jobpath="network_setup/transformations/${dirpath}.job"
+     if [ -f ${jobpath} ]; then
+       echo "${jobpath} already exists"
+       exit 1
+     fi
      for repeat in {0..2}; do
-       cmd="openfe quickrun $file -o results_{repeat}/$relpath -d results_{repeat}/$dirpath"
-       echo -e "#!/usr/bin/env bash\n${cmd}" > $jobpath
-       sbatch $jobpath
+       cmd="openfe quickrun ${file} -o results_${repeat}/${relpath} -d results_${repeat}/${dirpath}"
+       echo -e "#!/usr/bin/env bash\n${cmd}" > ${jobpath}
+       sbatch ${jobpath}
      done 
    done
 
