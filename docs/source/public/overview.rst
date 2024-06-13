@@ -40,9 +40,8 @@ Before you start
 
 .. warning::
    Please do not run benchmarks with pre-existing installations of OpenFE.
-   If creating a new environment is likely to be a lot of work, please
-   reach out to the team for a chat so that we can help reduce any setup
-   burdens.
+   You should look at our specific :ref:`benchmark openfe install instructions <installation>`
+   for how to set up openfe.
 
 
 Before starting you should :ref:`install openfe <installation>` on any local machine you will use
