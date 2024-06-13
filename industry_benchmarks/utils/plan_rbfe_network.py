@@ -4,6 +4,7 @@ import pathlib
 import logging
 import warnings
 import os
+import json
 from functools import partial
 from openff.units import unit
 import openfe
@@ -26,7 +27,7 @@ from gufe import tokenization
 
 
 logger = logging.getLogger(__name__)
-
+warnings.filterwarnings("ignore", message="Partial charges have been provided, these will preferentially be used instead of generating new partial charges")
 amber_rdkit = ToolkitRegistry([RDKitToolkitWrapper(), AmberToolsToolkitWrapper()])
 
 
@@ -35,6 +36,7 @@ def gen_charges(smc):
     Generate AM1BCC partial charges for a SmallMoleculeComponent using
     the input conformer and antechamber as backend.
     """
+    print(f"INFO: generating partial charges for ligand {smc.name} -- this may be slow")
     offmol = smc.to_openff()
     with toolkit_registry_manager(amber_rdkit):
         offmol.assign_partial_charges(
@@ -59,6 +61,7 @@ def gen_ligand_network(smcs):
     openfe.LigandNetwork
       The Lomap generated LigandNetwork.
     """
+    print("INFO: Generating Lomap Network")
     mapping_filters = [
         filter_ringbreak_changes,  # default
         filter_ringsize_changes,  # default
@@ -165,7 +168,7 @@ def get_settings_charge_changes():
 @click.option(
     '--output',
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
-    default=Path('alchemicalNetwork'),
+    default=pathlib.Path('alchemicalNetwork'),
     help="Directory name in which to store the transformation json files",
 )
 def run_inputs(ligands, pdb, cofactors, output):
@@ -184,8 +187,8 @@ def run_inputs(ligands, pdb, cofactors, output):
       A Path to a directory where the transformation json files
       and ligand network graphml file will be stored into.
     """
-    # Create the output directory -- default to cwd if None
-    output.mkdir(exist_ok=True, parents=True)
+    # Create the output directory -- default to alchemicalNetwork, fail if it exists
+    output.mkdir(exist_ok=False, parents=True)
     
     # Create the small molecule components of the ligands
     rdmols = [mol for mol in Chem.SDMolSupplier(str(ligands), removeHs=False)]
