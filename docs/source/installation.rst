@@ -36,7 +36,7 @@ The `conda-lock` file for OpenFE version v1.0.1 can be downloaded with ::
 .. note::
 
    You will likely need to install ``conda-lock``.
-   We recommend installing ``conda-lock`` in a new virtual environment.
+   We recommend installing ``conda-lock`` in a new virtual environment using either `conda` or `mamba`.
    This will reduce the chance of dependency conflicts ::
 
        $ # Install conda lock into a virtual environment
