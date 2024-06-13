@@ -4,6 +4,7 @@ import pathlib
 import logging
 import warnings
 import os
+import json
 from functools import partial
 from openff.units import unit
 import openfe
@@ -21,9 +22,12 @@ from openff.toolkit import (
 from openff.toolkit.utils.toolkit_registry import (
     toolkit_registry_manager, ToolkitRegistry
 )
+import gufe
+from gufe import tokenization
+
 
 logger = logging.getLogger(__name__)
-
+warnings.filterwarnings("ignore", message="Partial charges have been provided, these will preferentially be used instead of generating new partial charges")
 amber_rdkit = ToolkitRegistry([RDKitToolkitWrapper(), AmberToolsToolkitWrapper()])
 
 
@@ -32,6 +36,7 @@ def gen_charges(smc):
     Generate AM1BCC partial charges for a SmallMoleculeComponent using
     the input conformer and antechamber as backend.
     """
+    print(f"INFO: generating partial charges for ligand {smc.name} -- this may be slow")
     offmol = smc.to_openff()
     with toolkit_registry_manager(amber_rdkit):
         offmol.assign_partial_charges(
@@ -56,6 +61,7 @@ def gen_ligand_network(smcs):
     openfe.LigandNetwork
       The Lomap generated LigandNetwork.
     """
+    print("INFO: Generating Lomap Network")
     mapping_filters = [
         filter_ringbreak_changes,  # default
         filter_ringsize_changes,  # default
@@ -162,7 +168,7 @@ def get_settings_charge_changes():
 @click.option(
     '--output',
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
-    default=None,
+    default=pathlib.Path('alchemicalNetwork'),
     help="Directory name in which to store the transformation json files",
 )
 def run_inputs(ligands, pdb, cofactors, output):
@@ -181,9 +187,9 @@ def run_inputs(ligands, pdb, cofactors, output):
       A Path to a directory where the transformation json files
       and ligand network graphml file will be stored into.
     """
-    # Create the output directory
-    if not os.path.isdir(output):
-        os.mkdir(output)
+    # Create the output directory -- default to alchemicalNetwork, fail if it exists
+    output.mkdir(exist_ok=False, parents=True)
+    
     # Create the small molecule components of the ligands
     rdmols = [mol for mol in Chem.SDMolSupplier(str(ligands), removeHs=False)]
     smcs = [openfe.SmallMoleculeComponent.from_rdkit(mol) for mol in rdmols]
@@ -207,7 +213,8 @@ def run_inputs(ligands, pdb, cofactors, output):
         cofactors_smc = [gen_charges(openfe.SmallMoleculeComponent(m))
                          for m in Chem.SDMolSupplier(str(cofactors), removeHs=False)]
 
-    # Create the AlchemicalTransformations, and storing them to disk
+    # Create the AlchemicalTransformations, and storing them to an AlchemicalNetwork
+    transformations = []
     for mapping in ligand_network.edges:
         # Get different settings depending on whether the transformation
         # involves a change in net charge
@@ -256,7 +263,24 @@ def run_inputs(ligands, pdb, cofactors, output):
                 protocol=rbfe_protocol,
                 name=name
             )
-            transformation.dump(output / f"{transformation.name}.json")
+            transformations.append(transformation)
+
+    # Create the alchemical network and write it to disk
+    alchemical_network = openfe.AlchemicalNetwork(transformations)
+    alchemical_network_json_fp = output / "alchemical_network.json"
+    json.dump(
+        alchemical_network.to_dict(),
+        alchemical_network_json_fp.open(mode="w"),
+        cls=tokenization.JSON_HANDLER.encoder
+    )
+
+    # Write out each transformation
+    # Create a subdirectory for the transformations
+    transforms_dir = pathlib.Path(output / "transformations")
+    transforms_dir.mkdir(exist_ok=True, parents=True)
+
+    for transform in alchemical_network.edges:
+        transform.dump(transforms_dir / f"{transform.name}.json")
 
 
 if __name__ == "__main__":

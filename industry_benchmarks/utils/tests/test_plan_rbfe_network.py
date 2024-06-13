@@ -63,7 +63,7 @@ class TestScript:
                 assert result.exit_code == 0
                 assert os.path.exists(str(output))
                 # Create a list of all .json files
-                output_files = list(output.glob("*.json"))
+                output_files = list(output.glob("transformations/*.json"))
                 # Check if the output files are created
                 assert len(output_files) == 6
                 # Check that we have 4 json files with charge change settings,
