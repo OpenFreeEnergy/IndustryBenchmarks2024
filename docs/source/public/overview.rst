@@ -45,7 +45,7 @@ Before you start
    burdens.
 
 
-Before starting you should :ref:`install openfe <installation>`_ on any local machine you will use
+Before starting you should :ref:`install openfe <installation>` on any local machine you will use
 to prepare the benchmark systems and any HPC systems you will be running simulations on.
 
 Please note that a very specific install of `openfe` and its dependencies is required in
