@@ -20,7 +20,7 @@ For each submitted directory:
 * added a PDB file with the protein named `protein.pdb`
 * removed any cofactors from the PDB file and placed them in `cofactors.sdf`
 * kept cystallographic waters and metals in the PDB file
-* tested the PDB and, if available, cofactors.sdf file using the [input validation script][input_validation]
+* tested the PDB and, if available, cofactors.sdf file using the :ref:`input validation script <input-validation>`.
 * copied over the ligands SDF file to a file named `ligands.sdf` and removed alternate ligand conformations or protonation states
 
 
