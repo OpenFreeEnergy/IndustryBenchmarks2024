@@ -121,6 +121,8 @@ These exact cases can be difficult to identify, running the validation script (s
 Validating prepared files
 =========================
 
+.. _input-validation:
+
 To ensure that prepared files can be run using OpenFE, a short MD simulation validation script has been provided under
 `utils/input_validation.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/input_validation.py>`_.
 In an environment with OpenFE 1.0 installed, please run this script by calling:
