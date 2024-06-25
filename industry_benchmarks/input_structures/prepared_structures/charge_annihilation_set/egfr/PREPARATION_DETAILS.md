@@ -4,5 +4,4 @@ of termini). Afterward NMA cappings were converted to NME.
 therefore no modifications. 
 2. Ligands were left unchanged, no conformational states were detected, but protonations changes 
 where found and kept, as this is a charge anihilation test set. 
-3. tested successfully reading in ligands with gufe as 'SmallMoleculeComponents' and protein as
-'ProteinComponent'
+3. tested successfully the input protein with `input_validation.py`
