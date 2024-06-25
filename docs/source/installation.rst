@@ -44,7 +44,7 @@ The `conda-lock` file for OpenFE version v1.0.1 can be downloaded with ::
    This will reduce the chance of dependency conflicts ::
 
        $ # Install conda lock into a virtual environment
-       $ conda create -n conda-lock -c conda-lock
+       $ conda create -n conda-lock -c conda-forge conda-lock
        $ # Activate the environment to use the conda-lock command
        $ conda activate conda-lock
 
