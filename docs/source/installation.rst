@@ -11,15 +11,10 @@ To do this, we ask participants to install a version of openfe with a pre-define
 
 Please reach out to the OpenFE team should installing a new openfe version not be easily feasible or if you need help with your installation.
 
-
 .. note::
 
    We recommend using a ``conda-lock`` file unless you are unable to download packages.
-   The error may look something like this ::
 
-       ERROR:root:Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7bc5c3e75670>: Failed to resolve 'conda.anaconda.org' ([Errno -2] Name or service not known)")'
-
-   Only then should you use the single file installer
 
 
 ``conda-lock`` file
@@ -36,6 +31,13 @@ See https://github.com/conda/conda-lock?tab=readme-ov-file#conda-lock for more i
 The `conda-lock` file for OpenFE version v1.0.1 can be downloaded with ::
 
   $ curl -LOJ https://github.com/OpenFreeEnergy/openfe/releases/download/v1.0.1/conda-lock-openfe-1.0.1.yml
+
+We recommend using ``micromamba`` when working with ``conda-lock`` files ::
+
+  $ micromamba create -n openfe --file openfe-1.0.1-conda-lock.yml
+  $ micromamba activate openfe
+
+If ``micromamba`` is not available, ``conda`` or ``mamba`` may be used after installing ``conda-lock``.
 
 .. note::
 
@@ -57,6 +59,17 @@ For additional details, please visit the `Installation page <https://docs.openfr
 
 Single file installer
 =====================
+
+.. note::
+
+   We recommend using a ``conda-lock`` file unless you are unable to download packages.
+   The error may look something like this ::
+
+       ERROR:root:Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7bc5c3e75670>: Failed to resolve 'conda.anaconda.org' ([Errno -2] Name or service not known)")'
+
+   Only then should you use the single file installer.
+   If ``mamba`` or ``micromamba`` are able to install packages from ``conda-forge`` then we recommend using the ``conda-lock`` file.
+
 
 .. warning::
 
