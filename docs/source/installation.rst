@@ -7,7 +7,9 @@ The page has information for installing ``openfe``, and testing that your ``open
 
 For this benchmarking study, we would like to ask that all participants use a specific installation of OpenFE (v1.0.1) alongside selected pinned tooling dependencies (e.g. openff-toolkit v0.15.2, openmm v8.1.1, openmmforcefields v0.13.0, openmmtools v0.23.1).
 
-To do this, we ask participants to install a version of openfe with a pre-defined environment. This means that you may likely have to re-install any existing ``openfe`` installs. This can be achieved in two different ways, using a conda lock file or a single file installer as described below.
+To do this, we ask participants to install a version of openfe with a pre-defined environment. 
+This means that you may likely have to re-install any existing ``openfe`` installs. 
+This can be achieved in two different ways, using a conda lock file **or** a single file installer as described below.
 
 Please reach out to the OpenFE team should installing a new openfe version not be easily feasible or if you need help with your installation.
 
