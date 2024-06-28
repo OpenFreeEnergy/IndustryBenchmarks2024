@@ -30,7 +30,7 @@ See https://github.com/conda/conda-lock?tab=readme-ov-file#conda-lock for more i
 
 The `conda-lock` file for OpenFE version v1.0.1 can be downloaded with ::
 
-  $ curl -LOJ https://github.com/OpenFreeEnergy/openfe/releases/download/v1.0.1/conda-lock-openfe-1.0.1.yml
+  $ curl -LOJ https://github.com/OpenFreeEnergy/openfe/releases/download/v1.0.1/openfe-1.0.1-conda-lock.yml
 
 We recommend using ``micromamba`` when working with ``conda-lock`` files ::
 
