@@ -1,4 +1,5 @@
 .. _public_overview:
+
 *************************
 Public Dataset Benchmarks
 *************************
@@ -259,6 +260,7 @@ Data Storage Requirements
 **Temporary data:**
 
 *Retention time:* until the `post-simulation cleanup`_ script is applied to your data.
+
 *Estimated storage costs:*
   * Standard simulations: **5-10 GB** per triplicate repeat cycle
   * Net charge transformation: **40-80 GB** per triplicate repeat cycle

@@ -66,11 +66,13 @@ in the Schrodinger provided PDB files.
 
 1. If the termini are neutral, e.g. NH2 or C(=O)H, or have ACE/NME caps:
     * Assign ACE and/or NME caps to the termini
+
 .. note::
    In some cases Schrodinger / Maestro may call the NME cap NMA, if this happen, the cap should be renamed to NME.
 
 2. If the termini are charged, e.g. COO- or NH3+:
     * Keep the termini in their charged state
+
 .. note::
    In cases where this is observed, e.g. JNK1, there is a possibility that interactions between the perturbed ligand and the termini may form.
    Keeping the termini charged should retain the intended interaction.
