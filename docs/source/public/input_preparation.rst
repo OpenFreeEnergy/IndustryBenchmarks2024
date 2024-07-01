@@ -33,7 +33,7 @@ Input preparation instructions
 ******************************
 
 .. note::
-   Instructions for preparing the systems using Maestro are provided in Section :ref:`Input preparation using Maestro`. 
+   Instructions for preparing the systems using Maestro are provided in Section :ref:`Input preparation using Maestro <input prep maestro>`. 
 
 Input data source
 =================
@@ -202,6 +202,7 @@ In this case we will keep the stereo isomer with the more negative calculated bi
 * The calculated binding free energy of ligand ``SBT_S`` is more negative than for ligand ``SBT_R`` (-9.14 vs. -8.77 kcal/mol)
 * In this case we would remove ligand ``SBT_R`` from the ``ligands.sdf`` file
 
+.. _input prep maestro:
 
 Input preparation using Maestro
 ===============================
