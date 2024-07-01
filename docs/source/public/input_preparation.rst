@@ -32,6 +32,9 @@ By the end of these instructions you should have:
 Input preparation instructions
 ******************************
 
+.. note::
+   Instructions for preparing the systems using Maestro are provided in Section :ref:`Input preparation using Maestro`. 
+
 Input data source
 =================
 
