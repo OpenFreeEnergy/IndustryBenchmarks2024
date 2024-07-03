@@ -4,24 +4,31 @@ import argparse
 import json
 import os
 import traceback
+from pathlib import Path
 from shutil import copyfile
 
 import numpy as np
 
-# the plan
-# read in result json to get path to results dir
+# TODO
 # remove files we don't need in results dir
 # trim down the traj file in results dir
-# make a backup of results json
-# trim down results json and overwerite the old one
-# this means splitting out the data into numpy arrays
-# delete the backup (use try, except, finally)
-
-# TODO get this from argparse
-json_file = "results_tyk2_transformations_openfe_1.0.0rc0_uc_0/lig_jmc_23_complex_lig_jmc_28_complex_complex.json"
 
 
-def make_backup(json_file):
+def make_backup(json_file: str) -> str:
+    """
+    Creates a backup of the given JSON file.
+    The backup file is located next to the input file with BAK appended to the file name.
+
+    Parameters
+    ----------
+    json_file : str
+        Path to the JSON file to back up.
+
+    Returns
+    -------
+    str
+        Path to the backup file.
+    """
     dir_name = os.path.dirname(json_file)
     base_name = os.path.basename(json_file)
     backup_file = os.path.join(dir_name, f"{base_name}.BAK")
@@ -29,48 +36,111 @@ def make_backup(json_file):
     return backup_file
 
 
-def restore_backup(json_file, backup_file):
+def restore_backup(json_file: str, backup_file: str) -> None:
+    """
+    Restores a JSON file from its backup.
+
+    Parameters
+    ----------
+    json_file : str
+        Path to the original JSON file.
+    backup_file : str
+        Path to the backup file.
+    """
     copyfile(backup_file, json_file)
 
 
-def delete_backup(backup_file):
+def delete_backup(backup_file: str) -> None:
     os.remove(backup_file)
 
 
-try:
-    backup_file = make_backup(json_file)
-    with open(json_file, "r") as f:
-        results = json.load(f)
-    # remove pdb + ligand stuffed into the result
-    del results["protocol_result"]["data"]
-    # Check to make sure we don't have more than one proto result
-    assert len(results["unit_results"].keys()) == 1
-    # get the name of the key which is a gufe token
-    proto_key = next(iter(results["unit_results"]))
-    keys = results["unit_results"][proto_key]["outputs"]["structural_analysis"]
-    structural_analysis_data = results["unit_results"][proto_key]["outputs"][
-        "structural_analysis"
-    ]
-    # get this data back like
-    # loaded = np.load("structural_analysis_data.npz")
-    # loaded["time_ps"], loaded["protein_RMSD"], loaded["ligand_RMSD"], loaded["ligand_wander"], loaded["protein_2D_RMSD"]
-    # TODO save this in the results directory, which we can figure out from the results json
-    np.savez_compressed(
-        "structural_analysis_data.npz",
-        protein_RMSD=structural_analysis_data["protein_RMSD"],
-        ligand_RMSD=structural_analysis_data["ligand_RMSD"],
-        ligand_wander=structural_analysis_data["ligand_wander"],
-        protein_2D_RMSD=structural_analysis_data["protein_2D_RMSD"],
-        time_ps=structural_analysis_data["time(ps)"],
+def clean_results(json_files: list[str]) -> None:
+    """
+    Cleans up the results in the given JSON files.
+
+    Note:
+    To load in the structural analysis data
+
+    >>> loaded = np.load("structural_analysis_data.npz")
+    >>> loaded["time_ps"], loaded["protein_RMSD"], loaded["ligand_RMSD"], loaded["ligand_wander"], loaded["protein_2D_RMSD"]
+
+    Parameters
+    ----------
+    json_files : List[str]
+        List of paths to JSON files to clean up.
+    """
+    for json_file in json_files:
+        if not os.path.exists(json_file):
+            print(f"Error: {json_file} does not exist.")
+            continue
+        try:
+            backup_file = make_backup(json_file)
+            with open(json_file, "r") as f:
+                results = json.load(f)
+            # Check to see if we have already cleaned  up this result
+            if "data" in results["protocol_result"]:
+                print("Cleaning up file")
+            else:
+                print("Skipping file, already cleaned")
+                continue
+            # Check to make sure we don't have more than one proto result
+            # We might have ProtocolUnitResult-* and ProtocolUnitFailure-*
+            # We only handel the case where we have one ProtocolUnitResult
+            protocol_unit_result_count = len(
+                [
+                    k
+                    for k in results["unit_results"].keys()
+                    if k.startswith("ProtocolUnitResult")
+                ]
+            )
+            if protocol_unit_result_count != 1:
+                print("More than one ProtocolUnitResult, skipping")
+                continue
+            # get the name of the key which is a gufe token
+            proto_key = next(iter(results["unit_results"]))
+            results_dir = Path(
+                results["unit_results"][proto_key]["outputs"]["nc"]["path"]
+            ).parent
+            structural_analysis_data = results["unit_results"][proto_key]["outputs"][
+                "structural_analysis"
+            ]
+            # save structural analysis data
+            np.savez_compressed(
+                results_dir / "structural_analysis_data.npz",
+                protein_RMSD=structural_analysis_data["protein_RMSD"],
+                ligand_RMSD=structural_analysis_data["ligand_RMSD"],
+                ligand_wander=structural_analysis_data["ligand_wander"],
+                protein_2D_RMSD=structural_analysis_data["protein_2D_RMSD"],
+                time_ps=structural_analysis_data["time(ps)"],
+            )
+            # remove structural_analysis data stuffed into results
+            del results["unit_results"][proto_key]["outputs"]["structural_analysis"]
+            # remove pdb + ligand stuffed into the result
+            del results["protocol_result"]["data"]
+            with open(json_file, "w") as f:
+                json.dump(results, f)
+        except Exception as e:
+            print("oh no, we hit an error, restoring backup")
+            restore_backup(json_file, backup_file)
+            print(traceback.format_exc())
+            raise e
+        else:
+            print("removing backup")
+            delete_backup(backup_file)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Cleanup results directory and results json"
     )
-    del results["unit_results"][proto_key]["outputs"]["structural_analysis"]
-    with open(json_file, "w") as f:
-        json.dump(results, f)
-except Exception as e:
-    print("oh no, we hit an error, restoring backup")
-    restore_backup(json_file, backup_file)
-    print(traceback.format_exc())
-    raise e
-else:
-    print("removing backup")
-    delete_backup(backup_file)
+    parser.add_argument(
+        "json_files", metavar="JSON_FILE", nargs="+", help="JSON file(s) to reduce size"
+    )
+
+    args = parser.parse_args()
+
+    clean_results(args.json_files)
+
+
+if __name__ == "__main__":
+    main()
