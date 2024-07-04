@@ -1,6 +1,6 @@
 name: benchmark-docs
 channels:
-- https://conda.anaconda.org/conda-forge
+- conda-forge
 dependencies:
 - python=3.10
 - sphinx
