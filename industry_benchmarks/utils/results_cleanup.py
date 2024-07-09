@@ -7,12 +7,17 @@ import traceback
 from pathlib import Path
 from shutil import copyfile
 
+# TODO merge into a single file if not used elsewhere
+from traj_cleanup import extract_data
+
 import numpy as np
 
 # TODO
 # remove files we don't need in results dir
 # trim down the traj file in results dir
-
+# use traj_cleanup.py to sub sample, then delete nc and chk
+# only delete out this bit from data
+# d["protocol_result"]["data"]["135312977195331644756224466752878866009"][0]["outputs"]["structural_analysis"]
 
 def make_backup(json_file: str) -> str:
     """
@@ -74,6 +79,7 @@ def clean_results(json_files: list[str]) -> None:
             print(f"Error: {json_file} does not exist.")
             continue
         try:
+            print(f"Working on file {json_file}")
             backup_file = make_backup(json_file)
             with open(json_file, "r") as f:
                 results = json.load(f)
@@ -93,10 +99,16 @@ def clean_results(json_files: list[str]) -> None:
                     if k.startswith("ProtocolUnitResult")
                 ]
             )
+            # Check to make sure we don't just have failures
+            # if all failures, tell user to re-run
             if protocol_unit_result_count != 1:
                 print("More than one ProtocolUnitResult, skipping")
                 continue
+            elif protocol_unit_result_count == 0:
+                print("All protocol units failed")
+                continue
             # get the name of the key which is a gufe token
+            # TODO make sure we don't grab a result faiulre
             proto_key = next(iter(results["unit_results"]))
             results_dir = Path(
                 results["unit_results"][proto_key]["outputs"]["nc"]["path"]
@@ -105,6 +117,7 @@ def clean_results(json_files: list[str]) -> None:
                 "structural_analysis"
             ]
             # save structural analysis data
+            # TODO save as 32 bit floats
             np.savez_compressed(
                 results_dir / "structural_analysis_data.npz",
                 protein_RMSD=structural_analysis_data["protein_RMSD"],
@@ -115,8 +128,12 @@ def clean_results(json_files: list[str]) -> None:
             )
             # remove structural_analysis data stuffed into results
             del results["unit_results"][proto_key]["outputs"]["structural_analysis"]
+            for key in results["protocol_result"]["data"]:
+                del results["protocol_result"]["data"][key][0]["outputs"]["structural_analysis"]
             # remove pdb + ligand stuffed into the result
-            del results["protocol_result"]["data"]
+            # TODO remove
+            # del results["protocol_result"]["data"]
+            # TODO save as gzip
             with open(json_file, "w") as f:
                 json.dump(results, f)
         except Exception as e:
