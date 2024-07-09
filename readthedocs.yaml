@@ -9,3 +9,6 @@ build:
 
 conda:
   environment: docs/environment.yaml
+
+sphinx:
+   fail_on_warning: true
