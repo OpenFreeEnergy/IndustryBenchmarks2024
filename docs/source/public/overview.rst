@@ -229,6 +229,9 @@ Simulation Cleanup
 
 A post-simulation cleanup script will be made available by the OpenFE team to reduce the amount of data you need to store after your simulations.
 
+* download script
+* python script or chmod +x, ./script?
+
 
 Compute Requirements
 ====================
