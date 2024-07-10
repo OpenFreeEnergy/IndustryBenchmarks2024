@@ -16,6 +16,7 @@ from openmmtools import multistate
 # TODO test gather before and after
 # TODO add tdqm
 # TODO add more print statements
+# TODO check size diff in removing PDB + ligands
 
 
 def compute_mbar_energies(analyzer):
@@ -227,7 +228,7 @@ def clean_results(json_files: list[str]) -> None:
             checkpoint = results_dir / "checkpoint.chk"
             hybrid_pdb = results_dir / "hybrid_system.pdb"
             # TODO better name?
-            outfile = results_dir / "multi_state_sampler_data.npz"
+            outfile = results_dir / "energy_replica_state.npz"
             out_traj = results_dir / "out"
             extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out")
 
