@@ -14,6 +14,8 @@ from openfe_analysis import FEReader
 from openmmtools import multistate
 
 # TODO test gather before and after
+# TODO add tdqm
+# TODO add more print statements
 
 
 def compute_mbar_energies(analyzer):
