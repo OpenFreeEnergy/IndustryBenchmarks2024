@@ -7,9 +7,6 @@ import traceback
 from pathlib import Path
 from shutil import copyfile
 
-# TODO merge into a single file if not used elsewhere
-from traj_cleanup import extract_data
-
 import numpy as np
 
 # TODO
@@ -18,6 +15,7 @@ import numpy as np
 # use traj_cleanup.py to sub sample, then delete nc and chk
 # only delete out this bit from data
 # d["protocol_result"]["data"]["135312977195331644756224466752878866009"][0]["outputs"]["structural_analysis"]
+
 
 def make_backup(json_file: str) -> str:
     """
@@ -84,6 +82,7 @@ def clean_results(json_files: list[str]) -> None:
             with open(json_file, "r") as f:
                 results = json.load(f)
             # Check to see if we have already cleaned  up this result
+            # TODO change this check to be the last thing we do
             if "data" in results["protocol_result"]:
                 print("Cleaning up file")
             else:
@@ -105,11 +104,17 @@ def clean_results(json_files: list[str]) -> None:
                 print("More than one ProtocolUnitResult, skipping")
                 continue
             elif protocol_unit_result_count == 0:
-                print("All protocol units failed")
+                print("All protocol units failed, skipping")
                 continue
             # get the name of the key which is a gufe token
-            # TODO make sure we don't grab a result faiulre
-            proto_key = next(iter(results["unit_results"]))
+            # for the only ProtocolUnitResult-* in unit_results
+            # this means we can grab the first that matches since there is only
+            # one ProtocolUnitResult-*
+            proto_key = next(
+                k
+                for k in results["unit_results"].keys()
+                if k.startswith("ProtocolUnitResult")
+            )
             results_dir = Path(
                 results["unit_results"][proto_key]["outputs"]["nc"]["path"]
             ).parent
@@ -117,23 +122,41 @@ def clean_results(json_files: list[str]) -> None:
                 "structural_analysis"
             ]
             # save structural analysis data
-            # TODO save as 32 bit floats
             np.savez_compressed(
                 results_dir / "structural_analysis_data.npz",
-                protein_RMSD=structural_analysis_data["protein_RMSD"],
-                ligand_RMSD=structural_analysis_data["ligand_RMSD"],
-                ligand_wander=structural_analysis_data["ligand_wander"],
-                protein_2D_RMSD=structural_analysis_data["protein_2D_RMSD"],
-                time_ps=structural_analysis_data["time(ps)"],
+                protein_RMSD=np.asarray(
+                    structural_analysis_data["protein_RMSD"], dtype=np.float32
+                ),
+                ligand_RMSD=np.asarray(
+                    structural_analysis_data["ligand_RMSD"], dtype=np.float32
+                ),
+                ligand_wander=np.asarray(
+                    structural_analysis_data["ligand_wander"], dtype=np.float32
+                ),
+                protein_2D_RMSD=np.asarray(
+                    structural_analysis_data["protein_2D_RMSD"], dtype=np.float32
+                ),
+                time_ps=np.asarray(
+                    structural_analysis_data["time(ps)"], dtype=np.int32
+                ),
             )
-            # remove structural_analysis data stuffed into results
+            # remove structural_analysis data stuffed into unit results
             del results["unit_results"][proto_key]["outputs"]["structural_analysis"]
             for key in results["protocol_result"]["data"]:
+                del results["protocol_result"]["data"][key][0]["outputs"][
+                    "structural_analysis"
+                ]
+            # remove structural_analysis data stuffed into protocol_result
+            # and remove ligand + pdb
+            for key in results["protocol_result"]["data"]:
                 del results["protocol_result"]["data"][key][0]["outputs"]["structural_analysis"]
-            # remove pdb + ligand stuffed into the result
-            # TODO remove
-            # del results["protocol_result"]["data"]
-            # TODO save as gzip
+                del results["protocol_result"]["data"][key][0]["inputs"]["stateA"]
+                del results["protocol_result"]["data"][key][0]["inputs"]["stateB"]
+                del results["protocol_result"]["data"][key][0]["inputs"]["ligandmapping"]
+
+            # Now we subsamble the traj
+
+            # TODO save as gzip -- maybe, gather will fail then?
             with open(json_file, "w") as f:
                 json.dump(results, f)
         except Exception as e:
