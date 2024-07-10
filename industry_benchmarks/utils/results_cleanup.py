@@ -12,7 +12,7 @@ import MDAnalysis as mda
 import numpy as np
 from openfe_analysis import FEReader
 from openmmtools import multistate
-from tdqm import tdqm
+from tqdm import tqdm
 
 # TODO test gather before and after
 # TODO add more print statements
@@ -143,7 +143,7 @@ def clean_results(json_files: list[str]) -> None:
     json_files : List[str]
         List of paths to JSON files to clean up.
     """
-    for json_file in tdqm(json_files):
+    for json_file in tqdm(json_files):
         if not os.path.exists(json_file):
             print(f"Error: {json_file} does not exist.")
             continue
