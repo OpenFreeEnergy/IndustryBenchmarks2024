@@ -223,14 +223,22 @@ Simulation Cleanup
 
 .. _post-simulation cleanup:
 
-.. warning::
-   The simulation cleanup script is not yet available. Please retain all generated data for now. See the `data storage requirements`_ for more information.
+The post-simulation cleanup script will reduce the amount of data you need to store after your simulations.
+To obtain the script, download it with:
 
+.. code-block:: bash
 
-A post-simulation cleanup script will be made available by the OpenFE team to reduce the amount of data you need to store after your simulations.
+   $ curl -LOJ https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/industry_benchmarks/utils/results_cleanup.py
 
-* download script
-* python script or chmod +x, ./script?
+The cleanup script requires the path to the ``result.json`` file and also accepts a list of ``result.json`` files.
+Additionally, the script will detect if the result data has already been reduced and will skip processing that file.
+This means that you can run the script repeatedly with a glob as results are finished.
+For example:
+
+.. code-block:: bash
+   $ micromamba activate openfe-benchmark  # don't forget to activate your conda environment first!
+   $ python results_cleanup.py path/to/results/*.json
+
 
 
 Compute Requirements
