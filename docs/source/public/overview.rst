@@ -239,7 +239,9 @@ For example:
    $ micromamba activate openfe-benchmark  # don't forget to activate your conda environment first!
    $ python results_cleanup.py path/to/results/*.json
 
-
+.. warning::
+   Do not move data around before running the script.
+   The script assumes that the result directory has not been moved.
 
 Compute Requirements
 ====================
