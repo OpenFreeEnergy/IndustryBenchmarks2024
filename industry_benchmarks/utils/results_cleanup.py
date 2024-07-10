@@ -143,7 +143,7 @@ def clean_results(json_files: list[str]) -> None:
     json_files : List[str]
         List of paths to JSON files to clean up.
     """
-    for json_file in tqdm(json_files):
+    for json_file in tdqm(json_files):
         if not os.path.exists(json_file):
             print(f"Error: {json_file} does not exist.")
             continue
@@ -166,7 +166,7 @@ def clean_results(json_files: list[str]) -> None:
 
             # Check to make sure we don't have more than one proto result
             # We might have ProtocolUnitResult-* and ProtocolUnitFailure-*
-            # We only handel the case where we have one ProtocolUnitResult
+            # We only handle the case where we have one ProtocolUnitResult
             protocol_unit_result_count = len(
                 [
                     k
@@ -201,6 +201,7 @@ def clean_results(json_files: list[str]) -> None:
             ]
 
             # save structural analysis data
+            print("Saving structural analysis data")
             np.savez_compressed(
                 results_dir / "structural_analysis_data.npz",
                 protein_RMSD=np.asarray(
@@ -223,22 +224,25 @@ def clean_results(json_files: list[str]) -> None:
             # remove structural_analysis data stuffed into unit results
             del results["unit_results"][proto_key]["outputs"]["structural_analysis"]
 
-            # Now we subsamble the traj and save reporter data
+            # Now we sub sample the traj and save reporter data
             simulation = results_dir / "simulation.nc"
             checkpoint = results_dir / "checkpoint.chk"
             hybrid_pdb = results_dir / "hybrid_system.pdb"
             # TODO better name?
             outfile = results_dir / "energy_replica_state.npz"
             out_traj = results_dir / "out"
+            print("Subsampling trajectory and saving energy data")
             extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out")
 
             # Now we delete files we don't need anymore
+            print("Deleting trajectory files")
             os.remove(simulation)
             os.remove(checkpoint)
 
             # remove structural_analysis data stuffed into protocol_result
             # and remove ligand + pdb
             # this data is duped in structural_analysis_data.npz
+            print("Shrinking result JSON")
             del results["protocol_result"]["data"][result_key][0]["outputs"][
                 "structural_analysis"
             ]
@@ -251,8 +255,11 @@ def clean_results(json_files: list[str]) -> None:
             ]
 
             # TODO save as gzip -- maybe, gather will fail then?
+            print("Saving JSON")
             with open(json_file, "w") as f:
                 json.dump(results, f)
+
+            print(f"Done with {json_file}")
 
         except Exception as e:
             print("oh no, we hit an error, restoring backup")
