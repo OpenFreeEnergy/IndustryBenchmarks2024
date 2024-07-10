@@ -3,18 +3,86 @@
 import argparse
 import json
 import os
+import pathlib
 import traceback
 from pathlib import Path
 from shutil import copyfile
 
+import MDAnalysis as mda
 import numpy as np
+from openfe_analysis import FEReader
+from openmmtools import multistate
 
-# TODO
-# remove files we don't need in results dir
-# trim down the traj file in results dir
-# use traj_cleanup.py to sub sample, then delete nc and chk
-# only delete out this bit from data
-# d["protocol_result"]["data"]["135312977195331644756224466752878866009"][0]["outputs"]["structural_analysis"]
+# TODO test gather before and after
+
+
+def compute_mbar_energies(analyzer):
+    """
+    Returns
+    ------
+    u_ln: energy matrix of shape (K,N) indexed by k,n
+        K is the total number of states observables are desired.
+        N is the total number of samples drawn from ALL states.
+        The nth configuration is the energy evaluated in the kth thermodynamic state.
+    N_l: 1-D iterable of shape K
+        The number of samples drawn from each kth state.
+    """
+    analyzer.use_full_trajectory = True
+    u_ln, N_l = analyzer._compute_mbar_decorrelated_energies()
+    return u_ln, N_l
+
+
+def get_replica_state_indices(analyzer):
+    energy_data = list(analyzer._read_energies(truncate_max_n_iterations=True))
+    replicas_state_indices = energy_data[-1]
+    return replicas_state_indices
+
+
+def subsample_traj(simulation, hybrid_system_pdb, lambda_windows, outfile):
+    for i in range(0, lambda_windows):
+        u = mda.Universe(hybrid_system_pdb, simulation, format=FEReader, state_id=i)
+        frames = [round(i) for i in np.linspace(0, len(u.trajectory) - 1, 21)]
+        out_traj = pathlib.Path(f"{outfile}_{i}.xtc")
+        with mda.Writer(str(out_traj), n_atoms=len(u.atoms)) as w:
+            for ts in u.trajectory[frames]:
+                w.write(u.atoms)
+
+
+def extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out"):
+    """
+    Extract the MBAR-ready energy matrix and replica state indices.
+
+    Parameters
+    ----------
+    simulation: pathlib.Path
+        Path to the simulation `.nc` file
+    checkpoint: pathlib.Path
+        Path to the checkpoint `.chk` file
+    hybrid_pdb: pathlib.Path
+        Path to the `.pdb` file of the hybrid system
+    outfile: pathlib.Path
+        Path to the output `.npz` file
+    out_traj: pathlib.Path
+        Path to the output `.xtc` files. A separate file is created for every
+        lambda window. The state number is appended to the filename. Default: 'out'
+    """
+    if not simulation.is_file() or not checkpoint.is_file():
+        errmsg = "Either the simulation or checkpoint file could not be found"
+        raise ValueError(errmsg)
+
+    reporter = multistate.MultiStateReporter(
+        storage=simulation.as_posix(),
+        open_mode="r",
+        checkpoint_storage=checkpoint.as_posix(),
+    )
+
+    analyzer = multistate.MultiStateSamplerAnalyzer(reporter)
+    u_ln, N_l = compute_mbar_energies(analyzer)
+    replicas_state_indices = get_replica_state_indices(analyzer)
+    np.savez(outfile, u_ln=u_ln, N_l=N_l, replicas_state_indices=replicas_state_indices)
+
+    lambda_windows = len(replicas_state_indices)
+    subsample_traj(simulation, hybrid_pdb, lambda_windows, out_traj)
 
 
 def make_backup(json_file: str) -> str:
@@ -81,13 +149,18 @@ def clean_results(json_files: list[str]) -> None:
             backup_file = make_backup(json_file)
             with open(json_file, "r") as f:
                 results = json.load(f)
+
             # Check to see if we have already cleaned  up this result
-            # TODO change this check to be the last thing we do
-            if "data" in results["protocol_result"]:
+            result_key = next(k for k in results["protocol_result"]["data"].keys())
+            if (
+                "structural_analysis"
+                in results["protocol_result"]["data"][result_key][0]["outputs"]
+            ):
                 print("Cleaning up file")
             else:
                 print("Skipping file, already cleaned")
                 continue
+
             # Check to make sure we don't have more than one proto result
             # We might have ProtocolUnitResult-* and ProtocolUnitFailure-*
             # We only handel the case where we have one ProtocolUnitResult
@@ -98,6 +171,7 @@ def clean_results(json_files: list[str]) -> None:
                     if k.startswith("ProtocolUnitResult")
                 ]
             )
+
             # Check to make sure we don't just have failures
             # if all failures, tell user to re-run
             if protocol_unit_result_count != 1:
@@ -106,6 +180,7 @@ def clean_results(json_files: list[str]) -> None:
             elif protocol_unit_result_count == 0:
                 print("All protocol units failed, skipping")
                 continue
+
             # get the name of the key which is a gufe token
             # for the only ProtocolUnitResult-* in unit_results
             # this means we can grab the first that matches since there is only
@@ -121,6 +196,7 @@ def clean_results(json_files: list[str]) -> None:
             structural_analysis_data = results["unit_results"][proto_key]["outputs"][
                 "structural_analysis"
             ]
+
             # save structural analysis data
             np.savez_compressed(
                 results_dir / "structural_analysis_data.npz",
@@ -140,30 +216,47 @@ def clean_results(json_files: list[str]) -> None:
                     structural_analysis_data["time(ps)"], dtype=np.int32
                 ),
             )
+
             # remove structural_analysis data stuffed into unit results
             del results["unit_results"][proto_key]["outputs"]["structural_analysis"]
-            for key in results["protocol_result"]["data"]:
-                del results["protocol_result"]["data"][key][0]["outputs"][
-                    "structural_analysis"
-                ]
+
+            # Now we subsamble the traj and save reporter data
+            simulation = results_dir / "simulation.nc"
+            checkpoint = results_dir / "checkpoint.chk"
+            hybrid_pdb = results_dir / "hybrid_system.pdb"
+            # TODO better name?
+            outfile = results_dir / "multi_state_sampler_data.npz"
+            out_traj = results_dir / "out"
+            extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out")
+
+            # Now we delete files we don't need anymore
+            os.remove(simulation)
+            os.remove(checkpoint)
+
             # remove structural_analysis data stuffed into protocol_result
             # and remove ligand + pdb
-            for key in results["protocol_result"]["data"]:
-                del results["protocol_result"]["data"][key][0]["outputs"]["structural_analysis"]
-                del results["protocol_result"]["data"][key][0]["inputs"]["stateA"]
-                del results["protocol_result"]["data"][key][0]["inputs"]["stateB"]
-                del results["protocol_result"]["data"][key][0]["inputs"]["ligandmapping"]
-
-            # Now we subsamble the traj
+            # this data is duped in structural_analysis_data.npz
+            del results["protocol_result"]["data"][result_key][0]["outputs"][
+                "structural_analysis"
+            ]
+            # do we want to keep these or not? lig and pdb could be useful, but we have the inputs
+            # I think Irfan said keep
+            del results["protocol_result"]["data"][result_key][0]["inputs"]["stateA"]
+            del results["protocol_result"]["data"][result_key][0]["inputs"]["stateB"]
+            del results["protocol_result"]["data"][result_key][0]["inputs"][
+                "ligandmapping"
+            ]
 
             # TODO save as gzip -- maybe, gather will fail then?
             with open(json_file, "w") as f:
                 json.dump(results, f)
+
         except Exception as e:
             print("oh no, we hit an error, restoring backup")
             restore_backup(json_file, backup_file)
             print(traceback.format_exc())
             raise e
+
         else:
             print("removing backup")
             delete_backup(backup_file)
