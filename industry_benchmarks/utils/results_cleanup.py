@@ -114,6 +114,9 @@ def restore_backup(json_file: str, backup_file: str) -> None:
     """
     Restores a JSON file from its backup.
 
+    Note:
+    After the backup is restored, the backup is deleted!
+
     Parameters
     ----------
     json_file : str
@@ -122,6 +125,7 @@ def restore_backup(json_file: str, backup_file: str) -> None:
         Path to the backup file.
     """
     copyfile(backup_file, json_file)
+    os.remove(backup_file)
 
 
 def delete_backup(backup_file: str) -> None:
@@ -195,7 +199,7 @@ def clean_results(json_files: list[str]) -> None:
             )
             results_dir = Path(
                 results["unit_results"][proto_key]["outputs"]["nc"]["path"]
-            ).parent
+            ).resolve().parent
             structural_analysis_data = results["unit_results"][proto_key]["outputs"][
                 "structural_analysis"
             ]
