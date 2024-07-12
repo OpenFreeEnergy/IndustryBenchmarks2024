@@ -32,6 +32,9 @@ By the end of these instructions you should have:
 Input preparation instructions
 ******************************
 
+.. note::
+   Instructions for preparing the systems using Maestro are provided in Section :ref:`Input preparation using Maestro <input prep maestro>`. 
+
 Input data source
 =================
 
@@ -66,11 +69,13 @@ in the Schrodinger provided PDB files.
 
 1. If the termini are neutral, e.g. NH2 or C(=O)H, or have ACE/NME caps:
     * Assign ACE and/or NME caps to the termini
+
 .. note::
    In some cases Schrodinger / Maestro may call the NME cap NMA, if this happen, the cap should be renamed to NME.
 
 2. If the termini are charged, e.g. COO- or NH3+:
     * Keep the termini in their charged state
+
 .. note::
    In cases where this is observed, e.g. JNK1, there is a possibility that interactions between the perturbed ligand and the termini may form.
    Keeping the termini charged should retain the intended interaction.
@@ -197,6 +202,35 @@ In this case we will keep the stereo isomer with the more negative calculated bi
 * The calculated binding free energy of ligand ``SBT_S`` is more negative than for ligand ``SBT_R`` (-9.14 vs. -8.77 kcal/mol)
 * In this case we would remove ligand ``SBT_R`` from the ``ligands.sdf`` file
 
+.. _input prep maestro:
+
+Input preparation using Maestro
+===============================
+
+If you are preparing the input files using Maestro, the following steps can be carried out to prepare the protein, cofactor, and ligand files:
+
+* Read in original inputs (protein and ligands)
+* Duplicate the inputs (to have a reference)
+* If multiple ligand conformations or protonation states, extract preferred ligand input
+* Extract all cofactors into a single maestro entry
+* Check the sequence to see if it contains any non-natural amino acids, mutate back if present
+* Check all caps to see if any need to be charged or not. Leave residue if charged
+* Open the Protein preparation wizard, if caps are needed
+* Run only step 3 - "Preprocess". The only three options activated are:
+   * Cap termini
+   * Convert selomethionines to methionines
+   * Include peptides when capping termini
+   * Note: Not changing protonation states!
+* If applicable, convert waters SPC to HOH
+   * Highlight all waters
+   * Builder > Other Edits > Change Atom Properties > Property: Residue/Chain Name
+   * Residue name "HOH"
+* Change the cap names if not ACE, NME:
+   * Highlight all Cterm caps
+   * Builder > Other Edits > Change Atom Properties > Property: Residue/Chain Name
+   * Residue name "NME"
+* Export outputs, named "ligand.sdf", "protein.pdb" and optionally "cofactors.sdf"
+* Run input through validation script
 
 Submitting prepared input files
 ===============================
