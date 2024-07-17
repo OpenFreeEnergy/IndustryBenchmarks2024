@@ -18,6 +18,7 @@ from tqdm import tqdm
 # TODO add more print statements
 # TODO check size diff in removing PDB + ligands
 
+
 def remove_first_reversed_sequential_duplicate_from_path(path: Path) -> Path:
     """
     Remove the first duplicated directory from path
@@ -29,7 +30,7 @@ def remove_first_reversed_sequential_duplicate_from_path(path: Path) -> Path:
     reversed_path_parts = list(reversed(path.parts))
     max_idx = len(reversed_path_parts)
 
-    #find index of first dupe
+    # find index of first dupe
     for idx in range(max_idx - 1):
         if reversed_path_parts[idx] == reversed_path_parts[idx + 1]:
             break
@@ -40,6 +41,7 @@ def remove_first_reversed_sequential_duplicate_from_path(path: Path) -> Path:
 
     del reversed_path_parts[idx]
     return Path(*reversed(reversed_path_parts))
+
 
 def compute_mbar_energies(analyzer):
     """
@@ -219,22 +221,24 @@ def clean_results(json_files: list[str]) -> None:
                 for k in results["unit_results"].keys()
                 if k.startswith("ProtocolUnitResult")
             )
-            
 
-            results_dir = Path(
-                results["unit_results"][proto_key]["outputs"]["nc"]["path"]
-            ).resolve().parent
+            results_dir = (
+                Path(results["unit_results"][proto_key]["outputs"]["nc"]["path"])
+                .resolve()
+                .parent
+            )
             # if the dir doesn't exist, we should try and fix it
             if not results_dir.is_dir():
                 print("Fixing path to results dir")
-                results_dir = remove_first_reversed_sequential_duplicate_from_path(results_dir)
+                results_dir = remove_first_reversed_sequential_duplicate_from_path(
+                    results_dir
+                )
 
                 # Now we should check if the dir exists
                 if not results_dir.is_dir():
                     print("Can't find results directory, skipping")
                     continue
 
-	
             structural_analysis_data = results["unit_results"][proto_key]["outputs"][
                 "structural_analysis"
             ]
@@ -288,7 +292,9 @@ def clean_results(json_files: list[str]) -> None:
             ]
             del results["protocol_result"]["data"][result_key][0]["inputs"]["stateA"]
             del results["protocol_result"]["data"][result_key][0]["inputs"]["stateB"]
-            del results["protocol_result"]["data"][result_key][0]["inputs"]["ligandmapping"]
+            del results["protocol_result"]["data"][result_key][0]["inputs"][
+                "ligandmapping"
+            ]
 
             # TODO save as gzip -- maybe, gather will fail then?
             print("Saving JSON")
