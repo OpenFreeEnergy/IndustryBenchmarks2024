@@ -2,7 +2,7 @@
 
 _For example:_
 
-* All prepration was carried out using maestro and text editors.
+* All prepration was carried out using maestro (2024.2) and text editors.
 * Extracted GOL cofactor.
 * Removed PTM NAG and saturated the connected ASN.
 * Converted TYS to TYR.
