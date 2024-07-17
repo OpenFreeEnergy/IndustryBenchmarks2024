@@ -10,6 +10,7 @@ from shutil import copyfile
 
 import MDAnalysis as mda
 import numpy as np
+import yaml
 from openfe_analysis import FEReader
 from openmmtools import multistate
 from tqdm import tqdm
@@ -79,6 +80,9 @@ def extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out"):
     """
     Extract the MBAR-ready energy matrix and replica state indices.
 
+    Also extracts some info about the simulation and saves info in a
+    info.yaml file in the same folder as out_traj
+
     Parameters
     ----------
     simulation: pathlib.Path
@@ -110,6 +114,20 @@ def extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out"):
 
     lambda_windows = len(replicas_state_indices)
     subsample_traj(simulation, hybrid_pdb, lambda_windows, out_traj)
+
+    # get some info and save it in info.yaml
+    print("Creating info.yaml")
+    n_atoms = reporter._storage_checkpoint.dimensions["atom"].size
+
+    with open(
+        simulation.parent / "simulation_real_time_analysis.yaml", "r"
+    ) as yaml_file:
+        real_time_analysis_data = yaml.safe_load(yaml_file)
+        # grab the last entry
+        ns_per_day = real_time_analysis_data[-1]["timing_data"]["ns_per_day"]
+
+    with open(out_traj.parent / "info.yaml", "w") as yaml_file:
+        yaml.dump({"n_atoms": n_atoms, "ns_per_day": ns_per_day}, yaml_file)
 
 
 def make_backup(json_file: str) -> str:
