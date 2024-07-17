@@ -18,6 +18,28 @@ from tqdm import tqdm
 # TODO add more print statements
 # TODO check size diff in removing PDB + ligands
 
+def remove_first_reversed_sequential_duplicate_from_path(path: Path) -> Path:
+    """
+    Remove the first duplicated directory from path
+    We reverse the path so we remove the first duplicated directory
+    starting from the deepest part of the path
+    """
+
+    # reverse the path parts so we start from the deepest part first
+    reversed_path_parts = list(reversed(path.parts))
+    max_idx = len(reversed_path_parts)
+
+    #find index of first dupe
+    for idx in range(max_idx - 1):
+        if reversed_path_parts[idx] == reversed_path_parts[idx + 1]:
+            break
+    # no dupes
+    else:
+        print("Path didn't have any dupes")
+        return path
+
+    del reversed_path_parts[idx]
+    return Path(*reversed(reversed_path_parts))
 
 def compute_mbar_energies(analyzer):
     """
@@ -197,9 +219,22 @@ def clean_results(json_files: list[str]) -> None:
                 for k in results["unit_results"].keys()
                 if k.startswith("ProtocolUnitResult")
             )
+            
+
             results_dir = Path(
                 results["unit_results"][proto_key]["outputs"]["nc"]["path"]
             ).resolve().parent
+            # if the dir doesn't exist, we should try and fix it
+            if not results_dir.is_dir():
+                print("Fixing path to results dir")
+                results_dir = remove_first_reversed_sequential_duplicate_from_path(results_dir)
+
+                # Now we should check if the dir exists
+                if not results_dir.is_dir():
+                    print("Can't find results directory, skipping")
+                    continue
+
+	
             structural_analysis_data = results["unit_results"][proto_key]["outputs"][
                 "structural_analysis"
             ]
@@ -236,12 +271,13 @@ def clean_results(json_files: list[str]) -> None:
             outfile = results_dir / "energy_replica_state.npz"
             out_traj = results_dir / "out"
             print("Subsampling trajectory and saving energy data")
-            extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out")
+            extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj)
 
             # Now we delete files we don't need anymore
             print("Deleting trajectory files")
             os.remove(simulation)
             os.remove(checkpoint)
+            os.remove(results_dir / "structural_analysis.json")
 
             # remove structural_analysis data stuffed into protocol_result
             # and remove ligand + pdb
@@ -250,13 +286,9 @@ def clean_results(json_files: list[str]) -> None:
             del results["protocol_result"]["data"][result_key][0]["outputs"][
                 "structural_analysis"
             ]
-            # do we want to keep these or not? lig and pdb could be useful, but we have the inputs
-            # I think Irfan said keep
             del results["protocol_result"]["data"][result_key][0]["inputs"]["stateA"]
             del results["protocol_result"]["data"][result_key][0]["inputs"]["stateB"]
-            del results["protocol_result"]["data"][result_key][0]["inputs"][
-                "ligandmapping"
-            ]
+            del results["protocol_result"]["data"][result_key][0]["inputs"]["ligandmapping"]
 
             # TODO save as gzip -- maybe, gather will fail then?
             print("Saving JSON")
