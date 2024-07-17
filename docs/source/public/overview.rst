@@ -237,6 +237,7 @@ This means that you can run the script repeatedly with a glob as results are fin
 For example:
 
 .. code-block:: bash
+
    $ micromamba activate openfe-benchmark  # don't forget to activate your conda environment first!
    $ python results_cleanup.py path/to/results/*.json
 
