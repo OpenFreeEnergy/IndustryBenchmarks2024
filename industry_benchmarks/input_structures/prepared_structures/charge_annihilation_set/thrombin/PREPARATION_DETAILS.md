@@ -8,4 +8,3 @@ _For example:_
 * Converted TYS to TYR.
 * Converted N-terminal H atom to H3 for 1C GLU (chain L), same for other chains.
 * Converted C-terminal O atom to OXT for 14K ILE (chain L), same for other chains.
-* Removed ligand
