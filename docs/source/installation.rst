@@ -7,19 +7,15 @@ The page has information for installing ``openfe``, and testing that your ``open
 
 For this benchmarking study, we would like to ask that all participants use a specific installation of OpenFE (v1.0.1) alongside selected pinned tooling dependencies (e.g. openff-toolkit v0.15.2, openmm v8.1.1, openmmforcefields v0.13.0, openmmtools v0.23.1).
 
-To do this, we ask participants to install a version of openfe with a pre-defined environment. This means that you may likely have to re-install any existing `openfe` installs. This can be achieved in two different ways, using a conda lock file or a single file installer as described below.
+To do this, we ask participants to install a version of openfe with a pre-defined environment. 
+This means that you may likely have to re-install any existing ``openfe`` installs. 
+This can be achieved in two different ways, using a conda lock file **or** a single file installer as described below.
 
 Please reach out to the OpenFE team should installing a new openfe version not be easily feasible or if you need help with your installation.
-
 
 .. note::
 
    We recommend using a ``conda-lock`` file unless you are unable to download packages.
-   The error may look something like this ::
-
-       ERROR:root:Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7bc5c3e75670>: Failed to resolve 'conda.anaconda.org' ([Errno -2] Name or service not known)")'
-
-   Only then should you use the single file installer
 
 
 ``conda-lock`` file
@@ -33,30 +29,52 @@ We recommend the use of a ``conda-lock`` file when the same conda environment is
 
 See https://github.com/conda/conda-lock?tab=readme-ov-file#conda-lock for more information on ``conda-lock``.
 
-The `conda-lock` file for OpenFE version v1.0.1 can be downloaded with ::
+The ``conda-lock`` file for OpenFE version v1.0.1 can be downloaded with ::
 
-  $ curl -LOJ https://github.com/OpenFreeEnergy/openfe/releases/download/v1.0.1/conda-lock-openfe-1.0.1.yml
+  $ curl -LOJ https://github.com/OpenFreeEnergy/openfe/releases/download/v1.0.1/openfe-1.0.1-conda-lock.yml
 
-.. note::
+``openfe-1.0.1-conda-lock.yml`` with ``micomamba``
+--------------------------------------------------
 
-   You will likely need to install ``conda-lock``.
-   We recommend installing ``conda-lock`` in a new virtual environment using either `conda` or `mamba`.
-   This will reduce the chance of dependency conflicts ::
+We recommend using ``micromamba`` when working with ``conda-lock`` files ::
 
-       $ # Install conda lock into a virtual environment
-       $ conda create -n conda-lock -c conda-lock
-       $ # Activate the environment to use the conda-lock command
-       $ conda activate conda-lock
+  $ micromamba create -n openfe --file openfe-1.0.1-conda-lock.yml
+  $ micromamba activate openfe
+
+See instructions for testing your environment here: :ref:`installation:Testing your installation`
+
+``openfe-1.0.1-conda-lock.yml`` with ``conda-lock``
+---------------------------------------------------
+
+If ``micromamba`` is not available, ``conda`` or ``mamba`` may be used after installing ``conda-lock``.
+We recommend installing ``conda-lock`` in a new virtual environment using either ``conda`` or ``mamba``.
+This will reduce the chance of dependency conflicts ::
+
+  # Install conda lock into a virtual environment
+  $ conda create -n conda-lock -c conda-forge conda-lock
+  $ # Activate the environment to use the conda-lock command
+  $ conda activate conda-lock
 
 Create a conda environment from the lock file and activate it::
 
   $ conda-lock install -n openfe conda-lock-openfe-1.0.1.yml
   $ conda activate openfe
 
-For additional details, please visit the `Installation page <https://docs.openfree.energy/en/latest/installation.html>`_ in the OpenFE documentation.
+See instructions for testing your environment here: :ref:`installation:Testing your installation`
 
 Single file installer
 =====================
+
+.. note::
+
+   We recommend using a ``conda-lock`` file unless you are unable to download packages.
+   The error may look something like this ::
+
+       ERROR:root:Retrying (Retry(total=2, connect=None, read=None, redirect=None, status=None)) after connection broken by 'NameResolutionError("<urllib3.connection.HTTPSConnection object at 0x7bc5c3e75670>: Failed to resolve 'conda.anaconda.org' ([Errno -2] Name or service not known)")'
+
+   Only then should you use the single file installer.
+   If ``mamba`` or ``micromamba`` are able to install packages from ``conda-forge`` then we recommend using the ``conda-lock`` file.
+
 
 .. warning::
 
@@ -97,6 +115,7 @@ To check if your path is setup correctly, run ``which python`` your output shoul
 
 For additional details, please visit the `Installation page <https://docs.openfree.energy/en/latest/installation.html>`_ in the OpenFE documentation.
 
+See instructions for testing your environment here: :ref:`installation:Testing your installation`
 
 Testing your installation
 =========================
