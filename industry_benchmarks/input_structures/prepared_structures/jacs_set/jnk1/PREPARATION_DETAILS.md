@@ -2,5 +2,5 @@
 converted to NME. I had to add the capping manually for PRO 554, and every chain terminus after.
 2.The structure did not contain any cofactors and no non natural amino acids were found,
 therefore no modifications.
-2. Ligands were left unchanged, no protonation or conformational states were detected.
-3. tested successfully the input protein with `input_validation.py`
+3. Ligands were reduced to the ligands matching this list: https://github.com/schrodinger/public_binding_free_energy_benchmark/blob/main/21_4_results/ligand_predictions/jacs_set/jnk1_manual_flips_symbmcorr_out.csv, the structures were left unchanged, no protonation or conformational states were detected.
+4. tested successfully the input protein with `input_validation.py`
