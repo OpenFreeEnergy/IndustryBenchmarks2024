@@ -3,3 +3,5 @@
 therefore no modifications.
 3. Ligands were left unchanged, no protonation or conformational states were detected.
 4. tested successfully the input protein with `input_validation.py`
+
+using maestro v2024-2

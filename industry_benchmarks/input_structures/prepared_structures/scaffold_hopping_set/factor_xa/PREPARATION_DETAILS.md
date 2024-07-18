@@ -3,3 +3,5 @@
 natural amino acids were found.
 2. Ligands were left unchanged, no protonation or conformational states were detected.
 3. tested successfully the input protein with `input_validation.py`
+
+using maestro v2024-2
