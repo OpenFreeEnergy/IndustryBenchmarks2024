@@ -4,4 +4,4 @@
 # Run prepwizard
 # Changed residue type of NMA to NME and number to 1178 in the gui
 # all done for tyk2
-# removed ligand jmc_32neu to be able to have at least one charge transformation and no ligand with alternative protonation states.
+# removed ligands jmc_32neu and ejm_52neu to be able to have at least one charge transformation and no ligand with alternative protonation states.
