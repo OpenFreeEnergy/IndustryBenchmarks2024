@@ -24,19 +24,19 @@ def run(ligands):
     uncharger = rdMolStandardize.Uncharger()
     supp = Chem.SDMolSupplier(ligands)
     umols = [uncharger.uncharge(m) for m in supp]
-    smiles = [Chem.MolToSmiles(m) for m in umols]
+    inchis = [Chem.MolToInchi(m) for m in umols]
     
-    print("number of ligands: ", len(smiles))
+    print("number of ligands: ", len(inchis))
 
     duplicates = []
 
-    for key1, i in enumerate(smiles):
-        for key2, j in enumerate(smiles):
+    for key1, i in enumerate(inchis):
+        for key2, j in enumerate(inchis):
             if key1 == key2:
                 continue
             if i == j:
                 duplicates.append(j)
-                smiles.pop(key2)
+                inchis.pop(key2)
 
 
     if len(duplicates) > 0:
