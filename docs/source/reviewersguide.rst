@@ -89,6 +89,7 @@ You should also manually check the following:
   If the termini are in different capping states then the contributor should have a scientific reason why.
 * Any cofactors were removed to a separate `cofactors.sdf` file and has appropriate bond order / protonation states.
 * Crystallographic waters and metals were kept.
+  * Note: you should check if counterions (e.g. Na+ / Cl-) were retained. If they were not, then their removal should be justified (i.e. far from the binding site).
 * Any glycosylation sites have been reverted to normal AAs (with the sugars removed).
 * Any PTMs have been reverted to their canonical AA counterparts.
 
