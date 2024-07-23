@@ -77,7 +77,7 @@ This script will help you do the following:
 
 * Check that the number of atoms in each residue (excluding the termini)
   does not change (i.e. protonation states have not changed).
-* Check that the positions of protein atoms have not change significantly.
+* Check that the positions of protein atoms have not changed significantly.
 * Check that the number of non-protein atoms match (note this could be ok
   if cofactors were removed from the file or caps were renamed from UNK).
 * Check for any disulfide bridges and, if there are, make sure that the
