@@ -248,6 +248,13 @@ For example:
 .. warning::
    Do not run multiple instances of the script at once using a wild card glob ie ``*.json``.
    The script does not use file locks to ensure multiple instances are not operating on the same file.
+
+To save space as simulations complete, consider adding a line at the end of your job submission script that runs the cleaning script.
+
+.. code-block:: bash
+   
+   openfe quickrun ${file} -o results_${repeat}/${relpath} -d results_${repeat}/${dirpath}
+   python results_cleanup.py results_${repeat}/${relpath}
    
 
 Compute Requirements
