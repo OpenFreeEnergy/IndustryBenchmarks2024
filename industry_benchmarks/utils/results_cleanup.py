@@ -88,7 +88,7 @@ def extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out"):
     simulation: pathlib.Path
         Path to the simulation `.nc` file
     checkpoint: pathlib.Path
-        Path to the checkpoint `.chk` file
+        Checkpoint `.chk` file name
     hybrid_pdb: pathlib.Path
         Path to the `.pdb` file of the hybrid system
     outfile: pathlib.Path
@@ -97,14 +97,14 @@ def extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out"):
         Path to the output `.xtc` files. A separate file is created for every
         lambda window. The state number is appended to the filename. Default: 'out'
     """
-    if not simulation.is_file() or not checkpoint.is_file():
-        errmsg = "Either the simulation or checkpoint file could not be found"
+    if not simulation.is_file():
+        errmsg = "The simulation file could not be found"
         raise ValueError(errmsg)
 
     reporter = multistate.MultiStateReporter(
         storage=simulation.as_posix(),
         open_mode="r",
-        checkpoint_storage=checkpoint.as_posix(),
+        checkpoint_storage=checkpoint,
     )
 
     analyzer = multistate.MultiStateSamplerAnalyzer(reporter)
@@ -298,7 +298,7 @@ def clean_results(json_files: list[str]) -> None:
 
             # Now we sub sample the traj and save reporter data
             simulation = results_dir / "simulation.nc"
-            checkpoint = results_dir / "checkpoint.chk"
+            checkpoint = Path("checkpoint.chk")
             hybrid_pdb = results_dir / "hybrid_system.pdb"
             # TODO better name?
             outfile = results_dir / "energy_replica_state.npz"
