@@ -245,6 +245,11 @@ For example:
    Do not move data around before running the script.
    The script assumes that the result directory has not been moved.
 
+.. warning::
+   Do not run multiple instances of the script at once using a wild card glob ie ``*.json``.
+   The script does not use file locks to ensure multiple instances are not operating on the same file.
+   
+
 Compute Requirements
 ====================
 
