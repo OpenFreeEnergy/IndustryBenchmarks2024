@@ -298,12 +298,6 @@ def clean_results(json_files: list[str]) -> None:
             print("Subsampling trajectory and saving energy data")
             extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj)
 
-            # Now we delete files we don't need anymore
-            print("Deleting trajectory files")
-            os.remove(simulation)
-            os.remove(checkpoint)
-            os.remove(results_dir / "structural_analysis.json")
-
             # remove structural_analysis data stuffed into protocol_result
             # and remove ligand + pdb
             # this data is duped in structural_analysis_data.npz
@@ -317,10 +311,15 @@ def clean_results(json_files: list[str]) -> None:
                 "ligandmapping"
             ]
 
-            # TODO save as gzip -- maybe, gather will fail then?
             print("Saving JSON")
             with open(json_file, "w") as f:
                 json.dump(results, f)
+
+            # Now we delete files we don't need anymore
+            print("Deleting trajectory files")
+            os.remove(simulation)
+            os.remove(checkpoint)
+            os.remove(results_dir / "structural_analysis.json")
 
             print(f"Done with {json_file}")
 
