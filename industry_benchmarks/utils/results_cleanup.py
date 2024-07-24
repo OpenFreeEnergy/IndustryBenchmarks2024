@@ -23,8 +23,8 @@ from tqdm import tqdm
 def remove_first_reversed_sequential_duplicate_from_path(path: Path) -> Path:
     """
     Remove the first duplicated directory from path
-    We reverse the path so we remove the first duplicated directory
-    starting from the deepest part of the path
+    We reverse the path so we remove the first sequential
+    duplicated directory starting from the deepest part of the path
     """
 
     # reverse the path parts so we start from the deepest part first
@@ -256,6 +256,9 @@ def clean_results(json_files: list[str]) -> None:
             # if the dir doesn't exist, we should try and fix it
             if not results_dir.is_dir():
                 print("Fixing path to results dir")
+                # Depending on the relative location to the result dir, we might have
+                # to fix a duplicate folder, see this post for more details
+                # https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/pull/83#discussion_r1689003616
                 results_dir = remove_first_reversed_sequential_duplicate_from_path(
                     results_dir
                 )
