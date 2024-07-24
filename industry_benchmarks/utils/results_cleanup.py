@@ -129,6 +129,9 @@ def extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out"):
     with open(out_traj.parent / "info.yaml", "w") as yaml_file:
         yaml.dump({"n_atoms": n_atoms, "ns_per_day": ns_per_day}, yaml_file)
 
+    analyzer.clear()
+    reporter.close()
+
 
 def make_backup(json_file: str) -> str:
     """
