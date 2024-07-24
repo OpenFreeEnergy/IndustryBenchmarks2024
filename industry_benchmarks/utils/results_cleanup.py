@@ -202,6 +202,11 @@ def clean_results(json_files: list[str]) -> None:
             with open(json_file, "r") as f:
                 results = json.load(f)
 
+            # First we check if someome passed in an input json
+            if "name" in results.keys():
+                print(f"{json_file} is an input json, skipping")
+                continue
+
             # Check to see if we have already cleaned  up this result
             result_key = next(k for k in results["protocol_result"]["data"].keys())
             if (
