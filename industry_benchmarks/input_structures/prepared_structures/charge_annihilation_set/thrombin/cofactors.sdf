@@ -1,0 +1,66 @@
+GOL
+                    3D
+ Schrodinger Suite 2024-1.
+ 14 13  0  0  1  0            999 V2000
+   15.6590   -9.7020   14.4860 C   0  0  0  0  0  0
+   14.4770   -9.4910   13.7520 O   0  0  0  0  0  0
+   15.5100  -10.8850   15.4610 C   0  0  0  0  0  0
+   14.4600  -10.6400   16.3750 O   0  0  0  0  0  0
+   16.7890  -11.1270   16.2770 C   0  0  0  0  0  0
+   17.8870  -11.3620   15.4240 O   0  0  0  0  0  0
+   15.9270   -8.7920   15.0110 H   0  0  0  0  0  0
+   16.4620   -9.8890   13.7730 H   0  0  0  0  0  0
+   14.6560   -8.8090   13.0950 H   0  0  0  0  0  0
+   15.2620  -11.7820   14.8930 H   0  0  0  0  0  0
+   14.6840   -9.8550   16.8900 H   0  0  0  0  0  0
+   16.6550  -11.9730   16.9520 H   0  0  0  0  0  0
+   17.0150  -10.2680   16.9070 H   0  0  0  0  0  0
+   17.7080  -12.1460   14.8940 H   0  0  0  0  0  0
+  1  2  1  0  0  0
+  1  3  1  0  0  0
+  1  7  1  0  0  0
+  1  8  1  0  0  0
+  2  9  1  0  0  0
+  3  4  1  0  0  0
+  3  5  1  0  0  0
+  3 10  1  0  0  0
+  4 11  1  0  0  0
+  5  6  1  0  0  0
+  5 12  1  0  0  0
+  5 13  1  0  0  0
+  6 14  1  0  0  0
+M  END
+> <i_m_Source_File_Index>
+1
+
+> <i_m_stars>
+0
+
+> <b_m_subgroup_collapsed>
+0
+
+> <s_m_Source_File>
+protein.pdb
+
+> <s_m_Source_Path>
+/lrlhps/users/l045340/Projects/openFE/benchmark/thrombin
+
+> <s_m_entry_id>
+2
+
+> <s_m_entry_name>
+Structure2
+
+> <s_m_subgroup_title>
+imported_structures
+
+> <s_m_subgroupid>
+imported_structures
+
+> <s_pdb_PDB_TITLE>
+3SI4 - minimized
+
+> <s_pdb_PDB_format_version>
+3.0
+
+$$$$
