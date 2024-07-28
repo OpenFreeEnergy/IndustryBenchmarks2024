@@ -5,7 +5,7 @@ Prepared by Alexander Williams
 1. Maestro Protein Prep v.2024-02
 ## Protein Preparation: Steps Taken
 1. Protein from original structures was imported into Maestro and using the protein preparation panel the interactive mode was activated following settings were applied on the preprocess panel.
-### Maestro Protein Preparation Workflow
+### Maestro Protein Preparation Workflow Selected Settings
    1. Cap Termini
    2. Convert selenomethionines to methionines
    3. Include Peptides when capping termini.
