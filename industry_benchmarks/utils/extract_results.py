@@ -40,10 +40,10 @@ for file in files_0:
     dg = np.mean(dgs)
     std = np.std(dgs)
     if edge_name not in edges_dict:
-            edges_dict[edge_name] = {
-                    'ligand_a': molA,
-                    'ligand_b': molB,
-            }
+        edges_dict[edge_name] = {
+                'ligand_a': molA,
+                'ligand_b': molB,
+        }
     edges_dict[edge_name].update({runtype: [dg, std]})
 with open('ddg.csv', 'w') as f:
     f.write("# Ligand1,Ligand2,calc_DDG,calc_dDDG(std)\n")
