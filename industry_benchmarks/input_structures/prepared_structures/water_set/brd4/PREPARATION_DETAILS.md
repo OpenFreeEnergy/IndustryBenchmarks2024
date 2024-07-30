@@ -6,7 +6,7 @@ Done by J. Bluck
 <li>Read in original inputs from the repo
 <li>Duplicate the input, to ensure there is a reference to comapre to
 <li>Check the sequence to see if it contains any non-natural amino acids, mutate back if I do
-<li>Open the Protein preparation wizard, if caps are needed
+<li>Open the Protein preparation wizard (Schrodinger 2024-2), if caps are needed
 <li>Run only step 3 - "Preprocess". The only three options activated are:
    <ul type="disc">
     <li>Cap termini
