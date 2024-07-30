@@ -7,7 +7,7 @@ Done by J. Bluck
 <li>Duplicate the input, to ensure there is a reference to comapre to
 <li>Check the sequence to see if it contains any non-natural amino acids, mutate back if I do
 <li>Check all caps to see if any need to be charged or not. Here teh charged caps were kept, as they look like they interact and neautralise eachother.
-<li>Open the Protein preparation wizard, 
+<li>Open the Protein preparation wizard (Schrodinger 2024-2), 
 <li>Run only step 3 - "Preprocess". The only three options activated are:
    <ul type="disc">
     <li>Convert selomethionines to methionines
