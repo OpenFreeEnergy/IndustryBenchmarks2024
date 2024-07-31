@@ -48,8 +48,9 @@ def get_names(result) -> tuple[str, str]:
     type=click.File(mode='w'),
     default=pathlib.Path('ddg.tsv'),
     required=True,
-    help="Path to the output csv file in which the DDG values will be stored "
-         "default: ddg.csv.",
+    help="Path to the output tsv file in which the DDG values are be stored. "
+         "The output contains ligand names, DDG [kcal/mol] as the mean across "
+         "three repeats and the standard deviation. Default: ddg.tsv.",
 )
 def extract(results_0, results_1, results_2, output):
     files_0 = glob.glob(f"{results_0}/*.json")
