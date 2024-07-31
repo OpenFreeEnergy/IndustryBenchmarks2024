@@ -65,3 +65,10 @@ We thank the OpenFE industry partners for their participation, guidance, and fun
    ./public/overview
    ./private/overview
    get-in-touch
+
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Extra Resources
+
+   reviewersguide
