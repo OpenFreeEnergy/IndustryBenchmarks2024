@@ -1,8 +1,10 @@
 import numpy as np
 import glob
 import json
+from gufe.tokenization import JSON_HANDLER
 import pathlib
 import click
+import csv
 
 
 def get_names(result) -> tuple[str, str]:
@@ -41,9 +43,10 @@ def get_names(result) -> tuple[str, str]:
           "for repeat 2, default: results_2."),
 )
 @click.option(
-    '--output',
-    type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
-    default=pathlib.Path('ddg.csv'),
+    'output',
+    '-o',
+    type=click.File(mode='w'),
+    default=pathlib.Path('ddg.tsv'),
     required=True,
     help="Path to the output csv file in which the DDG values will be stored "
          "default: ddg.csv.",
@@ -74,20 +77,17 @@ def extract(results_0, results_1, results_2, output):
     # Start extracting results
     edges_dict = dict()
     for file in files_0:
-        with open(file) as stream:
-            json_0 = json.load(stream)
+        json_0 = json.load(open(file, 'r'), cls=JSON_HANDLER.decoder)
         runtype = file.split('/')[1].split('_')[-2]
         molA, molB = get_names(json_0)
         edge_name = f'edge_{molA}_{molB}'
-        dg_0 = json_0['estimate']['magnitude']
+        dg_0 = json_0['estimate'].m
         file_1 = results_1 / file.split('/')[1]
         file_2 = results_2 / file.split('/')[1]
-        with open(file_1) as stream:
-            json_1 = json.load(stream)
-        with open(file_2) as stream:
-            json_2 = json.load(stream)
-        dg_1 = json_1['estimate']['magnitude']
-        dg_2 = json_2['estimate']['magnitude']
+        json_1 = json.load(open(file_1, 'r'), cls=JSON_HANDLER.decoder)
+        json_2 = json.load(open(file_2, 'r'), cls=JSON_HANDLER.decoder)
+        dg_1 = json_1['estimate'].m
+        dg_2 = json_2['estimate'].m
         dgs = [dg_0, dg_1, dg_2]
         dg = np.mean(dgs)
         std = np.std(dgs)
@@ -97,14 +97,28 @@ def extract(results_0, results_1, results_2, output):
                     'ligand_b': molB,
             }
         edges_dict[edge_name].update({runtype: [dg, std]})
-    with open(output, 'w') as f:
-        f.write("# Ligand1,Ligand2,calc_DDG,calc_dDDG(std)\n")
-        for edge, data in edges_dict.items():
-            ddg = data['complex'][0] - data['solvent'][0]
-            error = np.sqrt(data['complex'][1]**2 + data['solvent'][1]**2)
-            molA = data['ligand_a']
-            molB = data['ligand_b']
-            f.write(f"{molA},{molB},{ddg:.2f},{error:.2f}\n")
+
+    writer = csv.writer(
+        output,
+        delimiter="\t",
+        lineterminator="\n",  # to exactly reproduce previous, prefer "\r\n"
+    )
+    writer.writerow(["ligand_i", "ligand_j", "DDG(i->j) (kcal/mol)",
+                     "uncertainty (kcal/mol)"])
+    for edge, data in edges_dict.items():
+        ddg = data['complex'][0] - data['solvent'][0]
+        error = np.sqrt(data['complex'][1] ** 2 + data['solvent'][1] ** 2)
+        molA = data['ligand_a']
+        molB = data['ligand_b']
+        writer.writerow([molA, molB, round(ddg, 2), round(error, 2)])
+    # with open(output, 'w') as f:
+    #     f.write("# Ligand1,Ligand2,calc_DDG,calc_dDDG(std)\n")
+    #     for edge, data in edges_dict.items():
+    #         ddg = data['complex'][0] - data['solvent'][0]
+    #         error = np.sqrt(data['complex'][1]**2 + data['solvent'][1]**2)
+    #         molA = data['ligand_a']
+    #         molB = data['ligand_b']
+    #         f.write(f"{molA},{molB},{ddg:.2f},{error:.2f}\n")
 
 
 if __name__ == "__main__":
