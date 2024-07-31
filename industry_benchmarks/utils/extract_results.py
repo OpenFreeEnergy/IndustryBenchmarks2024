@@ -52,11 +52,26 @@ def extract(results_0, results_1, results_2, output):
     files_0 = glob.glob(f"{results_0}/*.json")
     files_1 = glob.glob(f"{results_1}/*.json")
     files_2 = glob.glob(f"{results_2}/*.json")
-    if len(files_0) != len(files_1) != len(files_2):
-        print(
-            f'CAVE: Some edges did not finish: repeat 0: {len(files_0)} '
-            f'edges, '
-            f'repeat 1: {len(files_1)} edges, repeat 2: {len(files_2)} edges')
+    # Check if there are .json files in the provided folders
+    if len(files_0) == 0 or len(files_1) == 0 or len(files_2) == 0:
+        errmsg = ('No .json files found in at least one of the results folders'
+                  '. Please check your specified file paths. Got folder names:'
+                  f' {results_0}, {results_1}, {results_2}.')
+        raise ValueError(errmsg)
+    # Check if there are missing files
+    all_jsons = ([x.split('/')[1] for x in files_0]
+                 + [x.split('/')[1] for x in files_1]
+                 + [x.split('/')[1] for x in files_2])
+    missing_files = [x for x in set(all_jsons) if all_jsons.count(x) <= 2]
+    if len(missing_files) > 0:
+        errmsg = ('Some calculations did not finish and did not output a '
+                  'result .json file. Number of .json files for the three '
+                  f'repeats are: repeat 0: {len(files_0)} files, repeat 1: '
+                  f'{len(files_1)} files, and repeat 2: {len(files_2)} files. '
+                  f'Missing results have been found for {missing_files}.')
+        raise ValueError(errmsg)
+
+    # Start extracting results
     edges_dict = dict()
     for file in files_0:
         with open(file) as stream:
