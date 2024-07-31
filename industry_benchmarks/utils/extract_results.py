@@ -112,14 +112,6 @@ def extract(results_0, results_1, results_2, output):
         molA = data['ligand_a']
         molB = data['ligand_b']
         writer.writerow([molA, molB, round(ddg, 2), round(error, 2)])
-    # with open(output, 'w') as f:
-    #     f.write("# Ligand1,Ligand2,calc_DDG,calc_dDDG(std)\n")
-    #     for edge, data in edges_dict.items():
-    #         ddg = data['complex'][0] - data['solvent'][0]
-    #         error = np.sqrt(data['complex'][1]**2 + data['solvent'][1]**2)
-    #         molA = data['ligand_a']
-    #         molB = data['ligand_b']
-    #         f.write(f"{molA},{molB},{ddg:.2f},{error:.2f}\n")
 
 
 if __name__ == "__main__":
