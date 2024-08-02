@@ -76,8 +76,8 @@ def get_calc_data(filename: Path) -> dict[str, dict[str, float]]:
             calculated_data[tag] = {}
             calculated_data[tag]['ligand_i'] = row[0]
             calculated_data[tag]['ligand_j'] = row[1]
-            calculated_data[tag]['dG'] = float(row[2])
-            calculated_data[tag]['dG_err'] = float(row[3])
+            calculated_data[tag]['ddG'] = float(row[2])
+            calculated_data[tag]['ddG_err'] = float(row[3])
 
     return calculated_data
 
@@ -121,8 +121,8 @@ def get_femap(
         m = Measurement(
             labelA=calc_data[entry]['ligand_i'],
             labelB=calc_data[entry]['ligand_j'],
-            DG=calc_data[entry]['dG'] * unit.kilocalorie_per_mole,
-            uncertainty=calc_data[entry]['dG_err'] * unit.kilocalorie_per_mole,
+            DG=calc_data[entry]['ddG'] * unit.kilocalorie_per_mole,
+            uncertainty=calc_data[entry]['ddG_err'] * unit.kilocalorie_per_mole,
             computational=True
         )
         fe_results['Calculated'].append(m)
@@ -216,6 +216,7 @@ def plot_schrodinger_comparison(
         statistics=["RMSE", "MUE", "R2", "rho"],
         title='Experiment vs FEP+',
         filename=filename,
+        quantity= r"$\Delta$ G",
         bootstrap_x_uncertainty=False,
         bootstrap_y_uncertainty=False,
         statistic_type='mle',
