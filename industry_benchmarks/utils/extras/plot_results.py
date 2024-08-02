@@ -62,7 +62,7 @@ def get_calc_data(filename: Path) -> dict[str, dict[str, float]]:
     
     Returns
     -------
-    experimental_data : dict[str, dict[str, float]]
+    calculated_data : dict[str, dict[str, float]]
       Dictionary of calculated data dictionaries for each ligand.
     """
     calculated_data = {}
