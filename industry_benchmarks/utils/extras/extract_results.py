@@ -9,7 +9,13 @@ import csv
 
 def get_names(result) -> tuple[str, str]:
     # Result to tuple of ligand names
-    nm = list(result['unit_results'].values())[0]['name']
+    try:
+        nm = list(result['unit_results'].values())[0]['name']
+    except KeyError as err:
+        print("Error reading 'unit_results' key")
+        print(f"Keys in json: {result.keys()=}")
+        raise err
+
     toks = nm.split()
     if toks[2] == 'repeat':
         return toks[0], toks[1]
@@ -23,7 +29,7 @@ def get_names(result) -> tuple[str, str]:
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
     default=pathlib.Path('results_0'),
     required=True,
-    help=("Path to the directory that contains all result json files " 
+    help=("Path to the directory that contains all result json files "
           "for repeat 0, default: results_0."),
 )
 @click.option(
@@ -31,7 +37,7 @@ def get_names(result) -> tuple[str, str]:
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
     default=pathlib.Path('results_1'),
     required=True,
-    help=("Path to the directory that contains all result json files " 
+    help=("Path to the directory that contains all result json files "
           "for repeat 1, default: results_1."),
 )
 @click.option(
@@ -39,7 +45,7 @@ def get_names(result) -> tuple[str, str]:
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
     default=pathlib.Path('results_2'),
     required=True,
-    help=("Path to the directory that contains all result json files " 
+    help=("Path to the directory that contains all result json files "
           "for repeat 2, default: results_2."),
 )
 @click.option(
@@ -79,6 +85,7 @@ def extract(results_0, results_1, results_2, output):
     edges_dict = dict()
     for file in files_0:
         json_0 = json.load(open(file, 'r'), cls=JSON_HANDLER.decoder)
+        print(f"Reading {file}")
         runtype = file.split('/')[1].split('_')[-2]
         molA, molB = get_names(json_0)
         edge_name = f'edge_{molA}_{molB}'
