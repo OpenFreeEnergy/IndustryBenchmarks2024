@@ -3,11 +3,8 @@
 
 ## Protein
 - Schrodinger 2023-4 was used
-- No cofactor was found in the protein structure
-- SO4 molecules were removed, metal and crystal waters were kept
-- Protein preparation workflow was used with Cap termini, Convert
-selenomethionines to methionines and Include peptides when capping termini options selected
-- ACE and NME caps added
+- Two SO4 molecules were extracted in to a cofactors.sdf file. One Zn was kept in the protein.pdb file
+- NME caps were used for A1112 ALA and C1116 GLU termini
 ## Ligands
 - According to the Ref. J. Chem. Inf. Model. 2020, 60, 11, 5457–5474, a comprehensive dataset of 27 ligands, including 21 neutral ones, was utilized. 
 - A charge visualization step of each ligand, provided in the tnks2_fullmap_ligands.sdf file, was performed using Maestro
