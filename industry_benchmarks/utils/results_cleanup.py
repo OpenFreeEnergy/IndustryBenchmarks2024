@@ -15,10 +15,6 @@ from openfe_analysis import FEReader
 from openmmtools import multistate
 from tqdm import tqdm
 
-# TODO test gather before and after
-# TODO add more print statements
-# TODO check size diff in removing PDB + ligands
-
 
 def remove_first_reversed_sequential_duplicate_from_path(path: Path) -> Path:
     """
@@ -235,7 +231,19 @@ def clean_results(json_files: list[str]) -> None:
                 print("More than one ProtocolUnitResult, skipping")
                 continue
             elif protocol_unit_result_count == 0:
-                print("All protocol units failed, skipping")
+                print("All protocol units failed, skipping cleaning")
+                print(f"{json_file} failed to run, traceback and exception below \n")
+                proto_failures = [
+                    k
+                    for k in results["unit_results"].keys()
+                    if k.startswith("ProtocolUnitFailure")
+                ]
+                for proto_failure in proto_failures:
+                    print("\n")
+                    print(results["unit_results"][proto_failure]["traceback"])
+                    print(results["unit_results"][proto_failure]["exception"])
+                    print("\n")
+
                 continue
 
             # get the name of the key which is a gufe token
