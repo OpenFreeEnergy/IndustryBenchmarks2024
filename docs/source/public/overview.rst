@@ -219,6 +219,50 @@ Here is an example of a very simple script that will create and submit a separat
 Please reach out to the openfe team if you have any questions on how to adapt this script to your internal needs, we would be happy to assist with this.
 
 
+Inspecting results
+==================
+
+.. _inspecting results:
+
+
+.. note::
+   A separate script will be provided for gathering relevant FE output data in Phase 3.
+
+
+Due to the slightly modified simulation execution layout, using `openfe gather` will not work in openfe v1.0.1.
+
+Instead we recommend using the scripts we bundle in this repository.
+
+**Extracting ddG results**
+
+You can extract the ddG results in the following manner from the directory containing `results_0`, `results_1`, and `results_2`.
+
+
+.. code-block:: bash
+
+   wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/extras/extract_results.py
+   python extract_results.py
+
+
+This will create a file named `ddg.tsv` from the individual simulation repeats.
+
+If the simulations are complete, you can plot the `ddg.tsv` results
+against the Schrodinger results downloaded from the relevant systems' ligand prediction file
+from: https://github.com/schrodinger/public_binding_free_energy_benchmark/tree/main/21_4_results/ligand_predictions
+
+For example, for the JACS TYK2 set:
+
+
+.. code-block:: bash
+
+   wget https://raw.githubusercontent.com/schrodinger/public_binding_free_energy_benchmark/v2.0/21_4_results/ligand_predictions/jacs_set/tyk2_out.csv
+   wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/extras/plot_results.py
+   python plot_results.py --calculated ddg.tsv --experiment tyk2_out.csv
+
+
+This will automatically generate plots of OpenFE vs experiment and FEP+ vs experiment using cinnabar.
+
+
 Simulation Cleanup
 ==================
 
