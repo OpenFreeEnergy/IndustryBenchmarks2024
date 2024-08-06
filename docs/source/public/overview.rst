@@ -290,7 +290,7 @@ For example:
    The script assumes that the result directory has not been moved.
 
 .. warning::
-   Do not run multiple instances of the script at once using a wild card glob ie ``*.json``.
+   Do not run multiple instances of the script at once using a wild card glob, i.e. ``*.json``.
    The script does not use file locks to ensure multiple instances are not operating on the same file.
 
 To save space as simulations complete, consider adding a line at the end of your job submission script that runs the cleaning script.
