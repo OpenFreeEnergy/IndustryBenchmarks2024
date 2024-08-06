@@ -9,13 +9,12 @@ import csv
 
 def get_names(result) -> tuple[str, str]:
     # Result to tuple of ligand names
+    # find string ligA to ligB repeat 0 generation 0
+    # ligand names could have a space or an underscore in their name
     nm = list(result['unit_results'].values())[0]['name']
-    toks = nm.split()
-    # print(toks)
-    if toks[2] == 'repeat':
-        return toks[0], toks[1]
-    else:
-        return toks[0], toks[2]
+    toks = nm.split(' to ')
+    toks_2 = toks[1].split(' repeat')
+    return toks[0], toks_2[0]
 
 def get_type(res):
     list_of_pur = list(res['protocol_result']['data'].values())[0]
@@ -93,7 +92,10 @@ def extract(results_0, results_1, results_2, output):
     for file in files_0:
         json_0 = json.load(open(file, 'r'), cls=JSON_HANDLER.decoder)
         runtype = get_type(json_0)
-        molA, molB = get_names(json_0)
+        try:
+            molA, molB = get_names(json_0)
+        except (KeyError, IndexError):
+            raise ValueError("Failed to guess names")
         edge_name = f'edge_{molA}_{molB}'
         dg_0 = json_0['estimate'].m
         file_1 = results_1 / file.split('/')[-1]
