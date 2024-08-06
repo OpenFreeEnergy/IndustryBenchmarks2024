@@ -269,6 +269,7 @@ Simulation Cleanup
 .. _post-simulation cleanup:
 
 The post-simulation cleanup script will reduce the amount of data you need to store after your simulations.
+It does not delete any data required for analysis.
 To obtain the script, download it with:
 
 .. code-block:: bash
@@ -299,6 +300,13 @@ To save space as simulations complete, consider adding a line at the end of your
    
    openfe quickrun ${file} -o results_${repeat}/${relpath} -d results_${repeat}/${dirpath}
    python results_cleanup.py results_${repeat}/${relpath}
+
+The cleanup script will delete:
+
+* Redundant structural analysis data
+* Redundant input data
+* Simulation & checkpoint ``.nc`` files 
+  * The simulation ``.nc`` file is subsampled and for each lambda window, an ``.xtc`` trajectory file is created
    
 
 Compute Requirements
