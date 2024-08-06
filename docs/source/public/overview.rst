@@ -306,7 +306,10 @@ The cleanup script will delete:
 * Redundant structural analysis data
 * Redundant input data
 * Simulation & checkpoint ``.nc`` files 
-  * The simulation ``.nc`` file is subsampled and for each lambda window, an ``.xtc`` trajectory file is created
+
+.. note:: 
+      
+         The simulation ``.nc`` file is subsampled and for each lambda window, an ``.xtc`` trajectory file is created
    
 
 Compute Requirements
