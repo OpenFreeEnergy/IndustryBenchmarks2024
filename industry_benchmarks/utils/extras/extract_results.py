@@ -11,10 +11,23 @@ def get_names(result) -> tuple[str, str]:
     # Result to tuple of ligand names
     nm = list(result['unit_results'].values())[0]['name']
     toks = nm.split()
+    # print(toks)
     if toks[2] == 'repeat':
         return toks[0], toks[1]
     else:
         return toks[0], toks[2]
+
+def get_type(res):
+    list_of_pur = list(res['protocol_result']['data'].values())[0]
+    pur = list_of_pur[0]
+    components = pur['inputs']['stateA']['components']
+
+    if 'solvent' not in components:
+        return 'vacuum'
+    elif 'protein' in components:
+        return 'complex'
+    else:
+        return 'solvent'
 
 
 @click.command
@@ -63,9 +76,9 @@ def extract(results_0, results_1, results_2, output):
                   f' {results_0}, {results_1}, {results_2}.')
         raise ValueError(errmsg)
     # Check if there are missing files
-    all_jsons = ([x.split('/')[1] for x in files_0]
-                 + [x.split('/')[1] for x in files_1]
-                 + [x.split('/')[1] for x in files_2])
+    all_jsons = ([x.split('/')[-1] for x in files_0]
+                 + [x.split('/')[-1] for x in files_1]
+                 + [x.split('/')[-1] for x in files_2])
     missing_files = [x for x in set(all_jsons) if all_jsons.count(x) <= 2]
     if len(missing_files) > 0:
         errmsg = ('Some calculations did not finish and did not output a '
@@ -79,12 +92,12 @@ def extract(results_0, results_1, results_2, output):
     edges_dict = dict()
     for file in files_0:
         json_0 = json.load(open(file, 'r'), cls=JSON_HANDLER.decoder)
-        runtype = file.split('/')[1].split('_')[-2]
+        runtype = get_type(json_0)
         molA, molB = get_names(json_0)
         edge_name = f'edge_{molA}_{molB}'
         dg_0 = json_0['estimate'].m
-        file_1 = results_1 / file.split('/')[1]
-        file_2 = results_2 / file.split('/')[1]
+        file_1 = results_1 / file.split('/')[-1]
+        file_2 = results_2 / file.split('/')[-1]
         json_1 = json.load(open(file_1, 'r'), cls=JSON_HANDLER.decoder)
         json_2 = json.load(open(file_2, 'r'), cls=JSON_HANDLER.decoder)
         dg_1 = json_1['estimate'].m
