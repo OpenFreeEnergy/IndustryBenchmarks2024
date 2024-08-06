@@ -38,6 +38,17 @@ def get_type(res):
     else:
         return 'solvent'
 
+def load_results(f):
+    # path to deserialized results
+    result = json.load(open(f, 'r'), cls=JSON_HANDLER.decoder)
+    if result['estimate'] is None or result['uncertainty'] is None:
+        errmsg = (
+            f"Calculations for {f} did not finish successfully!"
+            )
+        raise ValueError(errmsg)
+
+    return result
+
 
 @click.command
 @click.option(
@@ -100,8 +111,8 @@ def extract(results_0, results_1, results_2, output):
     # Start extracting results
     edges_dict = dict()
     for file in files_0:
-        print(f'Reading file {file}')
-        json_0 = json.load(open(file, 'r'), cls=JSON_HANDLER.decoder)
+        click.echo(f'Reading file {file}')
+        json_0 = load_results(file)
         runtype = get_type(json_0)
         try:
             molA, molB = get_names(json_0)
@@ -111,10 +122,10 @@ def extract(results_0, results_1, results_2, output):
         dg_0 = json_0['estimate'].m
         file_1 = results_1 / file.split('/')[-1]
         file_2 = results_2 / file.split('/')[-1]
-        print(f'Reading file {file_1}')
-        json_1 = json.load(open(file_1, 'r'), cls=JSON_HANDLER.decoder)
-        print(f'Reading file {file_2}')
-        json_2 = json.load(open(file_2, 'r'), cls=JSON_HANDLER.decoder)
+        click.echo(f'Reading file {file_1}')
+        json_1 = load_results(file_1)
+        click.echo(f'Reading file {file_2}')
+        json_2 = load_results(file_2)
         dg_1 = json_1['estimate'].m
         dg_2 = json_2['estimate'].m
         dgs = [dg_0, dg_1, dg_2]
