@@ -1,7 +1,9 @@
+import gufe
 import numpy as np
 import glob
 import json
 from gufe.tokenization import JSON_HANDLER
+from gufe import SmallMoleculeComponent as SMC
 import pathlib
 import click
 import csv
@@ -9,12 +11,43 @@ import csv
 
 def get_names(result) -> tuple[str, str]:
     # Result to tuple of ligand names
+    # find string ligA to ligB repeat 0 generation 0
+    # ligand names could have a space or an underscore in their name
     nm = list(result['unit_results'].values())[0]['name']
-    toks = nm.split()
-    if toks[2] == 'repeat':
-        return toks[0], toks[1]
+    toks = nm.split(' to ')
+    toks_2 = toks[1].split(' repeat')
+    return toks[0], toks_2[0]
+
+def get_names(result) -> tuple[str, str]:
+    # get the name from the SmallMoleculeComponent
+    list_of_pur = list(result['protocol_result']['data'].values())[0]
+    pur = list_of_pur[0]
+    lig_A = pur['inputs']['stateA']['components']['ligand']
+    lig_B = pur['inputs']['stateB']['components']['ligand']
+    return SMC.from_dict(lig_A).name, SMC.from_dict(lig_B).name
+
+def get_type(res):
+    list_of_pur = list(res['protocol_result']['data'].values())[0]
+    pur = list_of_pur[0]
+    components = pur['inputs']['stateA']['components']
+
+    if 'solvent' not in components:
+        return 'vacuum'
+    elif 'protein' in components:
+        return 'complex'
     else:
-        return toks[0], toks[2]
+        return 'solvent'
+
+def load_results(f):
+    # path to deserialized results
+    result = json.load(open(f, 'r'), cls=JSON_HANDLER.decoder)
+    if result['estimate'] is None or result['uncertainty'] is None:
+        errmsg = (
+            f"Calculations for {f} did not finish successfully!"
+            )
+        raise ValueError(errmsg)
+
+    return result
 
 
 @click.command
@@ -63,9 +96,9 @@ def extract(results_0, results_1, results_2, output):
                   f' {results_0}, {results_1}, {results_2}.')
         raise ValueError(errmsg)
     # Check if there are missing files
-    all_jsons = ([x.split('/')[1] for x in files_0]
-                 + [x.split('/')[1] for x in files_1]
-                 + [x.split('/')[1] for x in files_2])
+    all_jsons = ([x.split('/')[-1] for x in files_0]
+                 + [x.split('/')[-1] for x in files_1]
+                 + [x.split('/')[-1] for x in files_2])
     missing_files = [x for x in set(all_jsons) if all_jsons.count(x) <= 2]
     if len(missing_files) > 0:
         errmsg = ('Some calculations did not finish and did not output a '
@@ -78,15 +111,21 @@ def extract(results_0, results_1, results_2, output):
     # Start extracting results
     edges_dict = dict()
     for file in files_0:
-        json_0 = json.load(open(file, 'r'), cls=JSON_HANDLER.decoder)
-        runtype = file.split('/')[1].split('_')[-2]
-        molA, molB = get_names(json_0)
+        click.echo(f'Reading file {file}')
+        json_0 = load_results(file)
+        runtype = get_type(json_0)
+        try:
+            molA, molB = get_names(json_0)
+        except (KeyError, IndexError):
+            raise ValueError("Failed to guess names")
         edge_name = f'edge_{molA}_{molB}'
         dg_0 = json_0['estimate'].m
-        file_1 = results_1 / file.split('/')[1]
-        file_2 = results_2 / file.split('/')[1]
-        json_1 = json.load(open(file_1, 'r'), cls=JSON_HANDLER.decoder)
-        json_2 = json.load(open(file_2, 'r'), cls=JSON_HANDLER.decoder)
+        file_1 = results_1 / file.split('/')[-1]
+        file_2 = results_2 / file.split('/')[-1]
+        click.echo(f'Reading file {file_1}')
+        json_1 = load_results(file_1)
+        click.echo(f'Reading file {file_2}')
+        json_2 = load_results(file_2)
         dg_1 = json_1['estimate'].m
         dg_2 = json_2['estimate'].m
         dgs = [dg_0, dg_1, dg_2]
