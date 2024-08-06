@@ -188,6 +188,8 @@ def clean_results(json_files: list[str]) -> None:
     json_files : List[str]
         List of paths to JSON files to clean up.
     """
+    total_json_files = len(json_files)
+    total_files_cleaned = 0
     for json_file in tqdm(json_files):
         if not os.path.exists(json_file):
             print(f"Error: {json_file} does not exist.")
@@ -338,6 +340,7 @@ def clean_results(json_files: list[str]) -> None:
             os.remove(results_dir / "structural_analysis.json")
 
             print(f"Done with {json_file}")
+            total_files_cleaned += 1
 
         except Exception as e:
             print("oh no, we hit an error, restoring backup")
@@ -348,6 +351,8 @@ def clean_results(json_files: list[str]) -> None:
         else:
             print("removing backup")
             delete_backup(backup_file)
+
+        print(f"{total_files_cleaned} / {total_json_files} successfully cleaned")
 
 
 def main():
