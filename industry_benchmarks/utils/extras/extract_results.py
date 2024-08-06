@@ -1,7 +1,9 @@
+import gufe
 import numpy as np
 import glob
 import json
 from gufe.tokenization import JSON_HANDLER
+from gufe import SmallMoleculeComponent as SMC
 import pathlib
 import click
 import csv
@@ -15,6 +17,14 @@ def get_names(result) -> tuple[str, str]:
     toks = nm.split(' to ')
     toks_2 = toks[1].split(' repeat')
     return toks[0], toks_2[0]
+
+def get_names(result) -> tuple[str, str]:
+    # get the name from the SmallMoleculeComponent
+    list_of_pur = list(result['protocol_result']['data'].values())[0]
+    pur = list_of_pur[0]
+    lig_A = pur['inputs']['stateA']['components']['ligand']
+    lig_B = pur['inputs']['stateB']['components']['ligand']
+    return SMC.from_dict(lig_A).name, SMC.from_dict(lig_B).name
 
 def get_type(res):
     list_of_pur = list(res['protocol_result']['data'].values())[0]
