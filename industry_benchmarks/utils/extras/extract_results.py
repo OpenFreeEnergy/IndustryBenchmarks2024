@@ -100,6 +100,7 @@ def extract(results_0, results_1, results_2, output):
     # Start extracting results
     edges_dict = dict()
     for file in files_0:
+        print(f'Reading file {file}')
         json_0 = json.load(open(file, 'r'), cls=JSON_HANDLER.decoder)
         runtype = get_type(json_0)
         try:
@@ -110,7 +111,9 @@ def extract(results_0, results_1, results_2, output):
         dg_0 = json_0['estimate'].m
         file_1 = results_1 / file.split('/')[-1]
         file_2 = results_2 / file.split('/')[-1]
+        print(f'Reading file {file_1}')
         json_1 = json.load(open(file_1, 'r'), cls=JSON_HANDLER.decoder)
+        print(f'Reading file {file_2}')
         json_2 = json.load(open(file_2, 'r'), cls=JSON_HANDLER.decoder)
         dg_1 = json_1['estimate'].m
         dg_2 = json_2['estimate'].m
