@@ -42,10 +42,14 @@ def load_results(f):
     # path to deserialized results
     result = json.load(open(f, 'r'), cls=JSON_HANDLER.decoder)
     if result['estimate'] is None or result['uncertainty'] is None:
-        errmsg = (
-            f"Calculations for {f} did not finish successfully!"
-            )
-        raise ValueError(errmsg)
+        click.echo(f"Calculations for {f} did not finish successfully!")
+        proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
+        for proto_failure in proto_failures:
+            click.echo("\n")
+            click.echo(results["unit_results"][proto_failure]["traceback"])
+            click.echo(results["unit_results"][proto_failure]["exception"])
+            click.echo("\n")
+        raise ValueError("Calculations did not finish successfully")
 
     return result
 
@@ -56,7 +60,7 @@ def load_results(f):
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
     default=pathlib.Path('results_0'),
     required=True,
-    help=("Path to the directory that contains all result json files " 
+    help=("Path to the directory that contains all result json files "
           "for repeat 0, default: results_0."),
 )
 @click.option(
@@ -64,7 +68,7 @@ def load_results(f):
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
     default=pathlib.Path('results_1'),
     required=True,
-    help=("Path to the directory that contains all result json files " 
+    help=("Path to the directory that contains all result json files "
           "for repeat 1, default: results_1."),
 )
 @click.option(
@@ -72,7 +76,7 @@ def load_results(f):
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
     default=pathlib.Path('results_2'),
     required=True,
-    help=("Path to the directory that contains all result json files " 
+    help=("Path to the directory that contains all result json files "
           "for repeat 2, default: results_2."),
 )
 @click.option(
