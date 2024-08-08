@@ -118,7 +118,7 @@ def extract(results_0, results_1, results_2, output):
     # Now that we know all the files exist that we expect, lets check for errors
     click.echo("Checking files for errors...")
     has_errors = False
-    for file in tqdm(files_0 + files_1 + files_3):
+    for file in tqdm(files_0 + files_1 + files_2):
         with open(f, 'r') as fd:
             result = json.load(fd, cls=JSON_HANDLER.decoder)
         if result['estimate'] is None or result['uncertainty'] is None:
