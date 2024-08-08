@@ -7,6 +7,7 @@ from gufe import SmallMoleculeComponent as SMC
 import pathlib
 import click
 import csv
+from tqdm import tqdm
 
 
 def get_names(result) -> tuple[str, str]:
@@ -40,8 +41,10 @@ def get_type(res):
 
 def load_results(f):
     # path to deserialized results
-    result = json.load(open(f, 'r'), cls=JSON_HANDLER.decoder)
+    with open(f, 'r') as fd:
+        result = json.load(f, cls=JSON_HANDLER.decoder)
     if result['estimate'] is None or result['uncertainty'] is None:
+        # Keeping this check so if we do hit an error somehow, we print the traceback
         click.echo(f"Calculations for {f} did not finish successfully!")
         proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
         for proto_failure in proto_failures:
@@ -111,6 +114,26 @@ def extract(results_0, results_1, results_2, output):
                   f'{len(files_1)} files, and repeat 2: {len(files_2)} files. '
                   f'Missing results have been found for {missing_files}.')
         raise ValueError(errmsg)
+
+    # Now that we know all the files exist that we expect, lets check for errors
+    click.echo("Checking files for errors...")
+    has_errors = False
+    for file in tqdm(files_0 + files_1 + files_3):
+        with open(f, 'r') as fd:
+            result = json.load(fd, cls=JSON_HANDLER.decoder)
+        if result['estimate'] is None or result['uncertainty'] is None:
+            has_errors = True
+            problem_files.append(f)
+            click.echo(f"Calculations for {f} did not finish successfully!")
+            proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
+            for proto_failure in proto_failures:
+                click.echo("\n")
+                click.echo(results["unit_results"][proto_failure]["traceback"])
+                click.echo(results["unit_results"][proto_failure]["exception"])
+                click.echo("\n")
+        raise ValueError("Calculations did not finish successfully")
+
+    click.echo("No errors found!")
 
     # Start extracting results
     edges_dict = dict()
