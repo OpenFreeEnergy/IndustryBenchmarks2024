@@ -56,6 +56,62 @@ def compute_mbar_energies(analyzer):
     return u_ln, N_l
 
 
+def save_mbar_energies(
+    simulation: Path, analyzer: multistate.MultiStateSamplerAnalyzer
+):
+    """
+    Save raw energy values from MBAR (Multistate Bennett Acceptance Ratio).
+
+    This function extracts raw energy matrices, neighborhood data, and replica state indices
+    from the provided `MultiStateSamplerAnalyzer` object and saves them to a `.npz` file.
+    The `.npz` file is saved in the parent directory of the specified simulation path.
+
+    Parameters
+    ----------
+    simulation : Path
+        The file path to the simulation directory or file. The energies will be saved in the
+        parent directory of this path as 'old_energy.npz'.
+    analyzer : multistate.MultiStateSamplerAnalyzer
+        An instance of `MultiStateSamplerAnalyzer` from which the energy data will be extracted.
+        The function uses the full trajectory data by setting `use_full_trajectory` to True.
+
+    Returns
+    -------
+    None
+        This function does not return any value. It saves the extracted energy data
+        to a file.
+
+    Notes
+    -----
+    The extracted data includes:
+    - `sampled_energy_matrix`: The energy matrix for sampled states.
+    - `unsampled_energy_matrix`: The energy matrix for unsampled states.
+    - `neighborhoods`: Neighborhood data for the sampled states.
+    - `replicas_state_indices`: Indices indicating the state of each replica.
+
+    The file is saved in the parent directory of `simulation` with the name 'old_energy.npz'.
+    """
+    # Not sure if we need this
+    analyzer.use_full_trajectory = True
+
+    (
+        sampled_energy_matrix,
+        unsampled_energy_matrix,
+        neighborhoods,
+        replicas_state_indices,
+    ) = analyzer._read_energies(truncate_max_n_iterations=True)
+
+    old_energy_file = simulation.parent / "old_energy.npz"
+
+    np.savez(
+        old_energy_file,
+        sampled_energy_matrix=sampled_energy_matrix,
+        unsampled_energy_matrix=unsampled_energy_matrix,
+        neighborhoods=neighborhoods,
+        replicas_state_indices=replicas_state_indices,
+    )
+
+
 def get_replica_state_indices(analyzer):
     energy_data = list(analyzer._read_energies(truncate_max_n_iterations=True))
     replicas_state_indices = energy_data[-1]
@@ -107,6 +163,9 @@ def extract_data(simulation, checkpoint, hybrid_pdb, outfile, out_traj="out"):
     u_ln, N_l = compute_mbar_energies(analyzer)
     replicas_state_indices = get_replica_state_indices(analyzer)
     np.savez(outfile, u_ln=u_ln, N_l=N_l, replicas_state_indices=replicas_state_indices)
+
+    # Save raw energies as well
+    save_mbar_energies(simulation, analyzer)
 
     lambda_windows = len(replicas_state_indices)
     subsample_traj(simulation, hybrid_pdb, lambda_windows, out_traj)
