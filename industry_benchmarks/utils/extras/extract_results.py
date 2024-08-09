@@ -123,7 +123,6 @@ def extract(results_0, results_1, results_2, output):
             result = json.load(fd, cls=JSON_HANDLER.decoder)
         if result['estimate'] is None or result['uncertainty'] is None:
             has_errors = True
-            problem_files.append(f)
             click.echo(f"Calculations for {f} did not finish successfully!")
             proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
             for proto_failure in proto_failures:
