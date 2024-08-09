@@ -336,7 +336,7 @@ def clean_results(json_files: list[str]) -> None:
             # Now we delete files we don't need anymore
             print("Deleting trajectory files")
             os.remove(simulation)
-            os.remove(checkpoint)
+            os.remove(results_dir / checkpoint)
             os.remove(results_dir / "structural_analysis.json")
 
             print(f"Done with {json_file}")
