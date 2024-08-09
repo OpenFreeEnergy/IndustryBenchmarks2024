@@ -42,7 +42,7 @@ def get_type(res):
 def load_results(f):
     # path to deserialized results
     with open(f, 'r') as fd:
-        result = json.load(f, cls=JSON_HANDLER.decoder)
+        result = json.load(fd, cls=JSON_HANDLER.decoder)
     if result['estimate'] is None or result['uncertainty'] is None:
         # Keeping this check so if we do hit an error somehow, we print the traceback
         click.echo(f"Calculations for {f} did not finish successfully!")
