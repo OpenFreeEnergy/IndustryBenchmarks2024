@@ -305,7 +305,7 @@ The cleanup script will delete:
 
 * Redundant structural analysis data
 * Redundant input data
-* Simulation & checkpoint ``.nc`` files 
+* Simulation ``.nc`` & checkpoint ``.chk`` files 
 
 .. note:: 
       
