@@ -1,7 +1,7 @@
-I) to prep the protein, I used Maesto protein prep with default settings: "cap termini" and "Fill in missing side chains"
-1. mutate p-Tyr 1007 and 1008 to Tyr
+I) Protein structure was prepared using Maestro v2024-1 following the recommended steps.
 
-2. rename NMA to NME
+And residues p-Tyr 1007 and 1008 were mutated back to Tyr using Maestro.
 
-II) for the ligand sdf input file, I renamed any ligand whose name has a white space: replace the white space with "_"
-"22 flip" is changed to "22_flip"
+
+II) for the ligand sdf input file, any ligand whose name has a white space was renamed: replacing the white space with "_"
+"22 flip" was changed to "22_flip"

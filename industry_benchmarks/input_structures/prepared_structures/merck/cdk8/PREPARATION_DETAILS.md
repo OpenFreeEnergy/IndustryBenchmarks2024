@@ -1,8 +1,10 @@
-I) to prep the protein, I used Maesto protein prep with default settings: "cap termini" and "Fill in missing side chains"
+I) Protein structure was prepared using Maestro v2024-1 following the recommended steps.
+The more dominant(default) alternates were chosen for these residues:
+A chain: Cys64, Arg178, His248;
+B chain: Arg107, Arg247, HOH438;
 
-1. rename NMA to NME
 
-II) for the ligand sdf input file, I renamed any ligand whose name has a white space: replace the white space with "_"
+II) for the ligand sdf input file, any ligand whose name has a white space was renamed: replacing the white space with "_".
 Renamed these ligands:
 “13 flipped” to “13_flipped”
 “18 flipped” to “18_flipped”
