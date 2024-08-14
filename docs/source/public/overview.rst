@@ -274,7 +274,8 @@ To obtain the script, download it with:
 
 .. code-block:: bash
 
-   $ curl -LOJ https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/industry_benchmarks/utils/results_cleanup.py
+   $ curl -LOJ https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/results_cleanup.py
+               
 
 The cleanup script requires the path to the ``result.json`` file and also accepts a list of ``result.json`` files.
 Additionally, the script will detect if the result data has already been reduced and will skip processing that file.
