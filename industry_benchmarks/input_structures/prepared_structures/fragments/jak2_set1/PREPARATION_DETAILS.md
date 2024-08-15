@@ -14,6 +14,9 @@ and replace with -OH.  Rename PTR 1007 and 1008 to TYR.
 The PTR modifications were using 3D Builder component of Maestro.
 4. The NME capping group was called NMA by Maestro, but 
 was renamed to NME using vi.
+5. Alternate conformations exist for resid CYS 917, CYS 961, VAL 916, 
+ILE 982, ARG 1117.  The conformation with the highest population
+was taken.  In each case this was conformer A.
 
 Ligand preparation:
 
