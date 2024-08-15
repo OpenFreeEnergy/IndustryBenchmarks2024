@@ -6,11 +6,11 @@ Prepared by Alexander Williams
 ## Protein Preparation: Steps Taken
 1. Protein from original structures was imported into Maestro and using the protein preparation panel the interactive mode was activated following settings were applied on the preprocess panel.
 ### Maestro Protein Preparation Workflow Selected Settings
-   1. Cap Termini
+   1. Cap Termini was performed for starting GLY placing ACE but not for terminal Arg
    2. Convert selenomethionines to methionines
    3. Include Peptides when capping termini.
-2. Final NMA peptide prepared by maestro was converted to NME by using the builder panel and selecting other edits ... change atom properties.
-3. Cofactor NAG was extracted from structure and saved to cofactor.sdf
+2. 
+3. Cofactor NAG was deleted from structure.
 4. Protein was saved out to protein.pdb
 
 ## Ligand Preparation: Steps Taken

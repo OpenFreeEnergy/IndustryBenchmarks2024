@@ -7,12 +7,11 @@ Prepared by Alexander Williams
 ## Protein Preparation: Steps Taken
 1. Protein from original structures was imported into Maestro and using the protein preparation panel the interactive mode was activated following settings were applied on the preprocess panel.
 ### Maestro Protein Preparation Workflow Selected Settings
-   1. Cap Termini
-   2. Convert selenomethionines to methionines
-   3. Include Peptides when capping termini.
-   4. For HNE, two additional hydrogens on ASN98 and ASN159 had to be added onto the sidechain nitrogen.
+   1. Convert selenomethionines to methionines
+   2. Include Peptides when capping termini.
+   3. For HNE, two additional hydrogens on ASN98 and ASN159 had to be added onto the sidechain nitrogen.
 
-1. Cofactors NAG and EPE were extracted into each individual entry, these were saved to cofactors.sdf
+1. Cofactor EPE was extracted to its own SDF file cofactor.sdf, other cofactors NAG and FUC were deleted.
 2. Using Flare v8. cofactors.sdf was loaded in and was resaved to add appropriate hydrogens not prepared by maestro.
 3. Final NMA peptide prepared by maestro was converted to NME by using the builder panel and selecting other edits ... change atom properties.
 4. Protein was saved out to protein.pdb
