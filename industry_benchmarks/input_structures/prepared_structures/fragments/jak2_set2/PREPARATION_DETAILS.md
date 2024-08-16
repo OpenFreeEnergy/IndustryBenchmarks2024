@@ -4,7 +4,7 @@ Protein preparation:
 
 All modifications made with Maestro 13.5.128 unless noted.
 
-1. AG 839 (N-terminus) has a ion -NH3+ (left charged, as is)
+1. ARG 839 (N-terminus) has a ion -NH3+ (left charged, as is)
 2. ALA 1131 (C-terminus) has a neutral -CO-H; cap with NME 1132
 The NMA capping groups were added, structure optimized and renumbered
 with the 3D Builder component of Maestro.
