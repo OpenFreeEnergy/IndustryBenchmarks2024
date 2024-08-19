@@ -43,7 +43,7 @@ def load_results(f):
     # path to deserialized results
     with open(f, 'r') as fd:
         result = json.load(fd, cls=JSON_HANDLER.decoder)
-    if result['estimate'] is None or result['uncertainty'] is None:
+    if result.get('estimate') is None or result.get('uncertainty') is None:
         # Keeping this check so if we do hit an error somehow, we print the traceback
         click.echo(f"Calculations for {f} did not finish successfully!")
         proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
@@ -121,7 +121,7 @@ def extract(results_0, results_1, results_2, output):
     for file in tqdm(files_0 + files_1 + files_2):
         with open(file, 'r') as fd:
             result = json.load(fd, cls=JSON_HANDLER.decoder)
-        if result['estimate'] is None or result['uncertainty'] is None:
+        if result.get('estimate') is None or result.get('uncertainty') is None:
             has_errors = True
             click.echo(f"Calculations for {file} did not finish successfully!")
             proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
