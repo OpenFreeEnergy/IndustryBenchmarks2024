@@ -6,7 +6,7 @@
 
 # Protein preparation
 * ACE and NMA caps were added using the "build" function in Schrodinger's Maestro (Release 2023-4)
-* ACE and NMA caps were added using Schrodinger's Maestro (Release 2023-4)
+	- Final residue numbers: ACE1 and NMA299
 * NMA was manually renamed to NME
 * Hydrogen names of ACE and NME were manually altered
 * The protein.pdb passed the validation script (python input_validation.py --pdb protein.pdb)
