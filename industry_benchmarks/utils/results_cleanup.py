@@ -382,8 +382,6 @@ def clean_results(json_files: list[str]) -> None:
             del results["protocol_result"]["data"][result_key][0]["outputs"][
                 "structural_analysis"
             ]
-            del results["protocol_result"]["data"][result_key][0]["inputs"]["stateA"]
-            del results["protocol_result"]["data"][result_key][0]["inputs"]["stateB"]
             del results["protocol_result"]["data"][result_key][0]["inputs"][
                 "ligandmapping"
             ]
