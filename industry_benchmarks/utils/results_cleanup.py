@@ -382,9 +382,6 @@ def clean_results(json_files: list[str]) -> None:
             del results["protocol_result"]["data"][result_key][0]["outputs"][
                 "structural_analysis"
             ]
-            del results["protocol_result"]["data"][result_key][0]["inputs"][
-                "ligandmapping"
-            ]
 
             print("Saving JSON")
             with open(json_file, "w") as f:
