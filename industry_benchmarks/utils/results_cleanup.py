@@ -259,7 +259,12 @@ def clean_results(json_files: list[str]) -> None:
             with open(json_file, "r") as f:
                 results = json.load(f)
 
-            # First we check if someome passed in an input json
+            # First we check if someone passed in a network_setup.json
+            if results.get("__qualname__") == "AlchemicalNetwork":
+                print(f"{json_file} is a network_setup.json, skipping")
+                continue
+
+            #  Now  we check if someome passed in an input json
             if "name" in results.keys():
                 print(f"{json_file} is an input json, skipping")
                 continue
