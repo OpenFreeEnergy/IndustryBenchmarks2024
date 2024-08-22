@@ -10,7 +10,7 @@ import csv
 from tqdm import tqdm
 
 
-def get_names(result) -> tuple[str, str]:
+def get_names_from_unit_results(result) -> tuple[str, str]:
     # Result to tuple of ligand names
     # find string ligA to ligB repeat 0 generation 0
     # ligand names could have a space or an underscore in their name
@@ -38,6 +38,19 @@ def get_type(res):
         return 'complex'
     else:
         return 'solvent'
+
+def get_type_from_file_path(res):
+    file_path = str(list(res["unit_results"].values())[0]["outputs"]["nc"])
+    if "solvent" in file_path:
+        return "solvent"
+    elif "complex" in file_path:
+        return "complex"
+    # is anyone even running vacuum?
+    elif "vacuum" in file_path:
+        return "vaccum"
+    else:
+        raise ValueError("Can't guess simulation type")
+
 
 def load_results(f):
     # path to deserialized results
@@ -140,11 +153,17 @@ def extract(results_0, results_1, results_2, output):
     for file in files_0:
         click.echo(f'Reading file {file}')
         json_0 = load_results(file)
-        runtype = get_type(json_0)
+        try:
+            runtype = get_type(json_0)
+        except (KeyError):
+            runtype = get_type_from_file_path(json_0)
         try:
             molA, molB = get_names(json_0)
         except (KeyError, IndexError):
-            raise ValueError("Failed to guess names")
+            try:
+                molA, molB = get_names_from_unit_results(json_0)
+            except (KeyError, IndexError):
+                raise ValueError("Failed to guess names")
         edge_name = f'edge_{molA}_{molB}'
         dg_0 = json_0['estimate'].m
         file_1 = results_1 / file.split('/')[-1]
