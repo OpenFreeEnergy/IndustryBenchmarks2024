@@ -156,11 +156,13 @@ def extract(results_0, results_1, results_2, output):
         try:
             runtype = get_type(json_0)
         except (KeyError):
+            click.echo("Guessing run type from file path")
             runtype = get_type_from_file_path(json_0)
         try:
             molA, molB = get_names(json_0)
         except (KeyError, IndexError):
             try:
+                click.echo("Guessing names from simulation name")
                 molA, molB = get_names_from_unit_results(json_0)
             except (KeyError, IndexError):
                 raise ValueError("Failed to guess names")
