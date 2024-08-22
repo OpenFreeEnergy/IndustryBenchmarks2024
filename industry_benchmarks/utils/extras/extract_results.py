@@ -56,7 +56,7 @@ def load_results(f):
     # path to deserialized results
     with open(f, 'r') as fd:
         result = json.load(fd, cls=JSON_HANDLER.decoder)
-    if result['estimate'] is None or result['uncertainty'] is None:
+    if result.get('estimate') is None or result.get('uncertainty') is None:
         # Keeping this check so if we do hit an error somehow, we print the traceback
         click.echo(f"Calculations for {f} did not finish successfully!")
         proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
@@ -109,6 +109,22 @@ def extract(results_0, results_1, results_2, output):
     files_0 = glob.glob(f"{results_0}/*.json")
     files_1 = glob.glob(f"{results_1}/*.json")
     files_2 = glob.glob(f"{results_2}/*.json")
+    # Check to make sure all the json files are result json files
+    # TODO We can combine this with the error checking loop. I am
+    # not sure the order to do this in, since I thought the checks
+    # before "checking files for errors" section would fail fast but
+    # we are seeing users have 1 extra json file in each folder,
+    # which then is tripping things up later
+    for file in tqdm(files_0 + files_1 + files_2):
+        with open(file, 'r') as fd:
+            results = json.load(fd)
+        # First we check if someone passed in an input json
+        if "name" in results.keys():
+            raise ValueError(f"{file} is an input json, move this file outside of the results directory")
+        # Now check that there are unit_results
+        if "unit_results" not in results.keys():
+            raise ValueError(f"{file} does not have have any unit results")
+
     # Check if there are .json files in the provided folders
     if len(files_0) == 0 or len(files_1) == 0 or len(files_2) == 0:
         errmsg = ('No .json files found in at least one of the results folders'
@@ -134,7 +150,7 @@ def extract(results_0, results_1, results_2, output):
     for file in tqdm(files_0 + files_1 + files_2):
         with open(file, 'r') as fd:
             result = json.load(fd, cls=JSON_HANDLER.decoder)
-        if result['estimate'] is None or result['uncertainty'] is None:
+        if result.get('estimate') is None or result.get('uncertainty') is None:
             has_errors = True
             click.echo(f"Calculations for {file} did not finish successfully!")
             proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
