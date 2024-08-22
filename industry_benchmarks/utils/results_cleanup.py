@@ -265,7 +265,7 @@ def clean_results(json_files: list[str]) -> None:
                 continue
 
             #  Now  we check if someome passed in an input json
-            if "name" in results.keys():
+            if results.get("__qualname__") == "Transformation":
                 print(f"{json_file} is an input json, skipping")
                 continue
 
@@ -309,7 +309,6 @@ def clean_results(json_files: list[str]) -> None:
                     print(results["unit_results"][proto_failure]["traceback"])
                     print(results["unit_results"][proto_failure]["exception"])
                     print("\n")
-
                 continue
 
             # get the name of the key which is a gufe token
