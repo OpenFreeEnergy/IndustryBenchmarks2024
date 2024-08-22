@@ -120,7 +120,7 @@ def extract(results_0, results_1, results_2, output):
                 continue
 
             # Now we check if there are unit_results
-            if unit_results not in results.keys():
+            if "unit_results" not in results.keys():
                 click.echo(f"{file} has no unit results")
                 files_with_errors.append(file)
                 continue
