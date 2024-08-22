@@ -259,8 +259,13 @@ def clean_results(json_files: list[str]) -> None:
             with open(json_file, "r") as f:
                 results = json.load(f)
 
-            # First we check if someome passed in an input json
-            if "name" in results.keys():
+            # First we check if someone passed in a network_setup.json
+            if results.get("__qualname__") == "AlchemicalNetwork":
+                print(f"{json_file} is a network_setup.json, skipping")
+                continue
+
+            #  Now  we check if someome passed in an input json
+            if results.get("__qualname__") == "Transformation":
                 print(f"{json_file} is an input json, skipping")
                 continue
 
@@ -304,7 +309,6 @@ def clean_results(json_files: list[str]) -> None:
                     print(results["unit_results"][proto_failure]["traceback"])
                     print(results["unit_results"][proto_failure]["exception"])
                     print("\n")
-
                 continue
 
             # get the name of the key which is a gufe token
@@ -381,11 +385,6 @@ def clean_results(json_files: list[str]) -> None:
             print("Shrinking result JSON")
             del results["protocol_result"]["data"][result_key][0]["outputs"][
                 "structural_analysis"
-            ]
-            del results["protocol_result"]["data"][result_key][0]["inputs"]["stateA"]
-            del results["protocol_result"]["data"][result_key][0]["inputs"]["stateB"]
-            del results["protocol_result"]["data"][result_key][0]["inputs"][
-                "ligandmapping"
             ]
 
             print("Saving JSON")
