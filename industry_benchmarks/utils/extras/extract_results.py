@@ -126,8 +126,15 @@ def extract(results_0, results_1, results_2, output):
                 continue
 
             # Now we check that we have a estimate and uncertainty
+            # We print the traceback as well
             if results.get('estimate') is None or results.get('uncertainty') is None:
                 click.echo(f"{file} has no estimate or uncertainty")
+                proto_failures = [k for k in results["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
+                for proto_failure in proto_failures:
+                    click.echo("\n")
+                    click.echo(results["unit_results"][proto_failure]["traceback"])
+                    click.echo(results["unit_results"][proto_failure]["exception"])
+                    click.echo("\n")
                 files_with_errors.append(file)
                 continue
 
