@@ -10,7 +10,7 @@ import csv
 from tqdm import tqdm
 
 
-def get_names(result) -> tuple[str, str]:
+def get_names_from_unit_results(result) -> tuple[str, str]:
     # Result to tuple of ligand names
     # find string ligA to ligB repeat 0 generation 0
     # ligand names could have a space or an underscore in their name
@@ -39,21 +39,23 @@ def get_type(res):
     else:
         return 'solvent'
 
+def get_type_from_file_path(res):
+    file_path = str(list(res["unit_results"].values())[0]["outputs"]["nc"])
+    if "solvent" in file_path:
+        return "solvent"
+    elif "complex" in file_path:
+        return "complex"
+    # is anyone even running vacuum?
+    elif "vacuum" in file_path:
+        return "vaccum"
+    else:
+        raise ValueError("Can't guess simulation type")
+
+
 def load_results(f):
     # path to deserialized results
     with open(f, 'r') as fd:
         result = json.load(fd, cls=JSON_HANDLER.decoder)
-    if result['estimate'] is None or result['uncertainty'] is None:
-        # Keeping this check so if we do hit an error somehow, we print the traceback
-        click.echo(f"Calculations for {f} did not finish successfully!")
-        proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
-        for proto_failure in proto_failures:
-            click.echo("\n")
-            click.echo(results["unit_results"][proto_failure]["traceback"])
-            click.echo(results["unit_results"][proto_failure]["exception"])
-            click.echo("\n")
-        raise ValueError("Calculations did not finish successfully")
-
     return result
 
 
@@ -96,6 +98,55 @@ def extract(results_0, results_1, results_2, output):
     files_0 = glob.glob(f"{results_0}/*.json")
     files_1 = glob.glob(f"{results_1}/*.json")
     files_2 = glob.glob(f"{results_2}/*.json")
+
+    list_of_files = [files_0, files_1, files_2]
+    click.echo("Checking files for errors")
+    files_with_errors = []
+    for file_list in tqdm(list_of_files, desc="Looping over replicas"):
+        for file in tqdm(file_list, desc="Looping over transformations"):
+            with open(file, "r") as fd:
+                results = json.load(fd)
+
+            # First we check if someone passed in a network_setup.json
+            if results.get("__qualname__") == "AlchemicalNetwork":
+                click.echo(f"{file} is a network_setup.json, removing from file list")
+                file_list.remove(file)
+                continue
+
+            #  Now  we check if someome passed in an input json
+            if results.get("__qualname__") == "Transformation":
+                click.echo(f"{file} is an input json, skipping")
+                file_list.remove(file)
+                continue
+
+            # Now we check if there are unit_results
+            if "unit_results" not in results.keys():
+                click.echo(f"{file} has no unit results")
+                files_with_errors.append(file)
+                continue
+
+            # Now we check that we have a estimate and uncertainty
+            # We print the traceback as well
+            if results.get('estimate') is None or results.get('uncertainty') is None:
+                click.echo(f"{file} has no estimate or uncertainty")
+                proto_failures = [k for k in results["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
+                for proto_failure in proto_failures:
+                    click.echo("\n")
+                    click.echo(results["unit_results"][proto_failure]["traceback"])
+                    click.echo(results["unit_results"][proto_failure]["exception"])
+                    click.echo("\n")
+                files_with_errors.append(file)
+                continue
+
+    if files_with_errors:
+        click.echo("Issues with these files, contact the OpenFE team for next steps")
+        click.echo("=" * 80)
+        for file in files_with_errors:
+            click.echo(file)
+        click.echo("=" * 80)
+        raise ValueError("Issues with these files, contact the OpenFE team for next steps")
+
+
     # Check if there are .json files in the provided folders
     if len(files_0) == 0 or len(files_1) == 0 or len(files_2) == 0:
         errmsg = ('No .json files found in at least one of the results folders'
@@ -115,36 +166,24 @@ def extract(results_0, results_1, results_2, output):
                   f'Missing results have been found for {missing_files}.')
         raise ValueError(errmsg)
 
-    # Now that we know all the files exist that we expect, lets check for errors
-    click.echo("Checking files for errors...")
-    has_errors = False
-    for file in tqdm(files_0 + files_1 + files_2):
-        with open(file, 'r') as fd:
-            result = json.load(fd, cls=JSON_HANDLER.decoder)
-        if result['estimate'] is None or result['uncertainty'] is None:
-            has_errors = True
-            click.echo(f"Calculations for {f} did not finish successfully!")
-            proto_failures = [k for k in result["unit_results"].keys() if k.startswith("ProtocolUnitFailure")]
-            for proto_failure in proto_failures:
-                click.echo("\n")
-                click.echo(results["unit_results"][proto_failure]["traceback"])
-                click.echo(results["unit_results"][proto_failure]["exception"])
-                click.echo("\n")
-    if has_errors:
-        raise ValueError("Calculations did not finish successfully")
-
-    click.echo("No errors found!")
-
     # Start extracting results
     edges_dict = dict()
     for file in files_0:
         click.echo(f'Reading file {file}')
         json_0 = load_results(file)
-        runtype = get_type(json_0)
+        try:
+            runtype = get_type(json_0)
+        except (KeyError):
+            click.echo("Guessing run type from file path")
+            runtype = get_type_from_file_path(json_0)
         try:
             molA, molB = get_names(json_0)
         except (KeyError, IndexError):
-            raise ValueError("Failed to guess names")
+            try:
+                click.echo("Guessing names from simulation name")
+                molA, molB = get_names_from_unit_results(json_0)
+            except (KeyError, IndexError):
+                raise ValueError("Failed to guess names")
         edge_name = f'edge_{molA}_{molB}'
         dg_0 = json_0['estimate'].m
         file_1 = results_1 / file.split('/')[-1]

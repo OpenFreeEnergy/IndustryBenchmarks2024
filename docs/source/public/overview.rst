@@ -268,12 +268,49 @@ Simulation Cleanup
 
 .. _post-simulation cleanup:
 
+The post-simulation cleanup script will reduce the amount of data you need to store after your simulations.
+It does not delete any data required for analysis.
+To obtain the script, download it with:
+
+.. code-block:: bash
+
+   $ curl -LOJ https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/results_cleanup.py
+
+The cleanup script requires the path to the ``result.json`` file and also accepts a list of ``result.json`` files.
+Additionally, the script will detect if the result data has already been reduced and will skip processing that file.
+This means that you can run the script repeatedly with a glob as results are finished.
+For example:
+
+.. code-block:: bash
+
+   $ micromamba activate openfe-benchmark  # don't forget to activate your conda environment first!
+   $ python results_cleanup.py path/to/results/*.json
+
 .. warning::
-   The simulation cleanup script is not yet available. Please retain all generated data for now. See the `data storage requirements`_ for more information.
+   Do not move data around before running the script.
+   The script assumes that the result directory has not been moved.
 
+.. warning::
+   Do not run multiple instances of the script at once using a wild card glob, i.e. ``*.json``.
+   The script does not use file locks to ensure multiple instances are not operating on the same file.
 
-A post-simulation cleanup script will be made available by the OpenFE team to reduce the amount of data you need to store after your simulations.
+To save space as simulations complete, consider adding a line at the end of your job submission script that runs the cleaning script.
 
+.. code-block:: bash
+   
+   openfe quickrun ${file} -o results_${repeat}/${relpath} -d results_${repeat}/${dirpath}
+   python results_cleanup.py results_${repeat}/${relpath}
+
+The cleanup script will delete:
+
+* Redundant structural analysis data
+* Redundant input data
+* Simulation ``.nc`` & checkpoint ``.chk`` files 
+
+.. note:: 
+      
+         The simulation ``.nc`` file is subsampled and for each lambda window, an ``.xtc`` trajectory file is created
+   
 
 Compute Requirements
 ====================
