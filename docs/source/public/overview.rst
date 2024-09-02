@@ -238,8 +238,11 @@ We propose the following strategy for dealing with those failures:
 * Keep a log of the failure
 * Do not rerun this edge
 * If this is a redundant edge:
+
   * Remove this edge from the network and carry out the analysis without this edge
+
 * If this is a non-redundant edge (meaning that removing this edge would lead to a disconnected graph):
+
   * Add a new edge to the network. We are currently working on a script that will automatically find a suitable new edge.
  
 
