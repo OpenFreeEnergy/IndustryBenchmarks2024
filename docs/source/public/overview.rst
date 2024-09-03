@@ -224,7 +224,7 @@ Handling failed edges
 
 It is possible that some of the simulations in the network fail.
 More specifically, not all repeats of an edge may finish successfully, or an edge can fail entirely.
-We propose the following strategy for dealing with those failures:
+You should follow this strategy for dealing with those failures:
 
 **1. Non-reproducible failures**
 
