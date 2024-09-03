@@ -5,11 +5,8 @@
 	- Ligands: https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/blob/main/industry_benchmarks/input_structures/original_structures/charge_annhil/ptp1b_ligands.sdf
 
 # Protein preparation
-* ACE and NMA caps were added using the "build" function in Schrodinger's Maestro (Release 2023-4)
-	- Final residue numbers: ACE1 and NMA299
-* NMA was manually renamed to NME
-* Hydrogen names of ACE and NME were manually altered
-* The protein.pdb passed the validation script (python input_validation.py --pdb protein.pdb)
+* The atom name "O   ASP A 298" was manually set to "O2   ASP A 298" (line 4808 in protein.pdb)
+* The protein.pdb passed the validation (python input_validation.py --pdb protein.pdb)
 
 # Ligand preparation
-* All ligands were used without any additional modification
+* The ligand 26neu was removed
