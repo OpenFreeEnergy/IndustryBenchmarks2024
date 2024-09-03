@@ -67,7 +67,6 @@ def get_calc_data(filename: Path) -> dict[str, dict[str, float]]:
     """
     calculated_data = {}
 
-
     with open(filename, 'r') as fd:
         rd = csv.reader(fd, delimiter="\t", quotechar='"')
         headers = next(rd)
@@ -146,7 +145,7 @@ def plot_femap(
     exp_data: dict[str, dict[str, float]],
     ddg_filename: str,
     dg_filename: str,
-    statistics: list =["RMSE", "MUE", "R2", "rho"],
+    statistics: list = ["RMSE", "MUE", "R2", "rho"],
  ) -> None:
     """
     Helper method to plot out ddG and dG plots.
@@ -161,6 +160,8 @@ def plot_femap(
       The name of the ddg plot file.
     dg_filename : str
       The name of the dg plot file.
+    statistics: list
+      Which statistics to calculate for the DG plot
     """
     cinnabar_plotting.plot_DDGs(
         femap.to_legacy_graph(),
@@ -209,7 +210,7 @@ def plot_femap(
 def plot_schrodinger_comparison(
     exp_data: dict[str, dict[str, float]],
     filename: str,
-    statistics: list =["RMSE", "MUE", "R2", "rho"],
+    statistics: list = ["RMSE", "MUE", "R2", "rho"],
 ) -> None:
     """
     Helper method to plot out a dG comparison between experimental,
@@ -221,6 +222,8 @@ def plot_schrodinger_comparison(
       The data loaded from the exp data file.
     filename : str
       The name of the plot file.
+    statistics: list
+      Which statistics to calculate for the DG plot
     """
     exp = []
     exp_err = []
@@ -244,7 +247,7 @@ def plot_schrodinger_comparison(
         statistics=statistics,
         title='Experiment vs FEP+',
         filename=filename,
-        quantity= r"$\Delta$ G",
+        quantity=r"$\Delta$ G",
         bootstrap_x_uncertainty=False,
         bootstrap_y_uncertainty=False,
         statistic_type='mle',
