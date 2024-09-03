@@ -67,7 +67,6 @@ def get_calc_data(filename: Path) -> dict[str, dict[str, float]]:
     """
     calculated_data = {}
 
-
     with open(filename, 'r') as fd:
         rd = csv.reader(fd, delimiter="\t", quotechar='"')
         headers = next(rd)
@@ -144,8 +143,9 @@ def get_femap(
 def plot_femap(
     femap: FEMap,
     exp_data: dict[str, dict[str, float]],
-    ddg_filename : str,
-    dg_filename : str
+    ddg_filename: str,
+    dg_filename: str,
+    statistics: list = ["RMSE", "MUE", "R2", "rho"],
  ) -> None:
     """
     Helper method to plot out ddG and dG plots.
@@ -160,6 +160,8 @@ def plot_femap(
       The name of the ddg plot file.
     dg_filename : str
       The name of the dg plot file.
+    statistics: list
+      Which statistics to calculate for the DG plot
     """
     cinnabar_plotting.plot_DDGs(
         femap.to_legacy_graph(),
@@ -169,19 +171,46 @@ def plot_femap(
     )
     
     shift = sum([i['exp_dG'] for i in exp_data.values()]) / len(exp_data)
-    
-    cinnabar_plotting.plot_DGs(
-        femap.to_legacy_graph(),
-        figsize=5,
-        shift=shift,
+
+    # data
+    graph = femap.to_legacy_graph()
+    x_data = np.asarray([node[1]["exp_DG"] for node in graph.nodes(data=True)])
+    y_data = np.asarray(
+        [node[1]["calc_DG"] for node in graph.nodes(data=True)])
+    xerr = np.asarray([node[1]["exp_dDG"] for node in graph.nodes(data=True)])
+    yerr = np.asarray([node[1]["calc_dDG"] for node in graph.nodes(data=True)])
+
+    # centralising
+    # this should be replaced by providing one experimental result
+    x_data = x_data - np.mean(x_data) + shift
+    y_data = y_data - np.mean(y_data) + shift
+
+    cinnabar_plotting._master_plot(
+        x_data,
+        y_data,
+        xerr=xerr,
+        yerr=yerr,
+        origins=False,
+        statistics=statistics,
+        quantity=rf"$\Delta$ G",
+        title='Experiment vs OpenFE',
+        method_name="",
+        target_name="",
         filename=dg_filename,
+        bootstrap_x_uncertainty=False,
+        bootstrap_y_uncertainty=False,
+        statistic_type="mle",
         xy_lim=[-15, -5],
+        figsize=5,
+        xlabel='experimental',
+        ylabel='openfe',
     )
     
 
 def plot_schrodinger_comparison(
     exp_data: dict[str, dict[str, float]],
     filename: str,
+    statistics: list = ["RMSE", "MUE", "R2", "rho"],
 ) -> None:
     """
     Helper method to plot out a dG comparison between experimental,
@@ -193,6 +222,8 @@ def plot_schrodinger_comparison(
       The data loaded from the exp data file.
     filename : str
       The name of the plot file.
+    statistics: list
+      Which statistics to calculate for the DG plot
     """
     exp = []
     exp_err = []
@@ -213,10 +244,10 @@ def plot_schrodinger_comparison(
         yerr=np.asarray(fep_err),
         xlabel='experimental',
         ylabel='fep+',
-        statistics=["RMSE", "MUE", "R2", "rho"],
+        statistics=statistics,
         title='Experiment vs FEP+',
         filename=filename,
-        quantity= r"$\Delta$ G",
+        quantity=r"$\Delta$ G",
         bootstrap_x_uncertainty=False,
         bootstrap_y_uncertainty=False,
         statistic_type='mle',
@@ -354,9 +385,17 @@ def run(
     exp_data = get_exp_data(experiment)
     calc_data = get_calc_data(calculated)
     femap = get_femap(exp_data, calc_data)
-    plot_femap(femap, exp_data, ddg_plot_filename, dg_plot_filename)
-    plot_schrodinger_comparison(exp_data, dg_fepplus_plot_filename)
-    plot_openfe_schrodinger_comparison(femap, exp_data, dg_openfe_fepplus_plot_filename)
+
+    try:
+        plot_femap(femap, exp_data, ddg_plot_filename, dg_plot_filename)
+        plot_schrodinger_comparison(exp_data, dg_fepplus_plot_filename)
+        plot_openfe_schrodinger_comparison(femap, exp_data, dg_openfe_fepplus_plot_filename)
+    except ValueError:
+        click.echo("Correlation statistics (R2 and rho) for DG plots cannot be"
+                   " calculated due to small sample size.")
+        plot_femap(femap, exp_data, ddg_plot_filename, dg_plot_filename, statistics=["RMSE", "MUE"])
+        plot_schrodinger_comparison(exp_data, dg_fepplus_plot_filename, statistics=["RMSE", "MUE"])
+        plot_openfe_schrodinger_comparison(femap, exp_data, dg_openfe_fepplus_plot_filename)
 
 
 if __name__ == "__main__":
