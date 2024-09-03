@@ -226,32 +226,6 @@ def plot_schrodinger_comparison(
     )
 
 
-def save_dg_values(
-        femap: FEMap,
-        filename: str,
-) -> None:
-    """
-    Helper method to write out MLE derived dG values.
-
-    Parameters
-    ----------
-    femap : FEMap
-      The cinnabar FEMap to plot
-    filename : str
-      The name of the tsv file.
-    """
-    graph = femap.to_legacy_graph()
-    writer = csv.writer(
-        filename,
-        delimiter="\t",
-        lineterminator="\n",
-    )
-    writer.writerow(["ligand", "DG (kcal/mol)", "uncertainty (kcal/mol)"])
-    # ToDo: Should the values be shifted?
-    for node in graph.nodes(data=True):
-        writer.writerow([node[0], node[1]["calc_DG"], node[1]["calc_dDG"]])
-
-
 def plot_openfe_schrodinger_comparison(
         femap: FEMap,
         exp_data: dict[str, dict[str, float]],
@@ -351,13 +325,6 @@ def plot_openfe_schrodinger_comparison(
     required=True,
     help=("name of output OpenFE vs schrodinger dG plot file"),
 )
-@click.option(
-    '--dg_filename',
-    type=click.File(mode='w'),
-    default=Path("dg.tsv"),
-    required=True,
-    help=("Name of output file for MLE derived absolute binding affinities"),
-)
 def run(
     calculated : Path,
     experiment : Path,
@@ -365,7 +332,6 @@ def run(
     dg_plot_filename : Path,
     dg_fepplus_plot_filename : Path,
     dg_openfe_fepplus_plot_filename : Path,
-    dg_filename: Path,
 ) -> None:
     """
     Get all the relevant plots.
@@ -384,13 +350,10 @@ def run(
       Name of output schrodinger vs experiment dG plot file.
     dg_openfe_fepplus_plot_filename : Path
       Name of output OpenFE vs Schrodinger dG plot file.
-    dg_filename : Path
-      Name of output dG .tsv file (to store MLE derived DG values).
     """
     exp_data = get_exp_data(experiment)
     calc_data = get_calc_data(calculated)
     femap = get_femap(exp_data, calc_data)
-    save_dg_values(femap, dg_filename)
     plot_femap(femap, exp_data, ddg_plot_filename, dg_plot_filename)
     plot_schrodinger_comparison(exp_data, dg_fepplus_plot_filename)
     plot_openfe_schrodinger_comparison(femap, exp_data, dg_openfe_fepplus_plot_filename)

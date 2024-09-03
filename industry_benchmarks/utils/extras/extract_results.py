@@ -68,12 +68,12 @@ def get_dg(
         filename,
 ) -> None:
     """
-    Create a cinnabar FEMap
+    Helper method to write out MLE derived dG values.
 
     Parameters
     ----------
     calc_data: dict[str, dict[str, float]]
-      The calculated data.
+      The calculated DDG data.
     filename : pathlib.Path
       Pathlib object for saving the calculated DG data to a .tsv file.
     """
@@ -147,8 +147,8 @@ def get_dg(
     default=pathlib.Path('dg.tsv'),
     required=True,
     help="Path to the output tsv file in which the DG values are be stored. "
-         "The output contains ligand names (label), the MLE derived DG "
-         "[kcal/mol] values and associated uncertainties. Default: ddg.tsv.",
+         "The output contains ligand names, the MLE derived DG [kcal/mol] "
+         "values and associated uncertainties. Default: dg.tsv.",
 )
 def extract(results_0, results_1, results_2, output, output_DG):
     files_0 = glob.glob(f"{results_0}/*.json")
