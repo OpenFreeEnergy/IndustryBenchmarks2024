@@ -12,4 +12,4 @@
 * The protein.pdb passed the validation script (python input_validation.py --pdb protein.pdb)
 
 # Ligand preparation
-* All ligands were used without any additional modification
+* Ligands 47neu and 19neu were removed
