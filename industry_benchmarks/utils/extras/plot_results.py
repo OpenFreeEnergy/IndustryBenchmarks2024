@@ -261,6 +261,7 @@ def plot_openfe_schrodinger_comparison(
         femap: FEMap,
         exp_data: dict[str, dict[str, float]],
         filename: str,
+        statistics: list = ["RMSE", "MUE", "R2", "rho"],
 ) -> None:
     """
     Helper method to plot out a dG comparison between OpenFE,
@@ -301,7 +302,7 @@ def plot_openfe_schrodinger_comparison(
         yerr=np.asarray(openfe_err),
         xlabel='FEP+',
         ylabel='OpenFE',
-        statistics=["RMSE", "MUE", "R2", "rho"],
+        statistics=statistics,
         title='FEP+ vs OpenFE',
         filename=filename,
         quantity=r"$\Delta$ G",
@@ -393,9 +394,15 @@ def run(
     except ValueError:
         click.echo("Correlation statistics (R2 and rho) for DG plots cannot be"
                    " calculated due to small sample size.")
-        plot_femap(femap, exp_data, ddg_plot_filename, dg_plot_filename, statistics=["RMSE", "MUE"])
-        plot_schrodinger_comparison(exp_data, dg_fepplus_plot_filename, statistics=["RMSE", "MUE"])
-        plot_openfe_schrodinger_comparison(femap, exp_data, dg_openfe_fepplus_plot_filename)
+        plot_femap(
+            femap, exp_data, ddg_plot_filename, dg_plot_filename, statistics=["RMSE", "MUE"],
+        )
+        plot_schrodinger_comparison(
+            exp_data, dg_fepplus_plot_filename, statistics=["RMSE", "MUE"],
+        )
+        plot_openfe_schrodinger_comparison(
+            femap, exp_data, dg_openfe_fepplus_plot_filename, statistics=["RMSE", "MUE"],
+        )
 
 
 if __name__ == "__main__":
