@@ -3,8 +3,9 @@ import pathlib
 import MDAnalysis as mda
 import pytest
 from importlib import resources
-from ..traj_cleanup import extract_data
+from ..results_cleanup import extract_data
 import numpy as np
+import yaml
 
 
 @pytest.fixture
@@ -56,6 +57,13 @@ def test_extract_data(simulation, checkpoint, pdb, outfile, tmp_path):
     # Check that replicate state indices are of length N*L
     assert len(replicas_state_indices) == 11
     assert [len(r) == N_l[0] for r in replicas_state_indices]
+
+    # Check that the info.yaml file was written
+    with open(tmp_path / 'info.yaml', 'r') as yamlfile:
+        test_info_yaml = yaml.safe_load(yamlfile)
+    assert test_info_yaml['n_atoms'] == 21
+    assert test_info_yaml['ns_per_day'] == 989.4304333219853
+
 
     # Check output trajectories
     for i in range(11):
