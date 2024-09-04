@@ -5,7 +5,8 @@ protein:
  - chain L: N-term and C-term were capped
  - renamed SPC to HOH
  - gmx editconf to consistently re-number atoms
+ - added CONECT entries to pdb for cystine bridges
 
 ligands:
- - no changes to the initial set
+ - removed redundant poses
 
