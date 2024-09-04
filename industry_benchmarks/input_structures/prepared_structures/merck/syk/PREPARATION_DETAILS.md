@@ -5,9 +5,9 @@
 * ACE and NME caps added
 * Duplicate ligands removed:
     * CHEMBL3265014flip
-    * CHEMBL3265025flip
+    * CHEMBL3265025
     * CHEMBL3265013flip
-    * CHEMBL3265011flip
-    * CHEMBL3265015flip
-    * redockedCHEMBL3265000groundstate
-    * CHEMBL3265003tautomer2
+    * CHEMBL3265011
+    * CHEMBL3265015
+    * redockedCHEMBL3265000
+    * CHEMBL3265003tautomer
