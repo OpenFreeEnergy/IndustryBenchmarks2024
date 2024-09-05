@@ -5,13 +5,16 @@ from glob import glob
 import networkx as nx
 
 from gufe.tokenization import JSON_HANDLER
+import openfe
 from openfe import ChemicalSystem, LigandAtomMapping, Protocol
 from openfe import Transformation, AlchemicalNetwork, LigandNetwork
 from openfe import SolventComponent
+from openfe.protocols.openmm_rfe.equil_rfe_methods import RelativeHybridTopologyProtocol
 
 from openfe.setup import KartografAtomMapper, lomap_scorers
 from konnektor.network_planners import MstConcatenator
 from konnektor.network_tools import concatenate_networks
+import plan_rbfe_network
 
 try:
     from konnektor.network_planners import MstConcatenator
@@ -41,9 +44,8 @@ def parse_result_folders(
     nodes = []
     edges = {}
     edge_count = {}
-    i = 0
     for resp in glob(result_files_regex):
-        res = json.load(open(resp, "rb"), cls=JSON_HANDLER.decoder)
+        res =  json.load(open(resp, 'rb'), cls=JSON_HANDLER.decoder)
         if any("exception" in u for u in res["unit_results"].values()):
             continue
 
@@ -63,6 +65,7 @@ def parse_result_folders(
                 )
             else:  # inputs were cleaned out! reengineer - hacky alchem net.
                 if input_ligand_network is not None:
+
                     transfromation_name = (
                         units[0]["name"].split(" repeat")[0].strip()
                     )
@@ -79,6 +82,7 @@ def parse_result_folders(
                             ligmap = e
                             break
                     if ligmap is None:
+
                         raise ValueError(
                             "could not finde edge: ("
                             + e.componentA.name
@@ -113,27 +117,16 @@ def parse_result_folders(
                     )
 
             # Count if both transformations present.
-            if name in edge_count:
-                if (
-                    "protein" in stateA.components
-                    or "solvent" not in stateA.components
-                ):
-                    if "protein" in edge_count[name]:
-                        edge_count[name]["protein"] += 1
-                    else:
-                        edge_count[name]["protein"] = 1
-                else:
-                    if "solvent" in edge_count[name]:
-                        edge_count[name]["solvent"] += 1
-                    else:
-                        edge_count[name]["solvent"] = 1
+            if name not in edge_count:
+              edge_count[name] = {"protein": 0, "solvent":0}
+            if (
+                "protein" in stateA.components
+                or "solvent" not in stateA.components
+              ):
+              edge_count[name]["protein"] += 1
             else:
-                edge_count[name] = {"protein": 0, "solvent": 0}
-                if "protein" in edge_count[name]:
-                    edge_count[name]["protein"] += 1
-                else:
-                    edge_count[name]["solvent"] += 1
-
+              edge_count[name]["solvent"] += 1
+          
             try:
                 protocol = Protocol.from_dict(units[0]["inputs"]["protocol"])
             except:
@@ -256,10 +249,88 @@ def get_new_network_tapes(
     return LigandNetwork(nodes=tape_nodes, edges=tape_edges)
 
 
+def get_taped_alchemical_network(ducktape_network, alchemical_network):
+    solv = openfe.SolventComponent()
+
+    for node in alchemical_network.nodes:
+        if "protein" in node.components:
+            prot = node.components["protein"]
+            # Add cofactors if present
+            cofactors = []
+            if len(node.components) > 3:
+                number_cofactors = len(node.components) - 3
+                for i in range(number_cofactors):
+                    cofactor_name = f"cofactor_{i}"
+                    cofactors.append(node.components[cofactor_name])
+            break
+
+    # Create the AlchemicalTransformations, and storing them to an
+    # AlchemicalNetwork
+    transformations = []
+    for mapping in ducktape_network.edges:
+        # Get different settings depending on whether the transformation
+        # involves a change in net charge
+        charge_difference = plan_rbfe_network.get_alchemical_charge_difference(mapping)
+        if abs(charge_difference) > 1e-3:
+            # Raise a warning that a charge changing transformation is included
+            # in the network
+            wmsg = ("Charge changing transformation between ligands "
+                    f"{mapping.componentA.name} and "
+                    f"{mapping.componentB.name}. "
+                    "A more expensive protocol with 22 lambda windows, "
+                    "sampled "
+                    "for 20 ns each, will be used here.")
+            warnings.warn(wmsg)
+            # Get settings for charge changing transformations
+            rfe_settings = plan_rbfe_network.get_settings_charge_changes()
+        else:
+            rfe_settings = plan_rbfe_network.get_settings()
+        for leg in ['solvent', 'complex']:
+            # use the solvent and protein created above
+            sysA_dict = {'ligand': mapping.componentA,
+                         'solvent': solv}
+            sysB_dict = {'ligand': mapping.componentB,
+                         'solvent': solv}
+
+            if leg == 'complex':
+                sysA_dict['protein'] = prot
+                sysB_dict['protein'] = prot
+                if len(cofactors) > 0:
+
+                    for cofactor, entry in zip(cofactors_smc,
+                                               string.ascii_lowercase):
+                        cofactor_name = f"cofactor_{entry}"
+                        sysA_dict[cofactor_name] = cofactor
+                        sysB_dict[cofactor_name] = cofactor
+
+            sysA = openfe.ChemicalSystem(sysA_dict)
+            sysB = openfe.ChemicalSystem(sysB_dict)
+
+            name = (f"{leg}_{mapping.componentA.name}_"
+                    f"{mapping.componentB.name}")
+
+            rbfe_protocol = RelativeHybridTopologyProtocol(
+                settings=rfe_settings)
+            transformation = openfe.Transformation(
+                stateA=sysA,
+                stateB=sysB,
+                mapping=mapping,
+                protocol=rbfe_protocol,
+                name=name,
+            )
+
+            transformations.append(transformation)
+
+    # Create the taped alchemical network
+    alchemical_network = openfe.AlchemicalNetwork(transformations)
+
+    return alchemical_network
+
+
 def do_taping(
     result_files_regex: str,
     input_alchem_network_file: str,
-    ouput_alchemical_network_folder: str = "./ducktaping_transformations",
+    output_alchemical_network_folder: str = "./ducktaping_transformations",
     n_connecting_edges: int = 3,
 ):
     # Parse Ligand Network
@@ -298,6 +369,7 @@ def do_taping(
     
     if len(ligand_sub_networks) == 1:
         raise ValueError("Did not find disconnected components in alchemical network!")
+
     print()
     
     # Tape the networks together
@@ -310,7 +382,24 @@ def do_taping(
     
     # write out
     print("Write out the tapes for the network:")
+    output_alchemical_network_folder.mkdir(exist_ok=False, parents=True)
+    duck_taped_alchemical_network = get_taped_alchemical_network(duck_taped_network, input_alchem_network)
+    alchemical_network_json_fp = output_alchemical_network_folder / "alchemical_network.json"
+    json.dump(
+        duck_taped_alchemical_network.to_dict(),
+        alchemical_network_json_fp.open(mode="w"),
+        cls=JSON_HANDLER.encoder
+    )
 
+    # Write out each transformation
+    # Create a subdirectory for the transformations
+    transforms_dir = pathlib.Path(output_alchemical_network_folder / "transformations")
+    transforms_dir.mkdir(exist_ok=True, parents=True)
+
+    for transform in duck_taped_alchemical_network.edges:
+        transform.dump(transforms_dir / f"{transform.name}.json")
+
+    print("Done!")
 
 
 @click.command
@@ -335,6 +424,7 @@ def do_taping(
     default=pathlib.Path("./tapesForAlchemicalNetwork"),
     help="Directory name in which to store the additional taping transformation json files. (default: './tapesForAlchemicalNetwork')",
 )
+
 @click.option(
     "-ne",
     "--n_connecting_edges",
@@ -351,7 +441,7 @@ def cli_do_taping(
     do_taping(
         result_files_regex=str(results_regex_path),
         input_alchem_network_file=input_alchem_network_file,
-        ouput_alchemical_network_folder=output_alchemical_network,
+        output_alchemical_network_folder=output_alchemical_network,
         n_connecting_edges=n_connecting_edges,
     )
 
