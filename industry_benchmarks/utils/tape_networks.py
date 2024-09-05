@@ -147,10 +147,7 @@ def parse_result_folders(
             )
 
             nodes.extend([stateA, stateB])
-            if name in edges:
-                edges[name].repeats += 1
-            else:
-                t.repeats = 1
+            if name not in edges:
                 edges[name] = t
 
     # get only finished edges:
@@ -164,17 +161,6 @@ def parse_result_folders(
 
     alchemical_network = AlchemicalNetwork(nodes=nodes, edges=fin_edge)
     return alchemical_network
-
-
-def alchemical_network_to_networkx(alchemical_network) -> nx.Graph:
-    edges = alchemical_network.edges
-    wedges = []
-    for edge in list(edges)[::2]:
-        wedges.append([edge.stateA, edge.stateB, edge.mapping["score"]])
-
-    g = nx.Graph(nodes=alchemical_network.nodes)
-    g.add_weighted_edges_from(ebunch_to_add=wedges)
-    return g
 
 
 def alchemical_network_to_ligand_network(alchemical_network) -> LigandNetwork:
@@ -204,6 +190,7 @@ def ligand_network_to_networkx(ligand_network) -> nx.Graph:
     g = nx.Graph(nodes=ligand_network.nodes)
     g.add_weighted_edges_from(ebunch_to_add=wedges)
     return g
+
 
 
 def decomposite_disconnected_ligand_network(
@@ -269,43 +256,6 @@ def get_new_network_tapes(
     return LigandNetwork(nodes=tape_nodes, edges=tape_edges)
 
 
-def tape_networks(
-    ligand_sub_networks: list[LigandNetwork], n_connecting_edges: int = 3
-) -> LigandNetwork:
-
-    mapper = KartografAtomMapper()
-    scorer = lomap_scorers.default_lomap_score
-    concatenator = MstConcatenator(
-        mapper=mapper,
-        scorer=scorer,
-        n_connecting_edges=n_connecting_edges,
-        n_processes=1,
-    )
-
-    in_edges = set(
-        [
-            e
-            for ligand_sub_network in ligand_sub_networks
-            for e in ligand_sub_network.edges
-        ]
-    )
-
-    concatenated_network = ligand_sub_networks[0]
-    for ligand_sub_network in ligand_sub_networks[1:]:
-        concatenated_network = concatenate_networks(
-            [ligand_sub_network, concatenated_network],
-            concatenator=concatenator,
-        )
-    tape_edges = concatenated_network.edges
-
-    only_tape_edges = list(tape_edges.difference(in_edges))
-
-    tape_nodes = set(
-        [n for e in only_tape_edges for n in [e.componentA, e.componentB]]
-    )
-    return LigandNetwork(nodes=tape_nodes, edges=only_tape_edges)
-
-
 def do_taping(
     result_files_regex: str,
     input_alchem_network_file: str,
@@ -334,27 +284,28 @@ def do_taping(
     ligand_sub_networks = list(sorted(ligand_sub_networks, key=lambda sn: len(sn.nodes), reverse=True))
     
     # check status
+    print(f"Inspecting input files:")
     print(f"\tinput LigandNetwork  nodes: {len(input_ligand_network.nodes)}")
-    print(f"\tinput LigandNetwork  edges: {len(input_ligand_network.edges)}")
-    print(f"\tinput missing components: {len(missing_commponents)}")
+    print(f"\tinput LigandNetwork  edges: {len(input_ligand_network.edges)}")    
+    print(f"\tresult LigandNetwork nodes: {len(res_ligand_network.nodes)}")
+    print(f"\tresult LigandNetwork edges: {len(res_ligand_network.edges)}")
+    print()
     
-    print(f"\tresult AlchemicalNetwork nodes: {len(res_ligand_network.nodes)}")
-    print(f"\tresult in AlchemicalNetwork edges: {len(res_ligand_network.edges)}")
-    print(f"\tresult disconnected networks: {len(ligand_sub_networks)}")
-    print(f"\tresult disconnected networks sizes: {[len(sn.nodes) for sn in ligand_sub_networks]}")
-    
+    print(f"Found the following problems:")
+    print(f"\tmissing components: {len(missing_commponents)}")
+    print(f"\tdisconnected networks: {len(ligand_sub_networks)}")
+    print(f"\tdisconnected networks sizes: {[len(sn.nodes) for sn in ligand_sub_networks]}")
     
     if len(ligand_sub_networks) == 1:
         raise ValueError("Did not find disconnected components in alchemical network!")
-    
     print()
     
     # Tape the networks together
     print("Taping the Networks together:")
     network_tapes = get_new_network_tapes(ligand_sub_networks=ligand_sub_networks, input_ligand_network=input_ligand_network, n_connecting_edges = 3)
     
-    print(f"\tGenerated in DuckTapedNetwork nodes: {len(network_tapes.nodes)}")
-    print(f"\tGenerated in DuckTapedNetwork edges: {len(network_tapes.edges)}")
+    print(f"\tGenerated new taping LigandMapping edges: {len(network_tapes.edges)}")
+    print(f"\tUsing ligand nodes for taping: {len(network_tapes.nodes)}")
     print()
     
     # write out
