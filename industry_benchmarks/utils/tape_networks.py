@@ -119,6 +119,7 @@ def parse_result_folders(
             # Count if both transformations present.
             if name not in edge_count:
               edge_count[name] = {"protein": 0, "solvent":0}
+                
             if (
                 "protein" in stateA.components
                 or "solvent" not in stateA.components
@@ -333,14 +334,21 @@ def do_taping(
     output_alchemical_network_folder: str = "./ducktaping_transformations",
     n_connecting_edges: int = 3,
 ):
+    print("#"*40)
+    print("Network Taping")
+    print("#"*40)
+    print()
+    print("Parsing input files:")
     # Parse Ligand Network
-    input_alchem_network = parse_alchemical_network(input_alchem_network_path)
+    print(f"\treading input Alchemical Network")
+    input_alchem_network = parse_alchemical_network(input_alchem_network_file)
     input_ligand_network = alchemical_network_to_ligand_network(input_alchem_network)
     
     # Parse Alchemical Network
-    print("Parsing input files:")
+    print(f"\treading result files")
     res_alchemical_network = parse_result_folders(result_files_regex, input_ligand_network)
     res_ligand_network = alchemical_network_to_ligand_network(res_alchemical_network)
+
     
     # decomposite disconnected sets
     ligand_sub_networks = decomposite_disconnected_ligand_network(res_ligand_network)
