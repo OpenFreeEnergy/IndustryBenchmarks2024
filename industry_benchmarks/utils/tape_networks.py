@@ -484,7 +484,7 @@ def cli_do_taping(
     do_taping(
         result_files_regex=str(results_regex_path),
         input_alchem_network_file=input_alchem_network_file,
-        ouput_alchemical_network_folder=output_alchemical_network,
+        output_alchemical_network_folder=output_alchemical_network,
         n_connecting_edges=n_connecting_edges,
     )
 
