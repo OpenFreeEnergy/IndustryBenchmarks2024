@@ -391,10 +391,10 @@ def do_taping(
     # write out
     print("Write out the tapes for the network:")
     output_alchemical_network_folder.mkdir(exist_ok=False, parents=True)
-    duck_taped_alchemical_network = get_taped_alchemical_network(duck_taped_network, input_alchem_network)
+    taped_alchemical_network = get_taped_alchemical_network(network_tapes, input_alchem_network)
     alchemical_network_json_fp = output_alchemical_network_folder / "alchemical_network.json"
     json.dump(
-        duck_taped_alchemical_network.to_dict(),
+        taped_alchemical_network.to_dict(),
         alchemical_network_json_fp.open(mode="w"),
         cls=JSON_HANDLER.encoder
     )
@@ -404,7 +404,7 @@ def do_taping(
     transforms_dir = pathlib.Path(output_alchemical_network_folder / "transformations")
     transforms_dir.mkdir(exist_ok=True, parents=True)
 
-    for transform in duck_taped_alchemical_network.edges:
+    for transform in taped_alchemical_network.edges:
         transform.dump(transforms_dir / f"{transform.name}.json")
 
     print("Done!")
