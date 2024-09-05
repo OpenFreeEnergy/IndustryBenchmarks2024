@@ -237,8 +237,6 @@ def do_taping(result_files_regex:str, input_alchem_network_file:str, ouput_alche
     # write out
     print("Write out the tapes for the network:")
 
-    # write out
-    print("Write out the tapes for the network:")
 
 
 @click.command
