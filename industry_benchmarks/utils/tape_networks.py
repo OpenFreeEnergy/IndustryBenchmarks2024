@@ -66,7 +66,7 @@ def parse_result_folders(
             else:  # inputs were cleaned out! reengineer - hacky alchem net.
                 if input_ligand_network is not None:
 
-                    transfromation_name = (
+                    transformation_name = (
                         units[0]["name"].split(" repeat")[0].strip()
                     )
                     componentA_name, componentB_name = (
