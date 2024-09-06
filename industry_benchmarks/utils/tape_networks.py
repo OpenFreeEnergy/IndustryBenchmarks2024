@@ -228,7 +228,13 @@ def get_new_network_tapes(
 
     in_edges = input_ligand_network.edges
 
+    # Adding reverse input edges, in order to avoid these transfomations totally.
+    in_edges = in_edges.union(set([LigandAtomMapping(componentA=m.componentB, componentB=m.componentA, componentA_to_componentB={v:k for k,v in m.componentA_to_componentB.items()}) for m in list(in_edges)]))
+
     concatenated_network = ligand_sub_networks[0]
+    if not get_is_connected(concatenated_network):
+            raise ValueError("Initial Sub-Network was Disconnected!")
+                
     tape_edges = []
     for ligand_sub_network in ligand_sub_networks[1:]:
         nedges= min(200, len(concatenated_network.edges))
@@ -247,8 +253,9 @@ def get_new_network_tapes(
         else:
             new_tapes = possible_edges
             tape_edges.extend(new_tapes)
-
+            
         concatenated_network = LigandNetwork(nodes=tmp_concatenated_network.nodes, edges=concatenated_network.edges.union(new_tapes))
+        
         if not get_is_connected(concatenated_network):
             raise ValueError("During taping the Network lost connectivity!")
 
