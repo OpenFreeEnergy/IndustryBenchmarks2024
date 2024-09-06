@@ -219,6 +219,34 @@ Here is an example of a very simple script that will create and submit a separat
 Please reach out to the openfe team if you have any questions on how to adapt this script to your internal needs, we would be happy to assist with this.
 
 
+Handling failed edges
+=====================
+
+It is possible that some of the simulations in the network fail.
+More specifically, not all repeats of an edge may finish successfully, or an edge can fail entirely.
+You should follow this strategy for dealing with those failures:
+
+**1. Non-reproducible failures**
+
+* When at least one repeat of the edge completed successfully
+* Keep a log of the failure
+* Rerun the failed job(s)
+
+**2. Reproducible failures**
+
+* When all repeats of an edge failed
+* Keep a log of the failure
+* Do not rerun this edge
+* If this is a redundant edge:
+
+  * Remove this edge from the network and carry out the analysis without this edge
+
+* If this is a non-redundant edge (meaning that removing this edge would lead to a disconnected graph):
+
+  * Add a new edge to the network. We are currently working on a script that will automatically find a suitable new edge.
+ 
+
+
 Inspecting results
 ==================
 
