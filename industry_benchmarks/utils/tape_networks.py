@@ -249,7 +249,7 @@ def get_new_network_tapes(
             tape_edges.extend(new_tapes)
 
         concatenated_network = LigandNetwork(nodes=tmp_concatenated_network.nodes, edges=concatenated_network.edges.union(new_tapes))
-        if not get_is_connected():
+        if not get_is_connected(concatenated_network):
             raise ValueError("During taping the Network lost connectivity!")
 
 
