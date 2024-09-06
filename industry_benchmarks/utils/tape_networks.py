@@ -19,6 +19,7 @@ import plan_rbfe_network
 try:
     from konnektor.network_planners import MstConcatenator
     from konnektor.network_tools import concatenate_networks
+    from konnektor.network_analysis import get_is_connected
 except ModuleNotFoundError:  # This will attempt to install kartograf
     print("Did not find Konnektor! will attempt install!")
     os.system(
@@ -26,7 +27,7 @@ except ModuleNotFoundError:  # This will attempt to install kartograf
     )
     from konnektor.network_planners import MstConcatenator
     from konnektor.network_tools import concatenate_networks
-
+    from konnektor.network_analysis import get_is_connected
 
 def parse_alchemical_network(
     input_alchem_network_json_path: str,
@@ -66,11 +67,11 @@ def parse_result_folders(
             else:  # inputs were cleaned out! reengineer - hacky alchem net.
                 if input_ligand_network is not None:
 
-                    transformation_name = (
+                    transfromation_name = (
                         units[0]["name"].split(" repeat")[0].strip()
                     )
                     componentA_name, componentB_name = (
-                        transformation_name.split(" to ")
+                        transfromation_name.split(" to ")
                     )
 
                     ligmap = None
@@ -230,23 +231,33 @@ def get_new_network_tapes(
     concatenated_network = ligand_sub_networks[0]
     tape_edges = []
     for ligand_sub_network in ligand_sub_networks[1:]:
-        nedges= min(n_connecting_edges*10, len(concatenated_network.edges))
+        nedges= min(200, len(concatenated_network.edges))
         
         concatenator.n_connecting_edges = nedges
-        concatenated_network = concatenate_networks(
+        tmp_concatenated_network = concatenate_networks(
             [ligand_sub_network, concatenated_network],
             concatenator=concatenator,
         )
-        concatenated_edges = concatenated_network.edges
+        concatenated_edges = tmp_concatenated_network.edges
         possible_edges = list(sorted(list(concatenated_edges.difference(in_edges)), key=lambda e: e.annotations["score"], reverse=True))
 
         if len(possible_edges) >= n_connecting_edges:
-            tape_edges.extend(possible_edges[:n_connecting_edges])
+            new_tapes = possible_edges[:n_connecting_edges]
+            tape_edges.extend(new_tapes)
         else:
-             tape_edges.extend(possible_edges)
+            new_tapes = possible_edges
+            tape_edges.extend(new_tapes)
+
+        concatenated_network = LigandNetwork(nodes=tmp_concatenated_network.nodes, edges=concatenated_network.edges.union(new_tapes))
+        if not get_is_connected():
+            raise ValueError("During taping the Network lost connectivity!")
+
+
     tape_nodes = set(
         [n for e in tape_edges for n in [e.componentA, e.componentB]]
     )
+    
+        
     return LigandNetwork(nodes=tape_nodes, edges=tape_edges)
 
 
@@ -389,7 +400,7 @@ def do_taping(
     print()
     
     # write out
-    print("Write out the tapes for the network.")
+    print("Write out the tapes for the network:")
     output_alchemical_network_folder.mkdir(exist_ok=False, parents=True)
     taped_alchemical_network = get_taped_alchemical_network(network_tapes, input_alchem_network)
     alchemical_network_json_fp = output_alchemical_network_folder / "alchemical_network.json"
