@@ -389,7 +389,7 @@ def do_taping(
     print()
     
     # write out
-    print("Write out the tapes for the network:")
+    print("Write out the tapes for the network.")
     output_alchemical_network_folder.mkdir(exist_ok=False, parents=True)
     taped_alchemical_network = get_taped_alchemical_network(network_tapes, input_alchem_network)
     alchemical_network_json_fp = output_alchemical_network_folder / "alchemical_network.json"
