@@ -70,7 +70,7 @@ def parse_result_folders(
                         units[0]["name"].split(" repeat")[0].strip()
                     )
                     componentA_name, componentB_name = (
-                        transfromation_name.split(" to ")
+                        transformation_name.split(" to ")
                     )
 
                     ligmap = None
