@@ -18,4 +18,4 @@ Prepared by Alexander Williams
 
 ## Ligand Preparation: Steps Taken
 1. Utilizing the included edges csv file within the original_structures folder, each ligand found within the included *ligands.sdf file was confirmed to have a node within said edges file. These ligands were then loaded into maestro to confirm their structure.
-2. Removed the neutral forms of the ligands 16, 19, 21
+2. Manually removed the neutral forms of the ligands 16, 19, 21
