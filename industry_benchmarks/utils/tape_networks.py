@@ -210,6 +210,37 @@ def decomposite_disconnected_ligand_network(
     return ligand_sub_networks
 
 
+import json
+import click
+import pathlib
+from glob import glob
+import networkx as nx
+
+from gufe.tokenization import JSON_HANDLER
+import openfe
+from openfe import ChemicalSystem, LigandAtomMapping, Protocol
+from openfe import Transformation, AlchemicalNetwork, LigandNetwork
+from openfe import SolventComponent
+from openfe.protocols.openmm_rfe.equil_rfe_methods import RelativeHybridTopologyProtocol
+
+from openfe.setup import KartografAtomMapper, lomap_scorers
+from konnektor.network_planners import MstConcatenator
+from konnektor.network_tools import concatenate_networks
+import plan_rbfe_network
+
+try:
+    from konnektor.network_planners import MstConcatenator
+    from konnektor.network_tools import concatenate_networks
+    from konnektor.network_analysis import get_is_connected
+except ModuleNotFoundError:  # This will attempt to install kartograf
+    print("Did not find Konnektor! will attempt install!")
+    os.system(
+        "pip install git+https://github.com/OpenFreeEnergy/konnektor.git"
+    )
+    from konnektor.network_planners import MstConcatenator
+    from konnektor.network_tools import concatenate_networks
+    from konnektor.network_analysis import get_is_connected
+    
 def get_new_network_tapes(
     ligand_sub_networks: list[LigandNetwork], 
     input_ligand_network: LigandNetwork,
@@ -227,7 +258,7 @@ def get_new_network_tapes(
     )
 
     in_edges = input_ligand_network.edges
-
+    
     # Adding reverse input edges, in order to avoid these transfomations totally.
     in_edges = in_edges.union(set([LigandAtomMapping(componentA=m.componentB, componentB=m.componentA, componentA_to_componentB={v:k for k,v in m.componentA_to_componentB.items()}) for m in list(in_edges)]))
 
@@ -236,35 +267,44 @@ def get_new_network_tapes(
             raise ValueError("Initial Sub-Network was Disconnected!")
                 
     tape_edges = []
-    for ligand_sub_network in ligand_sub_networks[1:]:
+    for i, ligand_sub_network in enumerate(ligand_sub_networks[1:]):
+        #print("subnet", [n.name for n in ligand_sub_network.nodes])
+
         nedges= min(200, len(concatenated_network.edges))
         
+        in_concatenated_edges = concatenated_network.edges
         concatenator.n_connecting_edges = nedges
         tmp_concatenated_network = concatenate_networks(
             [ligand_sub_network, concatenated_network],
             concatenator=concatenator,
         )
-        concatenated_edges = tmp_concatenated_network.edges
-        possible_edges = list(sorted(list(concatenated_edges.difference(in_edges)), key=lambda e: e.annotations["score"], reverse=True))
+        tmp_concatenated_edges = tmp_concatenated_network.edges
 
-        if len(possible_edges) >= n_connecting_edges:
-            new_tapes = possible_edges[:n_connecting_edges]
-            tape_edges.extend(new_tapes)
-        else:
-            new_tapes = possible_edges
-            tape_edges.extend(new_tapes)
-            
-        concatenated_network = LigandNetwork(nodes=tmp_concatenated_network.nodes, edges=concatenated_network.edges.union(new_tapes))
+        ctape_edges = []
+        edge_names = [(e.componentA.name, e.componentB.name) for e in in_edges.union(concatenated_network.edges)]
+        for e in sorted(tmp_concatenated_edges, key=lambda e: e.annotations["score"], reverse=True):
+            if (e.componentA.name, e.componentB.name) not in edge_names:
+                print((e.componentA.name, e.componentB.name))
+                ctape_edges.append(e)
+                if len(ctape_edges) >= n_connecting_edges:
+                    break
         
-        if not get_is_connected(concatenated_network):
-            raise ValueError("During taping the Network lost connectivity!")
+        #print("poss edges, poss tapes", len(ctape_edges), n_connecting_edges)
+        #print("p edges", [(e.componentA.name, e.componentB.name)  for e in ctape_edges])
+        tape_edges.extend(ctape_edges)
 
+        concatenated_edges = set(list(in_concatenated_edges)+ctape_edges)
+        #print("conc edges, tapes", len(in_concatenated_edges), len(ctape_edges), len(concatenated_edges))
+
+        concatenated_network = LigandNetwork(nodes=tmp_concatenated_network.nodes, edges=concatenated_edges)        
+        if not get_is_connected(concatenated_network):
+            raise ValueError(f"During taping the Network lost connectivity! Could not find a good taping in round {i}.")
 
     tape_nodes = set(
         [n for e in tape_edges for n in [e.componentA, e.componentB]]
     )
     
-        
+    #print(tape_edges)
     return LigandNetwork(nodes=tape_nodes, edges=tape_edges)
 
 
