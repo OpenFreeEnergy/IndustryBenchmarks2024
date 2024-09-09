@@ -1,0 +1,102 @@
+glycerol
+                    3D
+ Schrodinger Suite 2023-4.
+ 14 13  0  0  1  0            999 V2000
+   11.6514   -1.1039   -1.8264 C   0  0  0  0  0  0
+   13.0197   -0.9318   -2.1350 O   0  0  0  0  0  0
+   11.4617   -2.2034   -0.7668 C   0  0  0  0  0  0
+   10.1651   -2.0652   -0.2136 O   0  0  0  0  0  0
+   11.6199   -3.6088   -1.3854 C   0  0  0  0  0  0
+   11.5344   -4.6214   -0.4099 O   0  0  0  0  0  0
+   11.0925   -1.3441   -2.7320 H   0  0  0  0  0  0
+   11.2478   -0.1531   -1.4789 H   0  0  0  0  0  0
+   13.4190   -0.3948   -1.4427 H   0  0  0  0  0  0
+   12.1770   -2.0690    0.0468 H   0  0  0  0  0  0
+    9.5289   -2.4823   -0.8030 H   0  0  0  0  0  0
+   12.5864   -3.6988   -1.8827 H   0  0  0  0  0  0
+   10.8525   -3.7870   -2.1398 H   0  0  0  0  0  0
+   10.6196   -4.6793   -0.1222 H   0  0  0  0  0  0
+  1  2  1  0  0  0
+  1  3  1  0  0  0
+  1  7  1  0  0  0
+  1  8  1  0  0  0
+  2  9  1  0  0  0
+  3  4  1  0  0  0
+  3  5  1  0  0  0
+  3 10  1  0  0  0
+  4 11  1  0  0  0
+  5  6  1  0  0  0
+  5 12  1  0  0  0
+  5 13  1  0  0  0
+  6 14  1  0  0  0
+M  END
+> <i_m_Source_File_Index>
+1
+
+> <i_m_stars>
+0
+
+> <b_ppw_created_disulfur>
+1
+
+> <b_ppw_prepared>
+1
+
+> <r_i_Bend_Energy-S-OPLS>
+398.63
+
+> <r_i_Dihedral_Energy-S-OPLS>
+433.236
+
+> <r_i_El-14_Energy-S-OPLS>
+430.115
+
+> <r_i_Electrostatic_Energy-S-OPLS>
+-1905.47
+
+> <r_i_LJ-14_Energy-S-OPLS>
+951.978
+
+> <r_i_Max_Derivative-S-OPLS>
+1.54659
+
+> <r_i_Potential_Energy-S-OPLS>
+-1836.08
+
+> <r_i_RMS_Derivative-S-OPLS>
+0.0850805
+
+> <r_i_Stretch_Energy-S-OPLS>
+96.3389
+
+> <r_i_Van_der_Waals_Energy-S-OPLS>
+-2265.27
+
+> <r_i_target_temperature>
+298
+
+> <r_ppw_preprocess_pH>
+7.4
+
+> <s_m_Source_File>
+proteinprep_1-out.maegz
+
+> <s_m_Source_Path>
+/users/home/vgapsys/projects/openFE/industry_benchmark2024/hsp90_woodhead/proteinprep_1
+
+> <s_m_entry_id>
+24
+
+> <s_m_entry_name>
+Structure24
+
+> <s_pdb_PDB_TITLE>
+hsp90a_2xjj_A_prep_ref
+
+> <s_pdb_PDB_format_version>
+3.0
+
+> <s_ppw_prepared_with_version>
+2023-4
+
+$$$$
