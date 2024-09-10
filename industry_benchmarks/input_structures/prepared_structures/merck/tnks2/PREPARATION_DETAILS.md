@@ -10,4 +10,5 @@
 - A charge visualization step of each ligand, provided in the tnks2_fullmap_ligands.sdf file, was performed using Maestro
 - Ligand 8a neutral, 8b netural, 8c neutral, 8d neutral, 8f neutral and 8e adjust were removed from the ligand.sdf file
 - 8f, 8a, 8b, 8d, 8c adjust and 8e were identified as the six ligands in their protonated state
-- Consequently, the final ligands.sdf file contain 21 neutral ligand and 6 charged ones   
+- Consequently, the final ligands.sdf file contain 21 neutral ligand and 6 charged ones
+- Change 5o adjust and 8c adjust in the ligands.sdf file to 5o_adjust and 8c_adjust   
