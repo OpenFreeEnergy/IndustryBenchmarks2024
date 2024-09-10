@@ -1726,7 +1726,7 @@ M  END
 -8.39681
 
 $$$$
-8c adjust
+8c_adjust
                     3D
  Schrodinger Suite 2022-3.
  43 46  0  0  1  0            999 V2000
@@ -1930,7 +1930,7 @@ M  END
 -12.4895
 
 $$$$
-5o adjust
+5o_adjust
                     3D
  Schrodinger Suite 2022-3.
  47 49  0  0  1  0            999 V2000
