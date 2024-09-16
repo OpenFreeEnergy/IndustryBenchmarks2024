@@ -1,0 +1,109 @@
+MODEL        0
+ATOM      1  C1x UNK A   0      27.109  15.021   9.636  1.00  0.50           C  
+ATOM      2  C2x UNK A   0      27.703  13.768   9.324  1.00  0.50           C  
+ATOM      3  C3x UNK A   0      26.931  12.684   8.845  1.00  0.50           C  
+ATOM      4  C4x UNK A   0      25.551  12.873   8.669  1.00  0.50           C  
+ATOM      5  O1x UNK A   0      24.651  11.957   8.204  1.00  0.50           O  
+ATOM      6  C5x UNK A   0      23.344  12.555   8.268  1.00  0.50           C  
+ATOM      7  C6x UNK A   0      23.526  14.072   8.572  1.00  0.50           C  
+ATOM      8  N1x UNK A   0      22.650  14.546   9.645  1.00  0.50           N  
+ATOM      9  C7x UNK A   0      22.156  15.755   9.374  1.00  0.50           C  
+ATOM     10  N2x UNK A   0      21.386  16.426  10.238  1.00  0.50           N  
+ATOM     11  C8x UNK A   0      22.569  16.272   8.039  1.00  0.50           C  
+ATOM     12  C9x UNK A   0      23.168  15.011   7.380  1.00  0.50           C  
+ATOM     13 C10x UNK A   0      24.260  15.308   6.319  1.00  0.50           C  
+ATOM     14  F1x UNK A   0      23.728  16.014   5.327  1.00  0.50           F  
+ATOM     15  F2x UNK A   0      25.279  16.016   6.803  1.00  0.50           F  
+ATOM     16  F3x UNK A   0      24.723  14.167   5.808  1.00  0.50           F  
+ATOM     17 C11x UNK A   0      24.969  14.094   8.950  1.00  0.50           C  
+ATOM     18 C12x UNK A   0      25.711  15.168   9.464  1.00  0.50           C  
+ATOM     19  H1x UNK A   0      28.767  13.627   9.440  1.00  0.50           H  
+ATOM     20  H2x UNK A   0      27.394  11.736   8.610  1.00  0.50           H  
+ATOM     21  H3x UNK A   0      22.816  12.375   7.332  1.00  0.50           H  
+ATOM     22  H4x UNK A   0      22.778  12.058   9.058  1.00  0.50           H  
+ATOM     23  H5x UNK A   0      21.001  17.358  10.057  1.00  0.50           H  
+ATOM     24  H6x UNK A   0      21.321  16.085  11.207  1.00  0.50           H  
+ATOM     25  H7x UNK A   0      23.310  17.060   8.174  1.00  0.50           H  
+ATOM     26  H8x UNK A   0      21.723  16.676   7.480  1.00  0.50           H  
+ATOM     27  H9x UNK A   0      22.342  14.538   6.849  1.00  0.50           H  
+ATOM     28 H10x UNK A   0      25.215  16.110   9.650  1.00  0.50           H  
+ATOM     29 C13x UNK A   0      29.420  18.422  10.722  1.00  0.50           C  
+ATOM     30  N3x UNK A   0      29.991  17.460   9.969  1.00  0.50           N  
+ATOM     31 C14x UNK A   0      29.245  16.381   9.646  1.00  0.50           C  
+ATOM     32 C15x UNK A   0      27.912  16.180  10.075  1.00  0.50           C  
+ATOM     33 C16x UNK A   0      27.355  17.183  10.899  1.00  0.50           C  
+ATOM     34 C17x UNK A   0      28.104  18.330  11.211  1.00  0.50           C  
+ATOM     35 H11x UNK A   0      30.031  19.287  10.931  1.00  0.50           H  
+ATOM     36 H12x UNK A   0      29.726  15.665   8.997  1.00  0.50           H  
+ATOM     37 H13x UNK A   0      26.342  17.098  11.264  1.00  0.50           H  
+ATOM     38 C18x UNK A   0      27.496  19.401  11.976  1.00  0.50           C  
+ATOM     39 C19x UNK A   0      26.900  20.288  12.564  1.00  0.50           C  
+ATOM     40 C20x UNK A   0      26.124  21.344  13.224  1.00  0.50           C  
+ATOM     41 H14x UNK A   0      26.438  22.317  12.847  1.00  0.50           H  
+ATOM     42 H15x UNK A   0      25.069  21.219  12.986  1.00  0.50           H  
+ATOM     43  O2x UNK A   0      26.916  21.643  14.594  1.00  0.25           O  
+ATOM     44 C21x UNK A   0      28.078  22.455  14.662  1.00  0.25           C  
+ATOM     45 H16x UNK A   0      27.858  23.478  14.354  1.00  0.25           H  
+ATOM     46 H17x UNK A   0      28.442  22.485  15.688  1.00  0.25           H  
+ATOM     47 H18x UNK A   0      28.881  22.069  14.035  1.00  0.25           H  
+ATOM     48 H19x UNK A   0      22.524  14.075  10.560  1.00  0.50           H  
+ATOM     49 H16x UNK A   0      26.254  21.294  14.304  1.00  0.75           H  
+TER      50      UNK A   0
+ATOM     51 Na    NA B 604      38.222  26.035  22.600  1.00  0.00          Na  
+ATOM     52 Na    NA B 605      17.897  27.438  16.875  1.00  0.00          Na  
+ATOM     53 Cl    CL B 606      24.720  25.298   3.139  1.00  0.00          Cl  
+ATOM     54 Cl    CL B 607      35.876  25.758   0.510  1.00  0.00          Cl  
+ATOM     55 Cl    CL B 608      17.940   7.578  20.636  1.00  0.00          Cl  
+TER      56       CL B 608
+ENDMDL
+CONECT    1    2   18   32
+CONECT    2    1    3   19
+CONECT    3    2    4   20
+CONECT    4    3    5   17
+CONECT    5    4    6
+CONECT    6    5    7   21   22
+CONECT    7    6    8   12   17
+CONECT    8    7    9   48
+CONECT    9    8   10   11
+CONECT   10    9   23   24
+CONECT   11    9   12   25   26
+CONECT   12    7   11   13   27
+CONECT   13   12   14   15   16
+CONECT   14   13
+CONECT   15   13
+CONECT   16   13
+CONECT   17    4    7   18
+CONECT   18    1   17   28
+CONECT   19    2
+CONECT   20    3
+CONECT   21    6
+CONECT   22    6
+CONECT   23   10
+CONECT   24   10
+CONECT   25   11
+CONECT   26   11
+CONECT   27   12
+CONECT   28   18
+CONECT   29   30   34   35
+CONECT   30   29   31
+CONECT   31   30   32   36
+CONECT   32    1   31   33
+CONECT   33   32   34   37
+CONECT   34   29   33   38
+CONECT   35   29
+CONECT   36   31
+CONECT   37   33
+CONECT   38   34   39
+CONECT   39   38   40
+CONECT   40   39   41   42
+CONECT   40   49
+CONECT   41   40
+CONECT   42   40
+CONECT   43   40   44
+CONECT   44   43   45   46   47
+CONECT   45   44
+CONECT   46   44
+CONECT   47   44
+CONECT   48    8
+CONECT   49   40
+END
