@@ -1,9 +1,13 @@
 import json
 import click
 import pathlib
+from typing import Iterable
+import numpy as np
+import itertools
 from glob import glob
 import networkx as nx
 
+import gufe
 from gufe.tokenization import JSON_HANDLER
 import openfe
 from openfe import ChemicalSystem, LigandAtomMapping, Protocol
@@ -12,22 +16,8 @@ from openfe import SolventComponent
 from openfe.protocols.openmm_rfe.equil_rfe_methods import RelativeHybridTopologyProtocol
 
 from openfe.setup import KartografAtomMapper, lomap_scorers
-from konnektor.network_planners import MstConcatenator
-from konnektor.network_tools import concatenate_networks
 import plan_rbfe_network
 
-try:
-    from konnektor.network_planners import MstConcatenator
-    from konnektor.network_tools import concatenate_networks
-    from konnektor.network_analysis import get_is_connected
-except ModuleNotFoundError:  # This will attempt to install kartograf
-    print("Did not find Konnektor! will attempt install!")
-    os.system(
-        "pip install git+https://github.com/OpenFreeEnergy/konnektor.git"
-    )
-    from konnektor.network_planners import MstConcatenator
-    from konnektor.network_tools import concatenate_networks
-    from konnektor.network_analysis import get_is_connected
 
 def parse_alchemical_network(
     input_alchem_network_json_path: str,
@@ -46,7 +36,7 @@ def parse_result_folders(
     edges = {}
     edge_count = {}
     for resp in glob(result_files_regex):
-        res =  json.load(open(resp, 'rb'), cls=JSON_HANDLER.decoder)
+        res = json.load(open(resp, 'rb'), cls=JSON_HANDLER.decoder)
         if any("exception" in u for u in res["unit_results"].values()):
             continue
 
@@ -114,7 +104,8 @@ def parse_result_folders(
                             )
                 else:
                     raise ValueError(
-                        "Can not read alchemical input, as components are missing, please provied input ligand_network."
+                        "Can not read alchemical input, as components are "
+                        "missing, please provied input ligand_network."
                     )
 
             # Count if both transformations present.
@@ -187,7 +178,6 @@ def ligand_network_to_networkx(ligand_network) -> nx.Graph:
     return g
 
 
-
 def decomposite_disconnected_ligand_network(
     ligand_network: LigandNetwork,
 ) -> list[LigandNetwork]:
@@ -209,103 +199,223 @@ def decomposite_disconnected_ligand_network(
 
     return ligand_sub_networks
 
+def generate_maximal_ligand_network(
+        components: Iterable[gufe.Component],
+        mapper: gufe.AtomMapper,
+        scorer,
+) -> LigandNetwork:
+    """Create a network with all possible proposed mappings.
 
-import json
-import click
-import pathlib
-from glob import glob
-import networkx as nx
+    This will attempt to create (and optionally score) all possible
+    mappings
+    (up to $N(N-1)/2$ for each mapper given). There may be fewer actual
+    mappings that this because, when a mapper cannot return a mapping for a
+    given pair, there is simply no suggested mapping for that pair.
 
-from gufe.tokenization import JSON_HANDLER
-import openfe
-from openfe import ChemicalSystem, LigandAtomMapping, Protocol
-from openfe import Transformation, AlchemicalNetwork, LigandNetwork
-from openfe import SolventComponent
-from openfe.protocols.openmm_rfe.equil_rfe_methods import RelativeHybridTopologyProtocol
+    This function was adapted from Konnektor.
 
-from openfe.setup import KartografAtomMapper, lomap_scorers
-from konnektor.network_planners import MstConcatenator
-from konnektor.network_tools import concatenate_networks
-import plan_rbfe_network
+    Parameters
+    ----------
+    components : Iterable[SmallMoleculeComponent]
+      the ligands to include in the LigandNetwork
+    mapper: gufe.AtomMapper
+      The atom mapper used
+    scorer: AtomMappingScorer
+      any callable which takes a AtomMapping and returns a float
 
-try:
-    from konnektor.network_planners import MstConcatenator
-    from konnektor.network_tools import concatenate_networks
-    from konnektor.network_analysis import get_is_connected
-except ModuleNotFoundError:  # This will attempt to install kartograf
-    print("Did not find Konnektor! will attempt install!")
-    os.system(
-        "pip install git+https://github.com/OpenFreeEnergy/konnektor.git"
-    )
-    from konnektor.network_planners import MstConcatenator
-    from konnektor.network_tools import concatenate_networks
-    from konnektor.network_analysis import get_is_connected
-    
+    Returns
+    -------
+    LigandNetwork
+        a ligand network containing all possible mappings, ideally a
+        fully connected graph.
+    """
+    components = list(components)
+    total = len(components) * (len(components) - 1) // 2
+
+
+    progress = lambda x: x
+
+    mappings = []
+    for component_pair in progress(
+            itertools.combinations(components, 2)):
+        best_score = 0.0
+        best_mapping = None
+        molA = component_pair[0]
+        molB = component_pair[1]
+
+        try:
+            mapping_generator = mapper.suggest_mappings(molA, molB)
+        except:
+            continue
+
+        if scorer:
+            tmp_mappings = [
+                mapping.with_annotations(
+                    {"score": scorer(mapping)})
+                for mapping in mapping_generator
+            ]
+
+            if len(tmp_mappings) > 0:
+                tmp_best_mapping = min(
+                    tmp_mappings,
+                    key=lambda m: m.annotations["score"]
+                )
+
+                if (
+                        tmp_best_mapping.annotations[
+                            "score"] < best_score
+                        or best_mapping is None
+                ):
+                    best_score = tmp_best_mapping.annotations[
+                        "score"]
+                    best_mapping = tmp_best_mapping
+        else:
+            try:
+                best_mapping = next(mapping_generator)
+            except:
+                print("warning")
+                continue
+
+        if best_mapping is not None:
+            mappings.append(best_mapping)
+
+    if len(mappings) == 0:
+        raise RuntimeError("Could not generate any mapping!")
+
+    network = LigandNetwork(edges=mappings, nodes=components)
+    return network
+
+
 def get_new_network_tapes(
     ligand_sub_networks: list[LigandNetwork], 
     input_ligand_network: LigandNetwork,
-    n_connecting_edges: int = 3
-
 ) -> LigandNetwork:
 
     mapper = KartografAtomMapper()
     scorer = lomap_scorers.default_lomap_score
-    concatenator = MstConcatenator(
-        mapper=mapper,
-        scorer=scorer,
-        n_connecting_edges=n_connecting_edges,
-        n_processes=1,
+
+    # Create a maximal network
+    max_network = generate_maximal_ligand_network(
+        input_ligand_network.nodes,
+        mapper,
+        scorer,
     )
 
     in_edges = input_ligand_network.edges
-    
     # Adding reverse input edges, in order to avoid these transfomations totally.
-    in_edges = in_edges.union(set([LigandAtomMapping(componentA=m.componentB, componentB=m.componentA, componentA_to_componentB={v:k for k,v in m.componentA_to_componentB.items()}) for m in list(in_edges)]))
-
-    concatenated_network = ligand_sub_networks[0]
-    if not get_is_connected(concatenated_network):
-            raise ValueError("Initial Sub-Network was Disconnected!")
-                
-    tape_edges = []
-    for i, ligand_sub_network in enumerate(ligand_sub_networks[1:]):
-        #print("subnet", [n.name for n in ligand_sub_network.nodes])
-
-        nedges= min(200, len(concatenated_network.edges))
-        
-        in_concatenated_edges = concatenated_network.edges
-        concatenator.n_connecting_edges = nedges
-        tmp_concatenated_network = concatenate_networks(
-            [ligand_sub_network, concatenated_network],
-            concatenator=concatenator,
-        )
-        tmp_concatenated_edges = tmp_concatenated_network.edges
-
-        ctape_edges = []
-        edge_names = [(e.componentA.name, e.componentB.name) for e in in_edges.union(concatenated_network.edges)]
-        for e in sorted(tmp_concatenated_edges, key=lambda e: e.annotations["score"], reverse=True):
-            if (e.componentA.name, e.componentB.name) not in edge_names:
-                print((e.componentA.name, e.componentB.name))
-                ctape_edges.append(e)
-                if len(ctape_edges) >= n_connecting_edges:
-                    break
-        
-        #print("poss edges, poss tapes", len(ctape_edges), n_connecting_edges)
-        #print("p edges", [(e.componentA.name, e.componentB.name)  for e in ctape_edges])
-        tape_edges.extend(ctape_edges)
-
-        concatenated_edges = set(list(in_concatenated_edges)+ctape_edges)
-        #print("conc edges, tapes", len(in_concatenated_edges), len(ctape_edges), len(concatenated_edges))
-
-        concatenated_network = LigandNetwork(nodes=tmp_concatenated_network.nodes, edges=concatenated_edges)        
-        if not get_is_connected(concatenated_network):
-            raise ValueError(f"During taping the Network lost connectivity! Could not find a good taping in round {i}.")
-
-    tape_nodes = set(
-        [n for e in tape_edges for n in [e.componentA, e.componentB]]
+    # CAVE: the order in the componentA_to_componentB dict will not always match the
+    # mapping atom order created elsewhere, therefore we can't use these to
+    # check for edge equality, but must go through the components (see below)
+    in_edges = in_edges.union(
+        set([LigandAtomMapping(
+            componentA=m.componentB,
+            componentB=m.componentA,
+            componentA_to_componentB={v: k for k, v in m.componentA_to_componentB.items()}) for m in list(in_edges)]
+            )
     )
-    
-    #print(tape_edges)
-    return LigandNetwork(nodes=tape_nodes, edges=tape_edges)
+
+    # Prune out prior edges
+    # We have to go through the mapping components instead of the edges
+    new_edges = list(max_network.edges).copy()
+    for edge in max_network.edges:
+        molA = edge.componentA
+        molB = edge.componentB
+        for e in in_edges:
+            if molA == e.componentA and molB == e.componentB:
+                new_edges.remove(edge)
+                break
+    print(len(new_edges))
+    # Prune out self subnetwork edges
+    usable_edges = new_edges.copy()
+    for sn in ligand_sub_networks:
+        for edge in new_edges:
+            molA = edge.componentA
+            molB = edge.componentB
+            if molA in sn.nodes and molB in sn.nodes:
+                usable_edges.remove(edge)
+    print(len(usable_edges))
+
+    # Sort usable_edges by score (lowest to highest)
+    scores = [edge.annotations["score"] for edge in usable_edges]
+    sorted_score_indices = np.argsort(scores)
+    sorted_usable_edges = [usable_edges[i] for i in sorted_score_indices]
+
+    # Calculate redundancies
+    redundancy = [[] for _ in ligand_sub_networks]
+    for edge in sorted_usable_edges:
+        for i, net in enumerate(ligand_sub_networks):
+            if edge.componentA in net.nodes or edge.componentB in net.nodes:
+                redundancy[i].append(edge)
+
+    # Find the edges that we need
+    old_edges = [list(net.edges) for net in ligand_sub_networks if
+                 len(net.edges) > 0]
+    old_edges = [item for list in old_edges for item in list]
+    taped_edges = []
+    for edge in sorted_usable_edges:
+        for i, net in enumerate(redundancy):
+            if edge in net:
+                if len(net) <= 2:
+                    concatenated_edges = old_edges + taped_edges
+                    concatenated_network = LigandNetwork(
+                        nodes=input_ligand_network.nodes,
+                        edges=concatenated_edges,
+                    )
+                    if not concatenated_network.is_connected():
+                        taped_edges.extend(net)
+                    else:
+                        break
+                else:
+                    redundancy[i].remove(edge)
+
+    concatenated_edges = old_edges + taped_edges
+    concatenated_network = LigandNetwork(
+        nodes=input_ligand_network.nodes,
+        edges=concatenated_edges,
+    )
+    if not concatenated_network.is_connected():
+        raise ValueError("During taping the Network lost connectivity! ")
+                
+    # tape_edges = []
+    # for i, ligand_sub_network in enumerate(ligand_sub_networks[1:]):
+    #
+    #     nedges = min(200, len(concatenated_network.edges))
+    #
+    #     in_concatenated_edges = concatenated_network.edges
+    #     concatenator.n_connecting_edges = nedges
+    #     tmp_concatenated_network = concatenate_networks(
+    #         [ligand_sub_network, concatenated_network],
+    #         concatenator=concatenator,
+    #     )
+    #     tmp_concatenated_edges = tmp_concatenated_network.edges
+    #
+    #     ctape_edges = []
+    #     edge_names = [(e.componentA.name, e.componentB.name) for e in in_edges.union(concatenated_network.edges)]
+    #     for e in sorted(tmp_concatenated_edges, key=lambda e: e.annotations["score"], reverse=True):
+    #         if (e.componentA.name, e.componentB.name) not in edge_names:
+    #             print((e.componentA.name, e.componentB.name))
+    #             ctape_edges.append(e)
+    #             if len(ctape_edges) >= n_connecting_edges:
+    #                 break
+    #
+    #     #print("poss edges, poss tapes", len(ctape_edges), n_connecting_edges)
+    #     #print("p edges", [(e.componentA.name, e.componentB.name)  for e in ctape_edges])
+    #     tape_edges.extend(ctape_edges)
+    #
+    #     concatenated_edges = set(list(in_concatenated_edges)+ctape_edges)
+    #     #print("conc edges, tapes", len(in_concatenated_edges), len(ctape_edges), len(concatenated_edges))
+    #
+    #     concatenated_network = LigandNetwork(nodes=tmp_concatenated_network.nodes, edges=concatenated_edges)
+    #     if not get_is_connected(concatenated_network):
+    #         raise ValueError("During taping the Network lost connectivity! "
+    #                          f"Could not find a good taping in round {i}.")
+    #
+    # tape_nodes = set(
+    #     [n for e in tape_edges for n in [e.componentA, e.componentB]]
+    # )
+    #
+    # #print(tape_edges)
+    # return LigandNetwork(nodes=tape_nodes, edges=tape_edges)
 
 
 def get_taped_alchemical_network(ducktape_network, alchemical_network):
@@ -406,7 +516,6 @@ def do_taping(
     print(f"\treading result files")
     res_alchemical_network = parse_result_folders(result_files_regex, input_ligand_network)
     res_ligand_network = alchemical_network_to_ligand_network(res_alchemical_network)
-
     
     # decomposite disconnected sets
     ligand_sub_networks = decomposite_disconnected_ligand_network(res_ligand_network)
@@ -440,32 +549,35 @@ def do_taping(
     
     # Tape the networks together
     print("Taping the Networks together:")
-    network_tapes = get_new_network_tapes(ligand_sub_networks=ligand_sub_networks, input_ligand_network=input_ligand_network, n_connecting_edges = 3)
-    
-    print(f"\tGenerated new taping LigandMapping edges: {len(network_tapes.edges)}")
-    print(f"\tUsing ligand nodes for taping: {len(network_tapes.nodes)}")
-    print()
-    
-    # write out
-    print("Write out the tapes for the network:")
-    output_alchemical_network_folder.mkdir(exist_ok=False, parents=True)
-    taped_alchemical_network = get_taped_alchemical_network(network_tapes, input_alchem_network)
-    alchemical_network_json_fp = output_alchemical_network_folder / "alchemical_network.json"
-    json.dump(
-        taped_alchemical_network.to_dict(),
-        alchemical_network_json_fp.open(mode="w"),
-        cls=JSON_HANDLER.encoder
+    network_tapes = get_new_network_tapes(
+        ligand_sub_networks=ligand_sub_networks,
+        input_ligand_network=input_ligand_network,
     )
-
-    # Write out each transformation
-    # Create a subdirectory for the transformations
-    transforms_dir = pathlib.Path(output_alchemical_network_folder / "transformations")
-    transforms_dir.mkdir(exist_ok=True, parents=True)
-
-    for transform in taped_alchemical_network.edges:
-        transform.dump(transforms_dir / f"{transform.name}.json")
-
-    print("Done!")
+    
+    # print(f"\tGenerated new taping LigandMapping edges: {len(network_tapes.edges)}")
+    # print(f"\tUsing ligand nodes for taping: {len(network_tapes.nodes)}")
+    # print()
+    #
+    # # write out
+    # print("Write out the tapes for the network:")
+    # output_alchemical_network_folder.mkdir(exist_ok=False, parents=True)
+    # taped_alchemical_network = get_taped_alchemical_network(network_tapes, input_alchem_network)
+    # alchemical_network_json_fp = output_alchemical_network_folder / "alchemical_network.json"
+    # json.dump(
+    #     taped_alchemical_network.to_dict(),
+    #     alchemical_network_json_fp.open(mode="w"),
+    #     cls=JSON_HANDLER.encoder
+    # )
+    #
+    # # Write out each transformation
+    # # Create a subdirectory for the transformations
+    # transforms_dir = pathlib.Path(output_alchemical_network_folder / "transformations")
+    # transforms_dir.mkdir(exist_ok=True, parents=True)
+    #
+    # for transform in taped_alchemical_network.edges:
+    #     transform.dump(transforms_dir / f"{transform.name}.json")
+    #
+    # print("Done!")
 
 
 @click.command
@@ -481,16 +593,17 @@ def do_taping(
     "--input_alchem_network_file",
     type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
     default=pathlib.Path("./alchemicalNetwork/alchemical_network.json"),
-    help="Path to the used ligand network plan (default: 'alchemicalNetwork/ligand_network.graphml')",
+    help="Path to the used ligand network plan "
+         "(default: 'alchemicalNetwork/ligand_network.graphml')",
 )
 @click.option(
     "-oa",
     "--output_alchemical_network",
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
     default=pathlib.Path("./tapesForAlchemicalNetwork"),
-    help="Directory name in which to store the additional taping transformation json files. (default: './tapesForAlchemicalNetwork')",
+    help="Directory name in which to store the additional taping transformation"
+         " json files. (default: './tapesForAlchemicalNetwork')",
 )
-
 @click.option(
     "-ne",
     "--n_connecting_edges",
