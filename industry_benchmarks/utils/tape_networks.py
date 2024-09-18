@@ -6,8 +6,10 @@ import numpy as np
 import itertools
 from glob import glob
 import networkx as nx
+import warnings
 
 import gufe
+import pytest
 from gufe.tokenization import JSON_HANDLER
 import openfe
 from openfe import ChemicalSystem, LigandAtomMapping, Protocol
@@ -16,7 +18,7 @@ from openfe import SolventComponent
 from openfe.protocols.openmm_rfe.equil_rfe_methods import RelativeHybridTopologyProtocol
 
 from openfe.setup import KartografAtomMapper, lomap_scorers
-import plan_rbfe_network
+from . import plan_rbfe_network
 
 
 def parse_alchemical_network(
@@ -35,8 +37,13 @@ def parse_result_folders(
     nodes = []
     edges = {}
     edge_count = {}
+    if len(glob(result_files_regex)) == 0:
+        wmsg = (
+            "No results .json files were provided. This will create a " "new network."
+        )
+        warnings.warn(wmsg)
     for resp in glob(result_files_regex):
-        res = json.load(open(resp, 'rb'), cls=JSON_HANDLER.decoder)
+        res = json.load(open(resp, "rb"), cls=JSON_HANDLER.decoder)
         if any("exception" in u for u in res["unit_results"].values()):
             continue
 
@@ -45,24 +52,16 @@ def parse_result_folders(
 
             name = units[0]["name"].split(" repeat")[0]
             if "stateA" in units[0]["inputs"]:
-                stateA = ChemicalSystem.from_dict(
-                    units[0]["inputs"]["stateA"]
-                )
-                stateB = ChemicalSystem.from_dict(
-                    units[0]["inputs"]["stateB"]
-                )
+                stateA = ChemicalSystem.from_dict(units[0]["inputs"]["stateA"])
+                stateB = ChemicalSystem.from_dict(units[0]["inputs"]["stateB"])
                 ligmap = LigandAtomMapping.from_dict(
                     units[0]["inputs"]["ligandmapping"]
                 )
             else:  # inputs were cleaned out! reengineer - hacky alchem net.
                 if input_ligand_network is not None:
 
-                    transformation_name = (
-                        units[0]["name"].split(" repeat")[0].strip()
-                    )
-                    componentA_name, componentB_name = (
-                        transformation_name.split(" to ")
-                    )
+                    transformation_name = units[0]["name"].split(" repeat")[0].strip()
+                    componentA_name, componentB_name = transformation_name.split(" to ")
 
                     ligmap = None
                     for e in input_ligand_network.edges:
@@ -111,11 +110,8 @@ def parse_result_folders(
             # Count if both transformations present.
             if name not in edge_count:
                 edge_count[name] = {"protein": 0, "solvent": 0}
-                
-            if (
-                "protein" in stateA.components
-                or "solvent" not in stateA.components
-              ):
+
+            if "protein" in stateA.components or "solvent" not in stateA.components:
                 edge_count[name]["protein"] += 1
             else:
                 edge_count[name]["solvent"] += 1
@@ -165,9 +161,7 @@ def ligand_network_to_networkx(ligand_network) -> nx.Graph:
     edges = ligand_network.edges
     wedges = []
     for edge in list(edges):
-        wedges.append(
-            [edge.componentA, edge.componentB, edge.annotations["score"]]
-        )
+        wedges.append([edge.componentA, edge.componentB, edge.annotations["score"]])
 
     g = nx.Graph(nodes=ligand_network.nodes)
     g.add_weighted_edges_from(ebunch_to_add=wedges)
@@ -197,9 +191,9 @@ def decomposite_disconnected_ligand_network(
 
 
 def generate_maximal_ligand_network(
-        components: Iterable[gufe.Component],
-        mapper: gufe.AtomMapper,
-        scorer,
+    components: Iterable[gufe.Component],
+    mapper: gufe.AtomMapper,
+    scorer,
 ) -> LigandNetwork:
     """Create a network with all possible proposed mappings.
 
@@ -232,8 +226,7 @@ def generate_maximal_ligand_network(
     progress = lambda x: x
 
     mappings = []
-    for component_pair in progress(
-            itertools.combinations(components, 2)):
+    for component_pair in progress(itertools.combinations(components, 2)):
         best_score = 0.0
         best_mapping = None
         molA = component_pair[0]
@@ -246,21 +239,18 @@ def generate_maximal_ligand_network(
 
         if scorer:
             tmp_mappings = [
-                mapping.with_annotations(
-                    {"score": scorer(mapping)})
+                mapping.with_annotations({"score": scorer(mapping)})
                 for mapping in mapping_generator
             ]
 
             if len(tmp_mappings) > 0:
                 tmp_best_mapping = min(
-                    tmp_mappings,
-                    key=lambda m: m.annotations["score"]
+                    tmp_mappings, key=lambda m: m.annotations["score"]
                 )
 
                 if (
-                        tmp_best_mapping.annotations[
-                            "score"] < best_score
-                        or best_mapping is None
+                    tmp_best_mapping.annotations["score"] < best_score
+                    or best_mapping is None
                 ):
                     best_mapping = tmp_best_mapping
         else:
@@ -281,7 +271,7 @@ def generate_maximal_ligand_network(
 
 
 def get_new_network_tapes(
-    ligand_sub_networks: list[LigandNetwork], 
+    ligand_sub_networks: list[LigandNetwork],
     input_ligand_network: LigandNetwork,
 ) -> LigandNetwork:
 
@@ -302,11 +292,18 @@ def get_new_network_tapes(
     # mapping atom order created elsewhere, therefore we can't use these to
     # check for edge equality, but must go through the components (see below)
     in_edges = in_edges.union(
-        set([LigandAtomMapping(
-            componentA=m.componentB,
-            componentB=m.componentA,
-            componentA_to_componentB={v: k for k, v in m.componentA_to_componentB.items()},
-        ) for m in list(in_edges)])
+        set(
+            [
+                LigandAtomMapping(
+                    componentA=m.componentB,
+                    componentB=m.componentA,
+                    componentA_to_componentB={
+                        v: k for k, v in m.componentA_to_componentB.items()
+                    },
+                )
+                for m in list(in_edges)
+            ]
+        )
     )
 
     # Prune out prior edges
@@ -353,8 +350,7 @@ def get_new_network_tapes(
                     connections_sub_networks[i].remove(edge)
 
     # Get a list of the old edges (from the broken network)
-    old_edges = [list(net.edges) for net in ligand_sub_networks if
-                 len(net.edges) > 0]
+    old_edges = [list(net.edges) for net in ligand_sub_networks if len(net.edges) > 0]
     old_edges = [item for list in old_edges for item in list]
 
     # Check if the broken network is connected with the new tapes
@@ -364,12 +360,12 @@ def get_new_network_tapes(
         edges=concatenated_edges,
     )
     if not concatenated_network.is_connected():
-        raise ValueError("The attempt to fix the broken network failed!"
-                         "Please contact the OpenFE team if you experience this.")
+        raise ValueError(
+            "The attempt to fix the broken network failed!"
+            "Please contact the OpenFE team if you experience this."
+        )
 
-    tape_nodes = set(
-        [n for e in tape_edges for n in [e.componentA, e.componentB]]
-    )
+    tape_nodes = set([n for e in tape_edges for n in [e.componentA, e.componentB]])
 
     return LigandNetwork(nodes=tape_nodes, edges=tape_edges)
 
@@ -399,31 +395,30 @@ def get_taped_alchemical_network(ducktape_network, alchemical_network):
         if abs(charge_difference) > 1e-3:
             # Raise a warning that a charge changing transformation is included
             # in the network
-            wmsg = ("Charge changing transformation between ligands "
-                    f"{mapping.componentA.name} and "
-                    f"{mapping.componentB.name}. "
-                    "A more expensive protocol with 22 lambda windows, "
-                    "sampled "
-                    "for 20 ns each, will be used here.")
+            wmsg = (
+                "Charge changing transformation between ligands "
+                f"{mapping.componentA.name} and "
+                f"{mapping.componentB.name}. "
+                "A more expensive protocol with 22 lambda windows, "
+                "sampled "
+                "for 20 ns each, will be used here."
+            )
             warnings.warn(wmsg)
             # Get settings for charge changing transformations
             rfe_settings = plan_rbfe_network.get_settings_charge_changes()
         else:
             rfe_settings = plan_rbfe_network.get_settings()
-        for leg in ['solvent', 'complex']:
+        for leg in ["solvent", "complex"]:
             # use the solvent and protein created above
-            sysA_dict = {'ligand': mapping.componentA,
-                         'solvent': solv}
-            sysB_dict = {'ligand': mapping.componentB,
-                         'solvent': solv}
+            sysA_dict = {"ligand": mapping.componentA, "solvent": solv}
+            sysB_dict = {"ligand": mapping.componentB, "solvent": solv}
 
-            if leg == 'complex':
-                sysA_dict['protein'] = prot
-                sysB_dict['protein'] = prot
+            if leg == "complex":
+                sysA_dict["protein"] = prot
+                sysB_dict["protein"] = prot
                 if len(cofactors) > 0:
 
-                    for cofactor, entry in zip(cofactors_smc,
-                                               string.ascii_lowercase):
+                    for cofactor, entry in zip(cofactors_smc, string.ascii_lowercase):
                         cofactor_name = f"cofactor_{entry}"
                         sysA_dict[cofactor_name] = cofactor
                         sysB_dict[cofactor_name] = cofactor
@@ -431,11 +426,9 @@ def get_taped_alchemical_network(ducktape_network, alchemical_network):
             sysA = openfe.ChemicalSystem(sysA_dict)
             sysB = openfe.ChemicalSystem(sysB_dict)
 
-            name = (f"{leg}_{mapping.componentA.name}_"
-                    f"{mapping.componentB.name}")
+            name = f"{leg}_{mapping.componentA.name}_" f"{mapping.componentB.name}"
 
-            rbfe_protocol = RelativeHybridTopologyProtocol(
-                settings=rfe_settings)
+            rbfe_protocol = RelativeHybridTopologyProtocol(settings=rfe_settings)
             transformation = openfe.Transformation(
                 stateA=sysA,
                 stateB=sysB,
@@ -457,60 +450,66 @@ def do_taping(
     input_alchem_network_file: str,
     output_alchemical_network_folder: str = "./ducktaping_transformations",
 ):
-    print("#"*40)
+    print("#" * 40)
     print("Network Taping")
-    print("#"*40)
+    print("#" * 40)
     print()
     print("Parsing input files:")
     # Parse Ligand Network
     print(f"\treading input Alchemical Network")
     input_alchem_network = parse_alchemical_network(input_alchem_network_file)
     input_ligand_network = alchemical_network_to_ligand_network(input_alchem_network)
-    
+
     # Parse Alchemical Network
     print(f"\treading result files")
-    res_alchemical_network = parse_result_folders(result_files_regex, input_ligand_network)
+    res_alchemical_network = parse_result_folders(
+        result_files_regex, input_ligand_network
+    )
     res_ligand_network = alchemical_network_to_ligand_network(res_alchemical_network)
-    
+
     # decomposite disconnected sets
     ligand_sub_networks = decomposite_disconnected_ligand_network(res_ligand_network)
-    
+
     # Add missing nodes to ligand_sub_networks if ligand network provided
     # get network node differences
     alchemical_network_ligands = set([n for n in res_ligand_network.nodes])
-    missing_commponents = list(input_ligand_network.nodes.difference(res_ligand_network.nodes))
-    
+    missing_commponents = list(
+        input_ligand_network.nodes.difference(res_ligand_network.nodes)
+    )
+
     for missing_commponent in missing_commponents:
         ligand_sub_networks.append(LigandNetwork(nodes=[missing_commponent], edges=[]))
     ligand_sub_networks = list(
         sorted(ligand_sub_networks, key=lambda sn: len(sn.nodes), reverse=True)
     )
-    
+
     # check status
     print(f"Inspecting input files: ")
     print(f"\tinput LigandNetwork  nodes: {len(input_ligand_network.nodes)}")
-    print(f"\tinput LigandNetwork  edges: {len(input_ligand_network.edges)}")    
+    print(f"\tinput LigandNetwork  edges: {len(input_ligand_network.edges)}")
     print(f"\tresult LigandNetwork nodes: {len(res_ligand_network.nodes)}")
     print(f"\tresult LigandNetwork edges: {len(res_ligand_network.edges)}")
     print()
-    
+
     print(f"Found the following problems: ")
     print(f"\tmissing components: {len(missing_commponents)}")
     print(f"\tdisconnected networks: {len(ligand_sub_networks)}")
-    print(f"\tdisconnected networks sizes: {[len(sn.nodes) for sn in ligand_sub_networks]}")
-    
+    print(
+        f"\tdisconnected networks sizes: {[len(sn.nodes) for sn in ligand_sub_networks]}"
+    )
+
     if len(ligand_sub_networks) == 1:
         raise ValueError("Did not find disconnected components in alchemical network!")
 
     print()
-    
+
     # Tape the networks together
     print("Taping the Networks together:")
     network_tapes = get_new_network_tapes(
         ligand_sub_networks=ligand_sub_networks,
         input_ligand_network=input_ligand_network,
     )
-    
+
     print(f"\tGenerated new taping LigandMapping edges: {len(network_tapes.edges)}")
     print(f"\tUsing ligand nodes for taping: {len(network_tapes.nodes)}")
     print()
@@ -518,12 +517,16 @@ def do_taping(
     # write out
     print("Write out the tapes for the network:")
     output_alchemical_network_folder.mkdir(exist_ok=False, parents=True)
-    taped_alchemical_network = get_taped_alchemical_network(network_tapes, input_alchem_network)
-    alchemical_network_json_fp = output_alchemical_network_folder / "alchemical_network.json"
+    taped_alchemical_network = get_taped_alchemical_network(
+        network_tapes, input_alchem_network
+    )
+    alchemical_network_json_fp = (
+        output_alchemical_network_folder / "alchemical_network.json"
+    )
     json.dump(
         taped_alchemical_network.to_dict(),
         alchemical_network_json_fp.open(mode="w"),
-        cls=JSON_HANDLER.encoder
+        cls=JSON_HANDLER.encoder,
     )
 
     # Write out each transformation
@@ -551,7 +554,7 @@ def do_taping(
     type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
     default=pathlib.Path("./alchemicalNetwork/alchemical_network.json"),
     help="Path to the used ligand network plan "
-         "(default: 'alchemicalNetwork/ligand_network.graphml')",
+    "(default: 'alchemicalNetwork/ligand_network.graphml')",
 )
 @click.option(
     "-oa",
@@ -559,12 +562,12 @@ def do_taping(
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
     default=pathlib.Path("./tapesForAlchemicalNetwork"),
     help="Directory name in which to store the additional taping transformation"
-         " json files. (default: './tapesForAlchemicalNetwork')",
+    " json files. (default: './tapesForAlchemicalNetwork')",
 )
 def cli_do_taping(
-    results_regex_path: str,
-    input_alchem_network_file: str,
-    output_alchemical_network: str,
+    results_regex_path: pathlib.Path,
+    input_alchem_network_file: pathlib.Path,
+    output_alchemical_network: pathlib.Path,
 ):
     do_taping(
         result_files_regex=str(results_regex_path),
