@@ -224,7 +224,7 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output):
     click.echo("Summary of checks for missing files and file with errors")
     click.echo("=" * 80)
     click.echo(
-        "Total number of transformations (both solvent and complex): "
+        "Total number of transformations that should have completed (both solvent and complex): "
         f"{len(input_ligand_network.edges)*2}"
     )
     if files_with_errors or missing_files:
