@@ -219,14 +219,50 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output):
             if (molA, molB) not in transform_dict["complex"]:
                 missing_files.append(f"complex_{molA}_{molB} repeat {i}")
 
-    if files_with_errors:
-        click.echo("Issues with these files, contact the OpenFE team for next steps")
-        click.echo("=" * 80)
-        for file in files_with_errors:
-            click.echo(file)
-        click.echo("=" * 80)
+    # Before starting to raise errors, print out a summary of health checks
+    click.echo("=" * 80)
+    click.echo("Summary of checks for missing files and file with errors")
+    click.echo("=" * 80)
+    click.echo(
+        "Total number of transformations (both solvent and complex): "
+        f"{len(input_ligand_network.edges)*2}"
+    )
+    if files_with_errors or missing_files:
+        click.echo(
+            "There are issues with some transformations, please contact"
+            " the OpenFE team for next steps"
+        )
+        click.echo(
+            "Total number of failed transformations: "
+            f"{len(files_with_errors) + len(missing_files)}"
+        )
+        click.echo(
+            "    - Number of transformations with errors in the result "
+            f".json file: {len(files_with_errors)}"
+        )
+        click.echo(
+            "    - Number of transformations that did not output a "
+            f".json file: {len(missing_files)}"
+        )
+
+        # Print details: Which files failed?
+        if files_with_errors:
+            click.echo("=" * 80)
+            click.echo("Following result files contain errors:")
+            for file in files_with_errors:
+                click.echo(file)
+            click.echo("=" * 80)
+
+        if missing_files:
+            click.echo("=" * 80)
+            click.echo("There are no result files for the following transformations:")
+            for file in missing_files:
+                click.echo(file)
+            click.echo("=" * 80)
+
         raise ValueError(
-            "Issues with these files, contact the OpenFE team for next steps"
+            "There are issues with these transformations, please contact the "
+            "OpenFE team for next steps"
         )
 
     # Check if there are .json files in the provided folders
@@ -238,23 +274,12 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output):
         )
         raise ValueError(errmsg)
 
-    # Raise an error if there are missing files
-    if missing_files:
-        click.echo(
-            "Some calculations did not finish and did not output a "
-            "result .json file. There are no result files for the "
-            "following transformations:"
-        )
-        click.echo("=" * 80)
-        for file in missing_files:
-            click.echo(file)
-        click.echo("=" * 80)
-        raise ValueError(
-            "There are no result files for some transformations, "
-            "contact the OpenFE team for next steps"
-        )
+    else:
+        click.echo("All simulations finished successfully!")
+    click.echo("=" * 80)
 
     # Start extracting results
+    click.echo("Start extracting results")
     edges_dict = dict()
     for file in files_0:
         click.echo(f"Reading file {file}")
