@@ -8,11 +8,6 @@ Private Dataset Benchmarks
 This page outlines the plans and instructions for the private dataset benchmarking portion of the 2024 OpenFE Industry Benchmark study.
 
 
-.. note::
-   Plans for the Private Dataset Benchmarks are still being formulated.
-   More details will be provided soon!
-
-
 Overview
 ********
 
@@ -27,3 +22,157 @@ Here each industry partner will be expected to:
 * Report blinded correlation plots of free energy estimates against experimental data.
 
 Blinded data will be collated alongside any relevant meta analyses and published in an appropriate location.
+
+
+Before you start
+****************
+
+
+Please ensure that you use the same environment used to run the public dataset OpenFE
+benchmarks. Please see our benchmarks specific :ref:`benchmark openfe install instructions <installation>`
+for more details.
+
+
+Phase 1: Simulating Private Benchmark Sets
+******************************************
+
+Dataset Selection
+=================
+
+Each participating industry partner will be expected to select and prepare
+benchmarks sets from their own internal projects.
+
+Our aim is to try to assess how well OpenFE performs on the types of projects
+that are being worked on in industry. You are therefore asked to pick **a minimum of one**
+dataset for this task.
+
+The datasets should:
+
+* Have assay data for each ligand in the set.
+* Represent the types of campaigns you run internally; this can either be fully internal or come from pre-published work.
+* Not be part of any commonly published free energy benchmark sets.
+* Where possible, follow `best practices in benchmark set selection <https://livecomsjournal.org/index.php/livecoms/article/view/v4i1e1497>`_.
+
+You are also **encouraged to avoid** datasets which are known to not work with OpenFE.
+This includes:
+
+* Membrane-containing systems.
+* Ligand series that undergo cyclisation.
+* Ligand series that undergo scaffold hopping (i.e. very small to no conserved core).
+
+Should you end up using a system with known challenges, we would ask you to describe the challenging nature of the dataset upon submission.
+
+
+Dataset Preparation
+===================
+
+How the datasets are prepared is fully up to you. We encourage that use lessons learnt from the
+public set :ref:`input preparation step <input-preparation>` as a guide on how to prepare systems
+for use with OpenFE. We expect that you will have a PDB for your protein, an SDF for your ligands,
+and optionally another SDF for your cofactors.
+
+The only additional requirements for dataset preparations are:
+* Any ligand names should be anonymised. The OpenFE data gathering scripts will assume names to be anonymous.
+* If possible, you record any methods used in dataset preparation, as suitable for the SI of a journal publication.
+
+
+Running OpenFE Simulations
+==========================
+
+The same instructions as those from the :ref:`public datasets <public_phase2>` should be used here.
+
+Lomap networks should be created using the script provided under
+`utils/plan_rbfe_network.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/plan_rbfe_network.py>`_.
+
+
+.. code-block:: bash
+
+   # If you don’t have cofactors
+   python plan_rbfe_network.py --pdb protein.pdb --ligands ligands.sdf --output network_setup
+
+   # If you have cofactors
+   python plan_rbfe_network.py --pdb protein.pdb --ligands ligands.sdf --cofactors cofactors.sdf --output network_setup
+
+
+You should then execute each transformation using the `quickrun method <https://docs.openfree.energy/en/latest/guide/execution/quickrun_execution.html>`_.
+Below is an example script that will create and submit each job to a SLURM cluster scheduler:
+
+
+.. code-block:: bash
+
+   for file in network_setup/transformations/*.json; do
+     relpath="${file:30}"  # strip off "network_setup/"
+     dirpath=${relpath%.*}  # strip off final ".json"
+     jobpath="network_setup/transformations/${dirpath}.job"
+     if [ -f "${jobpath}" ]; then
+       echo "${jobpath} already exists"
+       exit 1
+     fi
+     for repeat in {0..2}; do
+       cmd="openfe quickrun ${file} -o results_${repeat}/${relpath} -d results_${repeat}/${dirpath}"
+       echo -e "#!/usr/bin/env bash\n${cmd}" > "${jobpath}"
+       sbatch "${jobpath}"
+     done
+   done
+
+
+Cleaning Results
+================
+
+
+.. note::
+   Please keep all post-cleanup data around for analysis until the end of the benchmarks (i.e.
+   after publication).
+
+
+The OpenFE tools are known to generate a lot of data by default (something we are looking to fix!).
+
+We recommend that folks use the :ref:`simulation cleanup <post-simulation cleanup>` script to clean up
+unecessary data.
+
+
+Inspecting Results
+==================
+
+
+.. note::
+   A separate script will be provided for gathering relevant FE output data in Phase 2.
+   This is not how all the data that OpenFE will gather.
+
+
+If you wish to look at your results, you can use the `extract_results.py` script used in the
+public dataset benchmarks:
+
+
+.. code-block:: bash
+
+   wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/extras/extract_results.py
+   python extract_results.py
+
+
+This will provide both dG and ddG outputs for you to further manipulate.
+
+As we cannot tell what format your experimental results are in, we do not provide a plotting script at this time
+and encourage you to use your own internal plotting tools. Note: this may change depending on demand.
+
+
+You are encouraged to share early results with everyone on the #industry-benchmarking slack channel!
+
+
+Handling Failed Edges
+=====================
+
+
+.. note::
+   Please keep a note of any failed edges, this should be reported on results submission.
+
+
+You should handle failed edges in the same way as the :ref:`public datasets <failed_edges>`.
+
+A script will be provided to try to fix broken networks soon.
+
+
+Phase 2: Data Gathering
+***********************
+
+Add something here
