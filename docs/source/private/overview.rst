@@ -116,6 +116,17 @@ Below is an example script that will create and submit each job to a SLURM clust
    done
 
 
+My Simulations Are Failing, What Do I Do?
+=========================================
+
+
+Unfortunately for these benchmarks, the OpenFE team will only be able to provide help in a
+limited manner (i.e. we will not be able to look at your structures).
+
+To help you, we have created a :ref:`preparing and debugging simulations FAQ <prep_and_debug>` with
+some common issues you may encounter.
+
+
 Cleaning Results
 ================
 
