@@ -202,3 +202,14 @@ Optionally (if you can't that's completely ok!) we would also the following:
 * Compute hardware description, e.g. what type of GPU was used.
 * Any additional information.
 
+How will this be gathered?
+==========================
+
+We anticipating gathering the data through:
+
+1. A script provided by the OpenFE team that will extract relevant information from your simulations.
+2. A text form for you to fill in with information.
+3. A CSV file with experimental data that you will need to prepare.
+
+
+The text form and data gathering scripts are currently being prepared by the OpenFE team. Please come back soon for more details!
