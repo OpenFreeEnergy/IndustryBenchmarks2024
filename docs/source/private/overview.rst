@@ -175,4 +175,30 @@ A script will be provided to try to fix broken networks soon.
 Phase 2: Data Gathering
 ***********************
 
-Add something here
+What data will we gather?
+=========================
+
+We will need the following data from you:
+
+* Calculated ddG values.
+* Experimental assay values (micromolar).
+* Broad assay description (e.g. Kd from ITC).
+* Estimated benchmark difficulty (i.e. "easy", "medium", "hard").
+* Convergence data (MBAR overlap, forward/backwards plots, etc...).
+* Number of completed & failed edges.
+  * Including information about any attempts at remediating broken networks due to failed edges.
+* Simulation time and the number of atoms.
+* Blinded transformation networks (i.e. name of nodes and how they are connected).
+* Transformation information.
+  * Mapping scores (Lomap, formal charge, shape overlay, RMSD, number of heavy dummy & core atoms) for each edge.
+  * 2D and 3D fingerprint similarity scores (e.g. Tanimoto).
+  * Number of rotatable bonds & rings.
+
+Optionally (if you can't that's completely ok!) we would also the following:
+
+* Free form additional details on the experimental assay.
+* Additional details which may impact simulation difficulty, e.g. "likely water sampling issues" or "ions in the binding site".
+* Structure model type, e.g. xray, cryo-em, homology model.
+* Compute hardware description, e.g. what type of GPU was used.
+* Any additional information.
+
