@@ -1,9 +1,10 @@
-import gufe
 import numpy as np
 import glob
 import json
 from gufe.tokenization import JSON_HANDLER
 from gufe import SmallMoleculeComponent as SMC
+from cinnabar import Measurement, FEMap
+from openff.units import unit
 import pathlib
 import click
 import csv
@@ -19,6 +20,7 @@ def get_names_from_unit_results(result) -> tuple[str, str]:
     toks_2 = toks[1].split(' repeat')
     return toks[0], toks_2[0]
 
+
 def get_names(result) -> tuple[str, str]:
     # get the name from the SmallMoleculeComponent
     list_of_pur = list(result['protocol_result']['data'].values())[0]
@@ -26,6 +28,7 @@ def get_names(result) -> tuple[str, str]:
     lig_A = pur['inputs']['stateA']['components']['ligand']
     lig_B = pur['inputs']['stateB']['components']['ligand']
     return SMC.from_dict(lig_A).name, SMC.from_dict(lig_B).name
+
 
 def get_type(res):
     list_of_pur = list(res['protocol_result']['data'].values())[0]
@@ -38,6 +41,7 @@ def get_type(res):
         return 'complex'
     else:
         return 'solvent'
+
 
 def get_type_from_file_path(res):
     file_path = str(list(res["unit_results"].values())[0]["outputs"]["nc"])
@@ -57,6 +61,48 @@ def load_results(f):
     with open(f, 'r') as fd:
         result = json.load(fd, cls=JSON_HANDLER.decoder)
     return result
+
+
+def get_dg(
+        calc_data: dict[str, dict[str, float]],
+        filename,
+) -> None:
+    """
+    Helper method to write out MLE derived dG values.
+
+    Parameters
+    ----------
+    calc_data: dict[str, dict[str, float]]
+      The calculated DDG data.
+    filename : pathlib.Path
+      Pathlib object for saving the calculated DG data to a .tsv file.
+    """
+    fe_results = []
+
+    for entry in calc_data:
+        m = Measurement(
+            labelA=calc_data[entry]['ligand_a'],
+            labelB=calc_data[entry]['ligand_b'],
+            DG=calc_data[entry]['ddG'] * unit.kilocalorie_per_mole,
+            uncertainty=calc_data[entry][
+                            'ddG_err'] * unit.kilocalorie_per_mole,
+            computational=True
+        )
+        fe_results.append(m)
+
+    # Feed into the FEMap object
+    femap = FEMap()
+
+    for entry in fe_results:
+        femap.add_measurement(entry)
+
+    femap.generate_absolute_values()
+    df = femap.get_absolute_dataframe()
+    df = df.iloc[:, :3]
+    df.rename({'label': 'ligand'}, axis='columns', inplace=True)
+    df.to_csv(filename, sep='\t', index=False, header=True)
+
+    return
 
 
 @click.command
@@ -94,7 +140,17 @@ def load_results(f):
          "The output contains ligand names, DDG [kcal/mol] as the mean across "
          "three repeats and the standard deviation. Default: ddg.tsv.",
 )
-def extract(results_0, results_1, results_2, output):
+@click.option(
+    'output_DG',
+    '-o_DG',
+    type=click.File(mode='w'),
+    default=pathlib.Path('dg.tsv'),
+    required=True,
+    help="Path to the output tsv file in which the DG values are be stored. "
+         "The output contains ligand names, the MLE derived DG [kcal/mol] "
+         "values and associated uncertainties. Default: dg.tsv.",
+)
+def extract(results_0, results_1, results_2, output, output_DG):
     files_0 = glob.glob(f"{results_0}/*.json")
     files_1 = glob.glob(f"{results_1}/*.json")
     files_2 = glob.glob(f"{results_2}/*.json")
@@ -145,7 +201,6 @@ def extract(results_0, results_1, results_2, output):
             click.echo(file)
         click.echo("=" * 80)
         raise ValueError("Issues with these files, contact the OpenFE team for next steps")
-
 
     # Check if there are .json files in the provided folders
     if len(files_0) == 0 or len(files_1) == 0 or len(files_2) == 0:
@@ -211,12 +266,20 @@ def extract(results_0, results_1, results_2, output):
     )
     writer.writerow(["ligand_i", "ligand_j", "DDG(i->j) (kcal/mol)",
                      "uncertainty (kcal/mol)"])
+    calc_data = {}
     for edge, data in edges_dict.items():
         ddg = data['complex'][0] - data['solvent'][0]
         error = np.sqrt(data['complex'][1] ** 2 + data['solvent'][1] ** 2)
         molA = data['ligand_a']
         molB = data['ligand_b']
         writer.writerow([molA, molB, round(ddg, 2), round(error, 2)])
+        calc_data[edge] = {}
+        calc_data[edge]['ligand_a'] = molA
+        calc_data[edge]['ligand_b'] = molB
+        calc_data[edge]['ddG'] = ddg
+        calc_data[edge]['ddG_err'] = error
+
+    get_dg(calc_data, output_DG)
 
 
 if __name__ == "__main__":
