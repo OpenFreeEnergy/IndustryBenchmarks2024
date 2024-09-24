@@ -1,9 +1,10 @@
-import gufe
 import numpy as np
 import glob
 import json
 from gufe.tokenization import JSON_HANDLER
 from gufe import SmallMoleculeComponent as SMC
+from cinnabar import Measurement, FEMap
+from openff.units import unit
 import pathlib
 import click
 import csv
@@ -82,6 +83,48 @@ def parse_ligand_network(
     return network
 
 
+def get_dg(
+        calc_data: dict[str, dict[str, float]],
+        filename,
+) -> None:
+    """
+    Helper method to write out MLE derived dG values.
+
+    Parameters
+    ----------
+    calc_data: dict[str, dict[str, float]]
+      The calculated DDG data.
+    filename : pathlib.Path
+      Pathlib object for saving the calculated DG data to a .tsv file.
+    """
+    fe_results = []
+
+    for entry in calc_data:
+        m = Measurement(
+            labelA=calc_data[entry]['ligand_a'],
+            labelB=calc_data[entry]['ligand_b'],
+            DG=calc_data[entry]['ddG'] * unit.kilocalorie_per_mole,
+            uncertainty=calc_data[entry][
+                            'ddG_err'] * unit.kilocalorie_per_mole,
+            computational=True
+        )
+        fe_results.append(m)
+
+    # Feed into the FEMap object
+    femap = FEMap()
+
+    for entry in fe_results:
+        femap.add_measurement(entry)
+
+    femap.generate_absolute_values()
+    df = femap.get_absolute_dataframe()
+    df = df.iloc[:, :3]
+    df.rename({'label': 'ligand'}, axis='columns', inplace=True)
+    df.to_csv(filename, sep='\t', index=False, header=True)
+
+    return
+
+
 @click.command
 @click.option(
     "--results_0",
@@ -133,7 +176,17 @@ def parse_ligand_network(
     "The output contains ligand names, DDG [kcal/mol] as the mean across "
     "three repeats and the standard deviation. Default: ddg.tsv.",
 )
-def extract(results_0, results_1, results_2, input_ligand_network_file, output):
+@click.option(
+    'output_DG',
+    '-o_DG',
+    type=click.File(mode='w'),
+    default=pathlib.Path('dg.tsv'),
+    required=True,
+    help="Path to the output tsv file in which the DG values are be stored. "
+         "The output contains ligand names, the MLE derived DG [kcal/mol] "
+         "values and associated uncertainties. Default: dg.tsv.",
+)
+def extract(results_0, results_1, results_2, input_ligand_network_file, output, output_DG):
     files_0 = glob.glob(f"{results_0}/*.json")
     files_1 = glob.glob(f"{results_1}/*.json")
     files_2 = glob.glob(f"{results_2}/*.json")
@@ -322,15 +375,22 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output):
         delimiter="\t",
         lineterminator="\n",  # to exactly reproduce previous, prefer "\r\n"
     )
-    writer.writerow(
-        ["ligand_i", "ligand_j", "DDG(i->j) (kcal/mol)", "uncertainty (kcal/mol)"]
-    )
+    writer.writerow(["ligand_i", "ligand_j", "DDG(i->j) (kcal/mol)",
+                     "uncertainty (kcal/mol)"])
+    calc_data = {}
     for edge, data in edges_dict.items():
         ddg = data["complex"][0] - data["solvent"][0]
         error = np.sqrt(data["complex"][1] ** 2 + data["solvent"][1] ** 2)
         molA = data["ligand_a"]
         molB = data["ligand_b"]
         writer.writerow([molA, molB, round(ddg, 2), round(error, 2)])
+        calc_data[edge] = {}
+        calc_data[edge]['ligand_a'] = molA
+        calc_data[edge]['ligand_b'] = molB
+        calc_data[edge]['ddG'] = ddg
+        calc_data[edge]['ddG_err'] = error
+
+    get_dg(calc_data, output_DG)
 
 
 if __name__ == "__main__":
