@@ -1,6 +1,7 @@
 import numpy as np
 import glob
 import json
+import gufe
 from gufe.tokenization import JSON_HANDLER
 from gufe import SmallMoleculeComponent as SMC
 from cinnabar import Measurement, FEMap
