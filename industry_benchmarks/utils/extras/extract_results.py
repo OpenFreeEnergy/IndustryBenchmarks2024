@@ -284,8 +284,8 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output, 
             f".json file: {len(files_with_errors)}"
         )
         click.echo(
-            "    - Number of transformations that did not output a "
-            f".json file: {len(missing_files)}"
+            "    - Number of transformations without output "
+            f"results files: {len(missing_files)}"
         )
 
         # Print details: Which files failed?
