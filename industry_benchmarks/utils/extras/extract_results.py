@@ -63,17 +63,6 @@ def load_results(f):
         result = json.load(fd, cls=JSON_HANDLER.decoder)
     return result
 
-
-def parse_alchemical_network(
-    input_alchem_network_json_path: str,
-) -> gufe.AlchemicalNetwork:
-    j_dict = json.load(
-        open(input_alchem_network_json_path, "r"), cls=JSON_HANDLER.decoder
-    )
-    alchem_network = gufe.AlchemicalNetwork.from_dict(j_dict)
-    return alchem_network
-
-
 def parse_ligand_network(
     input_ligand_network_path: str,
 ) -> gufe.LigandNetwork:
