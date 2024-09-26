@@ -69,11 +69,15 @@ Dataset Preparation
 How the datasets are prepared is fully up to you. We encourage that use lessons learnt from the
 public set :ref:`input preparation step <input-preparation>` as a guide on how to prepare systems
 for use with OpenFE. We expect that you will have a PDB for your protein, an SDF for your ligands,
-and optionally another SDF for your cofactors.
+and optionally another SDF for your cofactors. We encourage you to use the
+:ref:`input validation script <input-validation>` to check that your inputs are ready for use with
+OpenFE.
+
 
 The only additional requirements for dataset preparations are:
-* Any ligand names should be anonymised. The OpenFE data gathering scripts will assume names to be anonymous.
-* If possible, you record any methods used in dataset preparation, as suitable for the SI of a journal publication.
+
+* Any ligand names should be anonymised. The OpenFE data gathering scripts will not modify existing names, instead assuming them to be anonymous.
+* If possible, you should record any methods used in dataset preparation, as suitable for the SI of a journal publication.
 
 
 Running OpenFE Simulations
@@ -146,7 +150,7 @@ Cleaning Results
 The OpenFE tools are known to generate a lot of data by default (something we are looking to fix!).
 
 We recommend that folks use the :ref:`simulation cleanup <post-simulation cleanup>` script to clean up
-unecessary data.
+unnecessary data.
 
 
 Inspecting Results
@@ -154,8 +158,9 @@ Inspecting Results
 
 
 .. note::
-   A separate script will be provided for gathering relevant FE output data in Phase 2.
-   This is not how all the data that OpenFE will gather.
+   This section does not describe how data will be gathered by the OpenFE team for further analysis.
+   A separate script will be provided for this purpose. See the :ref:`data gathering information <private-data-gather>`
+   for more details.
 
 
 If you wish to look at your results, you can use the `extract_results.py` script used in the
@@ -171,7 +176,7 @@ public dataset benchmarks:
 This will provide both dG and ddG outputs for you to further manipulate.
 
 As we cannot tell what format your experimental results are in, we do not provide a plotting script at this time
-and encourage you to use your own internal plotting tools. Note: this may change depending on demand.
+and encourage you to use your own internal plotting tools.
 
 
 You are encouraged to share early results with everyone on the #industry-benchmarking slack channel!
@@ -182,12 +187,12 @@ Handling Failed Edges
 
 
 .. note::
-   Please keep a note of any failed edges, this should be reported on results submission.
+   Please keep a note of any failed edges and report them when you submit results.
 
 
 You should handle failed edges in the same way as the :ref:`public datasets <failed_edges>`.
 
-A script will be provided to try to fix broken networks soon.
+A script to try to fix broken networks will soon be provided.
 
 
 Phase 2: Data Gathering
@@ -200,19 +205,25 @@ We will need the following data from you:
 
 * Calculated ddG values.
 * Experimental assay values (micromolar).
-* Broad assay description (e.g. Kd from ITC).
+* Broad assay description (e.g. "Kd from ITC").
 * Estimated benchmark difficulty (i.e. "easy", "medium", "hard").
 * Convergence data (MBAR overlap, forward/backwards plots, etc...).
 * Number of completed & failed edges.
+
   * Including information about any attempts at remediating broken networks due to failed edges.
+
 * Simulation time and the number of atoms.
 * Blinded transformation networks (i.e. name of nodes and how they are connected).
 * Transformation information.
+
   * Mapping scores (Lomap, formal charge, shape overlay, RMSD, number of heavy dummy & core atoms) for each edge.
+
   * 2D and 3D fingerprint similarity scores (e.g. Tanimoto).
+
   * Number of rotatable bonds & rings.
 
-Optionally (if you can't that's completely ok!) we would also the following:
+
+Optionally (if you can't that's completely ok!) we also wish to gather the following:
 
 * Free form additional details on the experimental assay.
 * Additional details which may impact simulation difficulty, e.g. "likely water sampling issues" or "ions in the binding site".
@@ -222,6 +233,8 @@ Optionally (if you can't that's completely ok!) we would also the following:
 
 How will this be gathered?
 ==========================
+
+.. _private-data-gather:
 
 We anticipating gathering the data through:
 

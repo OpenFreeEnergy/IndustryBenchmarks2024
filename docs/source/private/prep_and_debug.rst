@@ -12,7 +12,7 @@ is provided by benchmark partners.
 1. Ligand Alignment
 *******************
 
-Ligands in a series should be pre-aligned when pass to OpenFE tools.
+Ligands in a series should be pre-aligned when passed to OpenFE tools.
 This means that regions of the ligand that should be part of a common
 core, should have the same coordinates.
 
@@ -39,7 +39,7 @@ This indicates a likely issue with the protein structure, either a clash
 with the ligand, or a clash within the protein structure itself.
 
 To check this we suggest running a conventional MD simulation and seeing if the system remains stable.
-You can use the `OpenFE MD Protocol for this purpose <https://docs.openfree.energy/en/stable/tutorials/md_tutorial.html>`.
+You can use the `OpenFE MD Protocol for this purpose <https://docs.openfree.energy/en/stable/tutorials/md_tutorial.html>`_.
 
 
 4. My Ligand Transformations Are Failing
@@ -47,5 +47,5 @@ You can use the `OpenFE MD Protocol for this purpose <https://docs.openfree.ener
 
 This likely indicates a bad mapping.
 
-We would encourage you to `visualize your mappings <https://docs.openfree.energy/en/stable/cookbook/ligandnetwork_vis.html>`.
+We would encourage you to `visualize your mappings <https://docs.openfree.energy/en/stable/cookbook/ligandnetwork_vis.html>`_.
 If you see unusual atom assignments, please get in touch with the OpenFE team and we will guide you through how to assign alternative mappings.
