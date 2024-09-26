@@ -66,7 +66,7 @@ Should you end up using a system with known challenges, we would ask you to desc
 Dataset Preparation
 ===================
 
-How the datasets are prepared is fully up to you. We encourage that use lessons learnt from the
+How the datasets are prepared is fully up to you. We encourage that you use lessons learnt from the
 public set :ref:`input preparation step <input-preparation>` as a guide on how to prepare systems
 for use with OpenFE. We expect that you will have a PDB for your protein, an SDF for your ligands,
 and optionally another SDF for your cofactors. We encourage you to use the
