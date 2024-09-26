@@ -25,6 +25,12 @@ def results_2():
 
 
 @pytest.fixture
+def ligand_network():
+    with resources.files("utils.tests.data") as d:
+        yield d / "cmet_results/alchemicalNetwork/ligand_network.graphml"
+
+
+@pytest.fixture
 def outfile():
     with resources.files("utils.tests.data") as d:
         yield d / "cmet_results/ddg.tsv"
@@ -45,7 +51,7 @@ class TestScript:
             assert "Usage: extract" in result.output
 
     def test_extract_results(
-        self, results_0, results_1, results_2, outfile, outfile_dG
+        self, results_0, results_1, results_2, ligand_network, outfile, outfile_dG
     ):
         runner = click.testing.CliRunner()
         with runner.isolated_filesystem():
@@ -58,6 +64,8 @@ class TestScript:
                     results_1,
                     "--results_2",
                     results_2,
+                    "--input_ligand_network_file",
+                    ligand_network,
                     "-o",
                     outfile,
                     "-o_DG",
