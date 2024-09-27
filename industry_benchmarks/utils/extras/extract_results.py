@@ -190,8 +190,10 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output, 
     click.echo("Checking files for errors and missing files")
     files_with_errors = []
     missing_files = []
+    transform_dict = {"solvent": [], "complex": []}
     for i, file_list in tqdm(enumerate(list_of_files), desc="Looping over replicas"):
-        transform_dict = {"solvent": [], "complex": []}
+        solvent_list = []
+        complex_list = []
         for file in tqdm(file_list, desc="Looping over transformations"):
             with open(file, "r") as fd:
                 results = json.load(fd)
@@ -249,18 +251,22 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output, 
 
             # Add ligand pairs of all transformations present to the dictionary
             if runtype == "solvent":
-                transform_dict["solvent"].append((molA, molB))
+                solvent_list.append((molA, molB))
             if runtype == "complex":
-                transform_dict["complex"].append((molA, molB))
+                complex_list.append((molA, molB))
 
         # Check if there are transformations without results .json files
         for e in input_ligand_network.edges:
             molA = e.componentA.name
             molB = e.componentB.name
-            if (molA, molB) not in transform_dict["solvent"]:
+            if (molA, molB) not in solvent_list:
                 missing_files.append(f"solvent_{molA}_{molB} repeat {i}")
-            if (molA, molB) not in transform_dict["complex"]:
+            if (molA, molB) not in complex_list:
                 missing_files.append(f"complex_{molA}_{molB} repeat {i}")
+
+        # append to the global transforms dictionary
+        transform_dict['solvent'].extend(solvent_list)
+        transform_dict['complex'].extend(complex_list)
 
     # Before starting to raise errors, print out a summary of health checks
     click.echo("=" * 80)
@@ -270,6 +276,7 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output, 
         "Total number of transformations that should have completed (both solvent and complex): "
         f"{len(input_ligand_network.edges)*2}"
     )
+
     if files_with_errors or missing_files:
         click.echo(
             "There are issues with some transformations, please contact"
@@ -303,6 +310,15 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output, 
                 click.echo(file)
             click.echo("=" * 80)
 
+
+        if files_with_errors:
+            raise ValueError(
+                "There are issues with these transformations, please contact the "
+                "OpenFE team for next steps"
+            )
+
+
+        # if no errors, check for partial missing files
         unique_solvent_transforms = len(set(transform_dict["solvent"]))
         unique_complex_transforms = len(set(transform_dict["complex"]))
 
@@ -316,11 +332,6 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output, 
             )
             raise ValueError(errmsg)
 
-        if files_with_errors:
-            raise ValueError(
-                "There are issues with these transformations, please contact the "
-                "OpenFE team for next steps"
-            )
 
     # Check if there are .json files in the provided folders
     if len(files_0) == 0 or len(files_1) == 0 or len(files_2) == 0:
