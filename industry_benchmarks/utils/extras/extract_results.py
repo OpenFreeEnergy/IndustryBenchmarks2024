@@ -303,10 +303,11 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output, 
                 click.echo(file)
             click.echo("=" * 80)
 
-        raise ValueError(
-            "There are issues with these transformations, please contact the "
-            "OpenFE team for next steps"
-        )
+        if files_with_errors:
+            raise ValueError(
+                "There are issues with these transformations, please contact the "
+                "OpenFE team for next steps"
+            )
 
     # Check if there are .json files in the provided folders
     if len(files_0) == 0 or len(files_1) == 0 or len(files_2) == 0:
