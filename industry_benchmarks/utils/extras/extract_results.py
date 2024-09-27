@@ -303,6 +303,19 @@ def extract(results_0, results_1, results_2, input_ligand_network_file, output, 
                 click.echo(file)
             click.echo("=" * 80)
 
+        unique_solvent_transforms = len(set(transform_dict["solvent"]))
+        unique_complex_transforms = len(set(transform_dict["complex"]))
+
+        if ((unique_solvent_transforms != unique_complex_transforms) or
+            (unique_solvent_transforms != len(transform_dict["solvent"]) / 3) or
+            (unique_complex_transforms != len(transform_dict["complex"]) / 3)):
+            errmsg = (
+                "Some files are partially missing for some edges. "
+                "If you intentionally removed an edge, please check "
+                "that you did not keep excess solvent or complex results JSON files."
+            )
+            raise ValueError(errmsg)
+
         if files_with_errors:
             raise ValueError(
                 "There are issues with these transformations, please contact the "
