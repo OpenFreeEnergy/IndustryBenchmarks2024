@@ -24,6 +24,9 @@ from . import plan_rbfe_network
 def parse_alchemical_network(
     input_alchem_network_json_path: str,
 ) -> AlchemicalNetwork:
+    """
+    Read an AlchemicalNetwork
+    """
     j_dict = json.load(
         open(input_alchem_network_json_path, "r"), cls=JSON_HANDLER.decoder
     )
@@ -31,81 +34,65 @@ def parse_alchemical_network(
     return alchem_network
 
 
-def parse_result_folders(
-    result_files_regex: str, input_ligand_network: LigandNetwork = None
+def _get_check_results_json(filename: str):
+    """
+    Get a json file, open it, check it's
+    a results json, and return it.
+    """
+    if not os.path.exists(json_file):
+        print(f"Error: {filename} does not exist.")
+        return None
+
+    ru = json.load(open(filename, 'rb'), cls=JSON_HANDLER.decoder)
+
+    if ru.get("__qualname__") == "AlchemicalNetwork":
+        print(f"{filename} is a network_setup.json, skipping")
+        return None
+    if ru.get("__qualname__") == "Transformation":
+        print(f"{filename} is an input json, skipping")
+        return None
+    if "unit_results" not in ru.keys():
+        print(f"{filename} has no unit results - likely a failure")
+        return None
+    if any('exception' in u for u in ru['unit_results'].values()):
+        print(f"{filename} is a failed simulation")
+        return None
+
+    return ru
+
+
+def parse_results(
+    result_files: list[str],
+    input_ligand_network: LigandNetwork,
 ) -> AlchemicalNetwork:
+    """
+    Create an AlchemicalNetwork from a set of input JSON files.
+    """
     nodes = []
     edges = {}
     edge_count = {}
-    if len(glob(result_files_regex)) == 0:
-        wmsg = (
-            "No results .json files were provided. This will create a " "new network."
-        )
-        warnings.warn(wmsg)
-    for resp in glob(result_files_regex):
-        res = json.load(open(resp, "rb"), cls=JSON_HANDLER.decoder)
-        if any("exception" in u for u in res["unit_results"].values()):
+
+    # Fail if we have no inputs
+    if len(result_files) == 0:
+        errmsg = "No results .json files were provided"
+        raise ValueError(errmsg)
+
+    for resfile in result_files:
+        ru = _get_check_results_json(resfile)
+
+        if ru is None:
             continue
 
         for k in res["protocol_result"]["data"]:
             units = res["protocol_result"]["data"][k]
 
             name = units[0]["name"].split(" repeat")[0]
-            if "stateA" in units[0]["inputs"]:
-                stateA = ChemicalSystem.from_dict(units[0]["inputs"]["stateA"])
-                stateB = ChemicalSystem.from_dict(units[0]["inputs"]["stateB"])
-                ligmap = LigandAtomMapping.from_dict(
-                    units[0]["inputs"]["ligandmapping"]
-                )
-            else:  # inputs were cleaned out! reengineer - hacky alchem net.
-                if input_ligand_network is not None:
-
-                    transformation_name = units[0]["name"].split(" repeat")[0].strip()
-                    componentA_name, componentB_name = transformation_name.split(" to ")
-
-                    ligmap = None
-                    for e in input_ligand_network.edges:
-                        if all(
-                            cn in (e.componentA.name, e.componentB.name)
-                            for cn in [componentA_name, componentB_name]
-                        ):
-                            ligmap = e
-                            break
-                    if ligmap is None:
-
-                        raise ValueError(
-                            "could not finde edge: ("
-                            + e.componentA.name
-                            + ", "
-                            + e.componentB.name
-                            + ")"
-                        )
-                    else:
-                        if "solvent" in str(units[0]["outputs"]["nc"]):
-                            stateA = ChemicalSystem(
-                                components={
-                                    "ligand": ligmap.componentA,
-                                    "solvent": SolventComponent(),
-                                }
-                            )
-                            stateB = ChemicalSystem(
-                                components={
-                                    "ligand": ligmap.componentB,
-                                    "solvent": SolventComponent(),
-                                }
-                            )
-                        else:
-                            stateA = ChemicalSystem(
-                                components={"ligand": ligmap.componentA}
-                            )
-                            stateB = ChemicalSystem(
-                                components={"ligand": ligmap.componentB}
-                            )
-                else:
-                    raise ValueError(
-                        "Can not read alchemical input, as components are "
-                        "missing, please provied input ligand_network."
-                    )
+            # TODO: use protocol_result instead - that's not cleaned up
+            stateA = ChemicalSystem.from_dict(units[0]["inputs"]["stateA"])
+            stateB = ChemicalSystem.from_dict(units[0]["inputs"]["stateB"])
+            ligmap = LigandAtomMapping.from_dict(
+                units[0]["inputs"]["ligandmapping"]
+            )
 
             # Count if both transformations present.
             if name not in edge_count:
@@ -142,6 +129,9 @@ def parse_result_folders(
 
 
 def alchemical_network_to_ligand_network(alchemical_network) -> LigandNetwork:
+    """
+    Create a LigandNetwork from an AlchemicalNetwork
+    """
     edges = []
     nodes = []
     for e in alchemical_network.edges:
@@ -156,23 +146,27 @@ def alchemical_network_to_ligand_network(alchemical_network) -> LigandNetwork:
     return network
 
 
-def ligand_network_to_networkx(ligand_network) -> nx.Graph:
+#def ligand_network_to_networkx(ligand_network) -> nx.Graph:
+#
+#    edges = ligand_network.edges
+#    wedges = []
+#    for edge in list(edges):
+#        wedges.append([edge.componentA, edge.componentB, edge.annotations["score"]])
+#
+#    g = nx.Graph(nodes=ligand_network.nodes)
+#    g.add_weighted_edges_from(ebunch_to_add=wedges)
+#    return g
 
-    edges = ligand_network.edges
-    wedges = []
-    for edge in list(edges):
-        wedges.append([edge.componentA, edge.componentB, edge.annotations["score"]])
 
-    g = nx.Graph(nodes=ligand_network.nodes)
-    g.add_weighted_edges_from(ebunch_to_add=wedges)
-    return g
-
-
-def decomposite_disconnected_ligand_network(
+def decompose_disconnected_ligand_network(
     ligand_network: LigandNetwork,
 ) -> list[LigandNetwork]:
+    """
+    Get a list of connected networks from an input
+    disconnected network
+    """
     # build alchemical sub-networks
-    g = ligand_network_to_networkx(ligand_network)
+    g = ligand_network.graph
     all_edges = list(ligand_network.edges)
     sub_network_nodes = list(nx.connected_components(g))
 
@@ -190,86 +184,6 @@ def decomposite_disconnected_ligand_network(
     return ligand_sub_networks
 
 
-def generate_maximal_ligand_network(
-    components: Iterable[gufe.Component],
-    mapper: gufe.AtomMapper,
-    scorer,
-) -> LigandNetwork:
-    """Create a network with all possible proposed mappings.
-
-    This will attempt to create (and optionally score) all possible
-    mappings
-    (up to $N(N-1)/2$ for each mapper given). There may be fewer actual
-    mappings that this because, when a mapper cannot return a mapping for a
-    given pair, there is simply no suggested mapping for that pair.
-
-    This function was adapted from Konnektor.
-
-    Parameters
-    ----------
-    components : Iterable[SmallMoleculeComponent]
-      the ligands to include in the LigandNetwork
-    mapper: gufe.AtomMapper
-      The atom mapper used
-    scorer: AtomMappingScorer
-      any callable which takes a AtomMapping and returns a float
-
-    Returns
-    -------
-    LigandNetwork
-        a ligand network containing all possible mappings, ideally a
-        fully connected graph.
-    """
-    components = list(components)
-    total = len(components) * (len(components) - 1) // 2
-
-    progress = lambda x: x
-
-    mappings = []
-    for component_pair in progress(itertools.combinations(components, 2)):
-        best_score = 0.0
-        best_mapping = None
-        molA = component_pair[0]
-        molB = component_pair[1]
-
-        try:
-            mapping_generator = mapper.suggest_mappings(molA, molB)
-        except:
-            continue
-
-        if scorer:
-            tmp_mappings = [
-                mapping.with_annotations({"score": scorer(mapping)})
-                for mapping in mapping_generator
-            ]
-
-            if len(tmp_mappings) > 0:
-                tmp_best_mapping = min(
-                    tmp_mappings, key=lambda m: m.annotations["score"]
-                )
-
-                if (
-                    tmp_best_mapping.annotations["score"] < best_score
-                    or best_mapping is None
-                ):
-                    best_mapping = tmp_best_mapping
-        else:
-            try:
-                best_mapping = next(mapping_generator)
-            except:
-                print("warning")
-                continue
-
-        if best_mapping is not None:
-            mappings.append(best_mapping)
-
-    if len(mappings) == 0:
-        raise RuntimeError("Could not generate any mapping!")
-
-    network = LigandNetwork(edges=mappings, nodes=components)
-    return network
-
-
 def get_new_network_tapes(
     ligand_sub_networks: list[LigandNetwork],
     input_ligand_network: LigandNetwork,
@@ -278,11 +192,13 @@ def get_new_network_tapes(
     mapper = KartografAtomMapper()
     scorer = lomap_scorers.default_lomap_score
 
-    # Create a maximal network
-    max_network = generate_maximal_ligand_network(
+    # Create a maximal networka
+    print("LOG: generating maximal network -- this may take time")
+    max_network = openfe.setup.generate_maximal_network(
         input_ligand_network.nodes,
         mapper,
         scorer,
+        True
     )
 
     in_edges = input_ligand_network.edges
@@ -446,29 +362,30 @@ def get_taped_alchemical_network(ducktape_network, alchemical_network):
 
 
 def do_taping(
-    result_files_regex: str,
-    input_alchem_network_file: str,
-    output_alchemical_network_folder: str = "./ducktaping_transformations",
+    result_files: list[str],
+    input_alchem_network_file: pathlib.Path,
+    output_alchemical_network_folder: pathlib.Path,
 ):
-    print("#" * 40)
-    print("Network Taping")
-    print("#" * 40)
-    print()
     print("Parsing input files:")
     # Parse Ligand Network
-    print(f"\treading input Alchemical Network")
+    print("Log: Reading input Alchemical Network")
     input_alchem_network = parse_alchemical_network(input_alchem_network_file)
     input_ligand_network = alchemical_network_to_ligand_network(input_alchem_network)
 
     # Parse Alchemical Network
-    print(f"\treading result files")
-    res_alchemical_network = parse_result_folders(
+    print("Log: Reading result files")
+    res_alchemical_network = parse_results(
         result_files_regex, input_ligand_network
     )
     res_ligand_network = alchemical_network_to_ligand_network(res_alchemical_network)
 
-    # decomposite disconnected sets
-    ligand_sub_networks = decomposite_disconnected_ligand_network(res_ligand_network)
+    if res_ligand_network.is_connected:
+        # TODO: 
+        print("LOG: results network is connected, nothing to do here")
+        return None
+
+    # decompose disconnected sets
+    ligand_sub_networks = decompose_disconnected_ligand_network(res_ligand_network)
 
     # Add missing nodes to ligand_sub_networks if ligand network provided
     # get network node differences
@@ -540,39 +457,26 @@ def do_taping(
     print("Done!")
 
 
-@click.command
-@click.option(
-    "-rp",
-    "--results_regex_path",
-    type=click.Path(dir_okay=False, file_okay=False, path_type=pathlib.Path),
-    default=pathlib.Path("./results*/*json"),
-    help="regular expression to find all result files of this system. (default: 'results*/*json')",
-)
-@click.option(
-    "-ia",
-    "--input_alchem_network_file",
-    type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
-    default=pathlib.Path("./alchemicalNetwork/alchemical_network.json"),
-    help="Path to the used ligand network plan "
-    "(default: 'alchemicalNetwork/ligand_network.graphml')",
-)
-@click.option(
-    "-oa",
-    "--output_alchemical_network",
-    type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
-    default=pathlib.Path("./tapesForAlchemicalNetwork"),
-    help="Directory name in which to store the additional taping transformation"
-    " json files. (default: './tapesForAlchemicalNetwork')",
-)
-def cli_do_taping(
-    results_regex_path: pathlib.Path,
-    input_alchem_network_file: pathlib.Path,
-    output_alchemical_network: pathlib.Path,
-):
+def cli_do_taping():
+    import argparse
+    parser = argparse.ArgumentParser(
+        description="Fix broken alchemical network"
+    )
+    parser.add_argument(
+        "result_files", metavar="JSON_FILE", nargs="+", help="Results JSON file(s)"
+    )
+    parser.add_argument(
+        "input_alchem_network_file", type=pathlib.Path, help="Path to the input alchemical network",
+    )
+    parser.add_argument(
+        "output_extra_transformations", type=Pathlib.Path, help="Path to where we will write out extra transformations to fix the network",
+    )
+
+    args = parser.parse_args()
     do_taping(
-        result_files_regex=str(results_regex_path),
-        input_alchem_network_file=input_alchem_network_file,
-        output_alchemical_network_folder=output_alchemical_network,
+        result_files=args.result_files,
+        input_alchem_network_file=args.input_alchem_network_file,
+        output_alchemical_network_folder=args.output_extra_transformations,
     )
 
 
