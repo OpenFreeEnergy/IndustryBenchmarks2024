@@ -139,6 +139,8 @@ Please see the :ref:`contributing inputs instructions <contributing-inputs>` for
    contributing_inputs
 
 
+.. _public_phase2:
+
 Phase 2: Running Simulations
 ****************************
 
@@ -155,6 +157,7 @@ In this phase, industry partners will run alchemical transformations for their a
 
 Please note that we expect the private dataset industry benchmark to start alongside this phase.
 
+.. _simulation_planning:
 
 Simulation Planning: LOMAP networks
 ===================================
@@ -188,8 +191,9 @@ for every edge in the network. The folder also contains a ``ligand_network.graph
 .. warning::
    Since the partial charge assignment can be slow, we recommend putting the planning command in a bash script and executing it on a high performance workstation or HPC resource. 
 
+.. _simulation_execution:
 
-Simulation execution
+Simulation Execution
 ====================
 
 All planned simulations will be run by industry partners on their own clusters using OpenFE execution tooling,
@@ -219,7 +223,9 @@ Here is an example of a very simple script that will create and submit a separat
 Please reach out to the openfe team if you have any questions on how to adapt this script to your internal needs, we would be happy to assist with this.
 
 
-Handling failed edges
+.. _failed_edges:
+
+Handling Failed Edges
 =====================
 
 It is possible that some of the simulations in the network fail.
@@ -230,7 +236,8 @@ You should follow this strategy for dealing with those failures:
 
 * When at least one repeat of the edge completed successfully
 * Keep a log of the failure
-* Rerun the failed job(s)
+* Rerun the failed job(s) up to 3 times.
+* If the simulation repeat is still failing after 3 times, and the failure is due to NaN errors, then treat this as a **reproducible failure**.
 
 **2. Reproducible failures**
 
@@ -247,7 +254,7 @@ You should follow this strategy for dealing with those failures:
  
 
 
-Inspecting results
+Inspecting Results
 ==================
 
 .. _inspecting results:
