@@ -215,7 +215,7 @@ def alchemical_network_to_ligand_network(alchemical_network) -> LigandNetwork:
     edges = []
     for e in alchemical_network.edges:
         edges.append(e.mapping)
-        
+
     network = LigandNetwork(edges=set(edges))
     return network
 
