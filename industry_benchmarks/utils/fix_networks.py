@@ -149,7 +149,7 @@ def _check_and_deduplicate_transforms(
             raise ValueError(errmsg)
         if not all(a == t_list[0] for a in t_list):
             errmsg = (
-                f"Transfromations for {t_name} do not match "
+                f"Transformations for {t_name} do not match "
                 "this may indicate some kind of corruption of the alchemical "
                 "network. Please contact the OpenFE team."
             )
@@ -207,7 +207,9 @@ def alchemical_network_to_ligand_network(alchemical_network) -> LigandNetwork:
     edges = []
     for e in alchemical_network.edges:
         edges.append(e.mapping)
-
+    # Only add edges if mappings are present twice, meaning both solvent and complex
+    # phases are present in the AlchemicalNetwork
+    edges = [e for e in edges if edges.count(e) == 2]
     network = LigandNetwork(edges=set(edges))
     return network
 
@@ -247,9 +249,9 @@ def get_new_network_connections(
     mapper = KartografAtomMapper()
     scorer = lomap_scorers.default_lomap_score
 
-    # Create a maximal networka
+    # Create a maximal network
     print("LOG: generating maximal network -- this may take time")
-    max_network = openfe.setup.generate_maximal_network(
+    max_network = openfe.setup.ligand_network_planning.generate_maximal_network(
         input_ligand_network.nodes,
         mapper,
         scorer,
