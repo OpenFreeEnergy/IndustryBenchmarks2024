@@ -221,6 +221,7 @@ def decompose_disconnected_ligand_network(
     """
     # build alchemical sub-networks
     g = ligand_network.graph
+    g = g.to_undirected()
     all_edges = list(ligand_network.edges)
     sub_network_nodes = list(nx.connected_components(g))
 
@@ -524,6 +525,7 @@ def fix_network(
     print(f"\tSimulation results no. ligands: {len(res_ligand_network.nodes)}\n")
     print(f"\tSimulation results no. connections: {len(res_ligand_network.edges)}\n")
     print(f"\tMissing ligands in simulation results: {len(missing_ligands)}\n")
+    #ToDo: If there is no disconnected network this would return 1 which is confusing
     print(f"\tDisconnected networks which need patching: {len(ligand_sub_networks)}\n")
     print(
         f"\tLigands in each disconnected network: {[len(sn.nodes) for sn in ligand_sub_networks]}"
