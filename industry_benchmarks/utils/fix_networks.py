@@ -3,6 +3,7 @@ import os
 import pathlib
 import networkx as nx
 import warnings
+from rdkit import Chem
 
 import gufe
 from gufe.tokenization import JSON_HANDLER
@@ -550,7 +551,7 @@ def fix_network(
         input_ligand_network=input_ligand_network,
     )
 
-    print(f"\tLOG: Generated new ligand transform edges: {len(network_tapes.edges)}\n")
+    print(f"\tLOG: Generated new ligand transform edges: {len(network_connections.edges)}\n")
 
     # write out
     print("LOG: writing out network of additional edges to fix the network:")
