@@ -131,6 +131,9 @@ def _check_and_deduplicate_transforms(
       * There are a total of 3 transformations per entry
       * The 3 transformations are the same
 
+    This removed transformations where only one leg of the cycle, either the
+    solvent or the complex, finished successfully.
+
     Returns
     -------
     alchemical_network : gufe.AlchemicalNetwork
@@ -155,8 +158,12 @@ def _check_and_deduplicate_transforms(
                 "network. Please contact the OpenFE team."
             )
             raise ValueError(errmsg)
-
         transform_list.append(t_list[0])
+
+    # Only adds transformations if mappings are present twice, meaning both
+    # solvent and complex phases are present in the transform_list
+    mappings = [t.mapping for t in transform_list]
+    transform_list = [e for inx, e in enumerate(transform_list) if mappings.count(mappings[inx]) == 2]
 
     return AlchemicalNetwork(transform_list)
 
@@ -208,9 +215,7 @@ def alchemical_network_to_ligand_network(alchemical_network) -> LigandNetwork:
     edges = []
     for e in alchemical_network.edges:
         edges.append(e.mapping)
-    # Only add edges if mappings are present twice, meaning both solvent and complex
-    # phases are present in the AlchemicalNetwork
-    edges = [e for e in edges if edges.count(e) == 2]
+        
     network = LigandNetwork(edges=set(edges))
     return network
 
@@ -585,13 +590,22 @@ def cli_fix_network():
         description="Fix broken alchemical network"
     )
     parser.add_argument(
-        "--input_alchem_network_file", type=pathlib.Path, help="Path to the input alchemical network",
+        "--input_alchem_network_file",
+        type=pathlib.Path,
+        help="Path to the input alchemical network",
+        required = True,
     )
     parser.add_argument(
-        "--output_extra_transformations", type=pathlib.Path, help="Path to where we will write out extra transformations to fix the network",
+        "--output_extra_transformations",
+        type=pathlib.Path,
+        help="Path to where we will write out extra transformations to fix the network",
+        required=True,
     )
     parser.add_argument(
-        "--result_files", nargs="+", help="Results JSON file(s)"
+        "--result_files",
+        nargs="+",
+        help="Results JSON file(s)",
+        required=True,
     )
 
 
