@@ -1,5 +1,12 @@
+import click
+import pathlib
+from rdkit import Chem
 import gufe
+import openfe
 from openfe import LigandNetwork
+from kartograf.atom_mapping_scorer import (
+    MappingRMSDScorer, MappingShapeOverlapScorer, MappingVolumeRatioScorer,
+)
 
 
 def parse_ligand_network(
@@ -26,30 +33,57 @@ def get_blinded_transformation_network(
     return
 
 
-def get_lomap_score():
-    return
+def get_lomap_score(mapping):
+    score = openfe.setup.lomap_scorers.default_lomap_score(mapping)
+    return score
 
 
-def get_formal_charge_score():
+def get_alchemical_charge_difference(mapping) -> int:
     """
-    Whether the transformation undergoes a change in net charge.
+    Checks and returns the difference in formal charge between state A and B.
+
+    Parameters
+    ----------
+    mapping : dict[str, ComponentMapping]
+      Dictionary of mappings between transforming components.
+
+    Returns
+    -------
+    int
+      The formal charge difference between states A and B.
+      This is defined as sum(charge state A) - sum(charge state B)
     """
-    return
+    chg_A = Chem.rdmolops.GetFormalCharge(
+        mapping.componentA.to_rdkit()
+    )
+    chg_B = Chem.rdmolops.GetFormalCharge(
+        mapping.componentB.to_rdkit()
+    )
+
+    return chg_A - chg_B
 
 
-def get_shape_score():
-    return
+def get_shape_score(mapping):
+    shape_scorer = MappingShapeOverlapScorer()
+    score = shape_scorer(mapping=mapping)
+    return score
 
 
-def get_volume_score():
-    return
+def get_volume_score(mapping):
+    volume_scorer = MappingVolumeRatioScorer()
+    score = volume_scorer(mapping=mapping)
+    return score
 
 
-def get_mapping_RMSD_score():
-    return
+def get_mapping_RMSD_score(mapping):
+    rmsd_scorer = MappingRMSDScorer()
+    score = rmsd_scorer(mapping=mapping)
+    return score
+
 
 def get_number_heavy_dummy_heavy_core_atoms():
     return
+
 
 def get_fingerprint_similarity_score():
     """
@@ -57,17 +91,20 @@ def get_fingerprint_similarity_score():
     """
     return
 
+
 def get_changing_number_rotatable_bonds():
     """
     Number of rotatable bonds in the non-core region
     """
     return
 
+
 def get_changing_number_rings():
     """
     Number of ring systems in the non-core region
     """
     return
+
 
 def gather_transformation_scores(
     input_ligand_network: LigandNetwork,
@@ -89,12 +126,33 @@ def gather_transformation_scores(
     dict[str, dict[str, int]]
       Dictionary of the edge name and a dictionary of score name and value.
     """
+    transformations_scores = {}
+    for edge in input_ligand_network.edges:
 
-    return
+        name = f'edge_{edge.componentA.name}_{edge.componentB.name}'
+        transformations_scores[name] = {}
+        edge_scores = {}
+        lomap_score = get_lomap_score(edge)
+        edge_scores["lomap_score"] = lomap_score
+        alchemical_charge_difference = get_alchemical_charge_difference(edge)
+        edge_scores["alchemical_charge_difference"] = alchemical_charge_difference
+        shape_score = get_shape_score(edge)
+        edge_scores["shape_score"] = shape_score
+        volume_score = get_volume_score(edge)
+        edge_scores["volume_score"] = volume_score
+        mapping_rmsd_score = get_mapping_RMSD_score(edge)
+        edge_scores["mapping_rmsd_score"] = mapping_rmsd_score
+
+        transformations_scores[name] = edge_scores
+
+    return transformations_scores
 
 
-def get_number_rotatable_bonds():
-    return
+def get_number_rotatable_bonds(smc):
+    m = smc.to_rdkit()
+    Chem.SanitizeMol(m)
+    num_rotatable_bonds = Chem.rdMolDescriptors.CalcNumRotatableBonds(m)
+    return num_rotatable_bonds
 
 def get_number_ring_systems():
     return
@@ -120,18 +178,33 @@ def gather_ligand_scores(
     dict[str, dict[str, int]]
       Dictionary of the ligand name and a dictionary of score name and value.
     """
+    for node in input_ligand_network.nodes:
+        num_rotatable_bonds = get_number_rotatable_bonds(node)
     return
 
 
+@click.command
+@click.option(
+    '--input_ligand_network',
+    type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
+    default=pathlib.Path("./alchemicalNetwork/ligand_network.graphml"),
+    required=True,
+    help=("Path to the ligand_network.graphml file that was used to run these "
+         "simulations."),
+)
 def gather_data(
-    input_ligand_network_path: str,
+    input_ligand_network
 ):
     """
     Function that gathers all the data.
     """
-    ligand_network = parse_ligand_network(input_ligand_network_path)
+    ligand_network = parse_ligand_network(input_ligand_network)
     transformation_scores = gather_transformation_scores(ligand_network)
     # Save this to json
 
     ligand_scores = gather_ligand_scores(ligand_network)
     # Save this to json
+
+
+if __name__ == "__main__":
+    gather_data()
