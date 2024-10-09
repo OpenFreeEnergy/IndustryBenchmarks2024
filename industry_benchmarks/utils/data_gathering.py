@@ -151,17 +151,26 @@ def gather_transformation_scores(
 def get_number_rotatable_bonds(smc):
     m = smc.to_rdkit()
     Chem.SanitizeMol(m)
-    num_rotatable_bonds = Chem.rdMolDescriptors.CalcNumRotatableBonds(m)
+    num_rotatable_bonds = Chem.rdMolDescriptors.CalcNumRotatableBonds(m, strict=True)
     return num_rotatable_bonds
 
-def get_number_ring_systems():
-    return
+def get_number_ring_systems(smc):
+    m = smc.to_rdkit()
+    Chem.SanitizeMol(m)
+    num_rings = Chem.rdMolDescriptors.CalcNumRings(m)
+    return num_rings
 
-def get_number_heavy_atoms():
-    return
+def get_number_heavy_atoms(smc):
+    m = smc.to_rdkit()
+    Chem.SanitizeMol(m)
+    num_heavy_atoms = Chem.rdMolDescriptors.CalcNumHeavyAtoms(m)
+    return num_heavy_atoms
 
-def get_system_element_count():
-    return
+def get_system_element_count(smc):
+    m = smc.to_rdkit()
+    Chem.SanitizeMol(m)
+    atomic_numbers = [atom.GetAtomicNum() for atom in m.GetAtoms()]
+    return len(set(atomic_numbers))
 
 def gather_ligand_scores(
     input_ligand_network: LigandNetwork,
@@ -179,7 +188,16 @@ def gather_ligand_scores(
       Dictionary of the ligand name and a dictionary of score name and value.
     """
     for node in input_ligand_network.nodes:
+        print(node.name)
         num_rotatable_bonds = get_number_rotatable_bonds(node)
+        num_rings = get_number_ring_systems(node)
+        num_heavy_atoms = get_number_heavy_atoms(node)
+        num_elements = get_system_element_count(node)
+        print(num_rotatable_bonds)
+        print(num_rings)
+        print(num_heavy_atoms)
+        print(num_elements)
+
     return
 
 
