@@ -278,6 +278,46 @@ The directory should be removed and the job should be resubmitted (depending on 
 
 2. The extract results script mentioned :ref:`here <inspecting results>` and the cleanup script mentioned :ref:`here <post-simulation cleanup>` both include output of which folder(s) and ``json`` file(s) contain errors and can be removed prior to starting new jobs.
 
+Fixing broken networks
+----------------------
+
+If removing of a reproducibly failing edge leads to a disconnected graph, new edges need to be added in order to fix the broken network.
+The fixing of disconnected networks is carried out using the script provided under
+`utils/fix_networks.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/fix_networks.py>`_.
+
+Note that the script will throw an error if at least one repeat completed successfully. In that case (non-reproducible failure) we recommend re-running the failed jobs (see :ref:`Handling failed edges <failed_edges>`
+
+Here an example of how to run the script:
+
+.. code-block:: bash
+
+   python fix_networks.py --input_alchem_network_file alchemicalNetwork/alchemical_network.json --result_files results_*/*json --output_extra_transformations new_edges
+
+The script takes as inputs the `AlchemicalNetwork` from the original setup, the result `.json` files, and the folder name for storing the outputs.
+This command will create a folder (named `new_edges` as specified using the `--output_extra_transformations` flag) that contains a `transformations` folder with a separate .json file for the solvent and complex legs for every new edge connecting the previously broken network.
+The `new_edges` folder also contains a `ligand_network.graphml` file that is a serialized version of the full LigandNetwork (combining the old and the new `LigandNetwork` s) as well as an `alchemical_network.json` file containing the serialized version of the new `AlchemicalNetwork`.
+
+Once the inputs for the edges to fix the broken network have been created, you can submit those calculations as described in the :ref:`Simulation execution section <simulation_execution>`.
+Note that you will have to update the filepath to point to the new input .json files, e.g.
+
+.. code-block:: bash
+
+   for file in new_edges/transformations/*.json; do
+     relpath="${file:30}"  # strip off "network_setup/"
+     dirpath=${relpath%.*}  # strip off final ".json"
+     jobpath="new_edges/transformations/${dirpath}.job"
+     if [ -f "${jobpath}" ]; then
+       echo "${jobpath} already exists"
+       exit 1
+     fi
+     for repeat in {0..2}; do
+       cmd="openfe quickrun ${file} -o results_${repeat}/${relpath} -d results_${repeat}/${dirpath}"
+       echo -e "#!/usr/bin/env bash\n${cmd}" > "${jobpath}"
+       sbatch "${jobpath}"
+     done
+   done
+
+
 Inspecting Results
 ==================
 
