@@ -350,7 +350,7 @@ def get_new_network_connections(
     return LigandNetwork(edges=tape_edges)
 
 
-def get_alchemical_charge_difference(mapping) -> int:
+def get_alchemical_charge_difference(mapping: openfe.LigandAtomMapping) -> int:
     """
     Checks and returns the difference in formal charge between state A and B.
 
@@ -425,8 +425,10 @@ def get_fixed_alchemical_network(ducktape_network, alchemical_network):
             prot = prot_comps[0]
             # Add cofactors if present
             if len(node.components) > 3:
+                # assuming solvent, protein and ligand are the other components
                 number_cofactors = len(node.components) - 3
-                for i in range(number_cofactors):
+                # are cofactors indexed from 1 always like in eg5?
+                for i in range(1, number_cofactors + 1):
                     cofactor_name = f"cofactor_{i}"
                     cofactors.append(node.components[cofactor_name])
             break
@@ -463,7 +465,7 @@ def get_fixed_alchemical_network(ducktape_network, alchemical_network):
                 sysB_dict["protein"] = prot
 
                 # add cofactors if present
-                for i, cofactor in enumerate(cofactors):
+                for i, cofactor in enumerate(cofactors, start=1):
                     cofactor_name = f"cofactor_{i}"
                     sysA_dict[cofactor_name] = cofactor
                     sysB_dict[cofactor_name] = cofactor

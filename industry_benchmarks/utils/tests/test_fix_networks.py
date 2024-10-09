@@ -7,7 +7,7 @@ import os
 import glob
 import shlex
 
-from gufe import Transformation, AlchemicalNetwork
+from gufe import LigandNetwork, AlchemicalNetwork
 from gufe.tokenization import JSON_HANDLER
 
 from ..fix_networks import (
@@ -18,6 +18,7 @@ from ..fix_networks import (
     get_settings,
     get_settings_charge_changes,
     decompose_disconnected_ligand_network,
+    get_alchemical_charge_difference
 )
 
 @pytest.fixture
@@ -90,7 +91,12 @@ def cmet_network():
 @pytest.fixture
 def eg5_network():
     with resources.files("utils.tests.data") as d:
-        yield str(d / "eg5_inputs/alchemicalNetwork/alchemical_network.json")
+        yield str(d / "eg5_results/subset_alchemical_network.json")
+
+@pytest.fixture
+def eg5_results():
+    with resources.files("utils.tests.data") as d:
+        yield glob.glob(f"{str(d)}/eg5_results/results_[0-9]/*.json")
 
 
 def test_parse_alchemical_network(input_alchemical_network):
@@ -156,6 +162,8 @@ class TestScript:
         command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations {temp_out_dir} --result_files {' '.join(results)}"
         cli_fix_network(shlex.split(command))
         log = capsys.readouterr().out
+        print(log)
+        # make sure all expected prints are emitted
         assert "Planned input  no. ligands: 9" in log
         assert "Planned input  no. connections: 11" in log
         assert "Simulation results no. ligands: 6" in log
@@ -174,6 +182,7 @@ class TestScript:
         assert len(new_transformations) == 12
         for transform in new_transformations:
             assert transform.split("/")[-1] in expected_transformations
+
         # load the network and check the protocol settings are right for no charge changes
         new_network = AlchemicalNetwork.from_dict(
             json.load(
@@ -185,10 +194,44 @@ class TestScript:
         for edge in new_network.edges:
             assert edge.protocol.settings == default_settings
 
-    def test_fix_network_cofactor_charges(self, eg5_network, tmp_path, capsys):
+        # load the ligand network and check for the failed edges
+        ligand_network = temp_out_dir / "ligand_network.graphml"
+        full_ligand_network = LigandNetwork.from_graphml(
+            open(ligand_network, "r").read()
+        )
+        for edge in full_ligand_network.edges:
+            print(edge.annotations)
+        # there should be at least 1 failed edge
+        assert any([edge for edge in full_ligand_network.edges if "failed" in edge.annotations])
+
+
+    def test_fix_network_cofactor_charges(self, eg5_network, eg5_results, tmp_path, capsys):
         """Make sure we can fix networks with cofactors and charge changes."""
 
         temp_out_dir = tmp_path / "eg5_tranformations"
-        command = f"--input_alchem_network_file {eg5_network} --output_extra_transformations {temp_out_dir}"
+        command = f"--input_alchem_network_file {eg5_network} --output_extra_transformations {temp_out_dir} --result_files {' '.join(eg5_results)}"
+        # TODO change the results to trigger the charge warning
         cli_fix_network(shlex.split(command))
-
+        log = capsys.readouterr().out
+        # make sure the network is fixed and the message is emitted
+        assert "Planned input  no. ligands: 4" in log
+        assert "Disconnected networks which need patching: 2" in log
+        assert "Ligands in each disconnected network: [3, 1]" in log
+        assert "LOG: finding additional connections to merge the broken networks:" in log
+        # load the networks and check the protocol settings for each leg
+        output_alchemical_network = temp_out_dir / 'alchemical_network.json'
+        new_network = AlchemicalNetwork.from_dict(
+            json.load(
+                open(output_alchemical_network),
+                cls=JSON_HANDLER.decoder
+            )
+        )
+        default_charge_settings = get_settings_charge_changes()
+        defaullt_settings = get_settings()
+        # make sure that charge change edges have the correct settings
+        for edge in new_network.edges:
+            charge_diff = get_alchemical_charge_difference(edge.mapping)
+            if charge_diff != 0:
+                assert edge.protocol.settings == default_charge_settings
+            else:
+                assert edge.protocol.settings == defaullt_settings
