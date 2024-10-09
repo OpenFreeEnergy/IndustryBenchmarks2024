@@ -293,9 +293,9 @@ Here an example of how to run the script:
 
    python fix_networks.py --input_alchem_network_file alchemicalNetwork/alchemical_network.json --result_files results_*/*json --output_extra_transformations new_edges
 
-The script takes as inputs the `AlchemicalNetwork` from the original setup, the result `.json` files, and the folder name for storing the outputs.
-This command will create a folder (named `new_edges` as specified using the `--output_extra_transformations` flag) that contains a `transformations` folder with a separate .json file for the solvent and complex legs for every new edge connecting the previously broken network.
-The `new_edges` folder also contains a `ligand_network.graphml` file that is a serialized version of the full LigandNetwork (combining the old and the new `LigandNetwork` s) as well as an `alchemical_network.json` file containing the serialized version of the new `AlchemicalNetwork`.
+The script takes as inputs the ``AlchemicalNetwork`` from the original setup, the result ``.json`` files, and the folder name for storing the outputs.
+This command will create a folder (named ``new_edges`` as specified using the ``--output_extra_transformations`` flag) that contains a ``transformations`` folder with a separate .json file for the solvent and complex legs for every new edge connecting the previously broken network.
+The ``new_edges`` folder also contains a ``ligand_network.graphml`` file that is a serialized version of the full LigandNetwork (combining the old and the new ``LigandNetwork`` s) as well as an ``alchemical_network.json`` file containing the serialized version of the new ``AlchemicalNetwork``.
 
 Once the inputs for the edges to fix the broken network have been created, you can submit those calculations as described in the :ref:`Simulation execution section <simulation_execution>`.
 Note that you will have to update the filepath to point to the new input .json files, e.g.
