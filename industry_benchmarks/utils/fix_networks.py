@@ -490,6 +490,28 @@ def get_fixed_alchemical_network(ducktape_network, alchemical_network):
     return alchemical_network
 
 
+def get_full_ligand_network(
+    input_ligand_network: LigandNetwork,
+    result_ligand_network: LigandNetwork,
+    new_ligand_network: LigandNetwork,
+) -> LigandNetwork:
+    # get the failed edges
+    failed_edges = list(
+        input_ligand_network.edges.difference(result_ligand_network.edges)
+    )
+    # Add annotation "failed" to the failed edges
+    annotated_failed_edges = [edge.with_annotations({"failed": True}) for edge in failed_edges]
+    # Get a list of all the edges
+    full_edges = [
+        *annotated_failed_edges,
+        *list(result_ligand_network.edges),
+        *list(new_ligand_network.edges),
+    ]
+    # Create the full LigandNetwork
+    full_network = LigandNetwork(nodes=input_ligand_network.nodes, edges=full_edges)
+
+    return full_network
+
 def fix_network(
     result_files: list[str],
     input_alchem_network_file: pathlib.Path,
@@ -581,6 +603,11 @@ def fix_network(
 
     for transform in taped_alchemical_network.edges:
         transform.dump(transforms_dir / f"{transform.name}.json")
+
+    full_ligand_network = get_full_ligand_network(input_ligand_network, res_ligand_network, network_connections)
+    ln_fname = "ligand_network.graphml"
+    with open(output_alchemical_network_folder / ln_fname, mode='w') as f:
+        f.write(full_ligand_network.to_graphml())
 
     print("Done!")
 
