@@ -4,13 +4,15 @@ from importlib import resources
 import gufe
 import os
 import glob
+import shlex
+
 from ..fix_networks import (
     parse_alchemical_network,
     parse_results,
     alchemical_network_to_ligand_network,
     fix_network,
+    cli_fix_network
 )
-
 
 @pytest.fixture
 def results():
@@ -62,6 +64,18 @@ def expected_transformations():
             ]
 
 
+@pytest.fixture
+def complete_cmet_results():
+    with resources.files("utils.tests.data") as d:
+        yield glob.glob(f"{str(d)}/cmet_results/results_[0-9]/*json")
+
+
+@pytest.fixture
+def cmet_network():
+    with resources.files("utils.tests.data") as d:
+        yield str(d / "cmet_results/alchemicalNetwork/alchemical_network.json")
+
+
 def test_parse_alchemical_network(input_alchemical_network):
     alchem_network = parse_alchemical_network(input_alchemical_network)
     assert isinstance(alchem_network, gufe.AlchemicalNetwork)
@@ -94,3 +108,33 @@ def test_fix_network(results, input_alchemical_network, output_dir, expected_tra
     assert len(new_transformations) == 12
     for transform in new_transformations:
         assert transform.split("/")[-1] in expected_transformations
+
+
+class TestScript:
+
+    def test_too_few_transforms(self, cmet_network, complete_cmet_results):
+        command = f"--input_alchem_network_file {cmet_network} --output_extra_transformations ./ --result_files {complete_cmet_results[0]}"
+        with pytest.raises(ValueError, match="Too few transformations found for solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402754_40_14"):
+            cli_fix_network(shlex.split(command))
+
+
+    def test_detect_failed_simulation(self, cmet_network, complete_cmet_results, capsys):
+        command = f"--input_alchem_network_file {cmet_network} --output_extra_transformations ./ --result_files {' '.join(complete_cmet_results)}"
+        with pytest.raises(ValueError, match="Too few transformations found for solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402744_300_4"):
+            cli_fix_network(shlex.split(command))
+
+    def test_do_nothing(self):
+        pass
+
+    def test_fix_network(self, capsys, results, input_alchemical_network, output_dir, tmp_path):
+        temp_out_dir = tmp_path / output_dir
+        command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations {temp_out_dir} --result_files {' '.join(results)}"
+        cli_fix_network(shlex.split(command))
+        log = capsys.readouterr().out
+        assert "Planned input  no. ligands: 9" in log
+        assert "Planned input  no. connections: 11" in log
+        assert "Simulation results no. ligands: 6" in log
+        assert "Simulation results no. connections: 6" in log
+        assert "Missing ligands in simulation results: 3" in log
+        assert "Disconnected networks which need patching: 4" in log
+        assert "Ligands in each disconnected network: [6, 1, 1, 1]" in log

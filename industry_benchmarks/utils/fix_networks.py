@@ -31,7 +31,7 @@ def parse_alchemical_network(
     return alchem_network
 
 
-def _get_check_results_json(filename: str):
+def _get_check_results_json(filename: str) -> None | dict:
     """
     Get a json file, open it, check it's
     a results json, and return it.
@@ -59,7 +59,7 @@ def _get_check_results_json(filename: str):
 
 
 def get_transformation_alternate(
-    pur: gufe.ProtocolUnitResult, ligand_network: LigandNetwork
+    pur: dict, ligand_network: LigandNetwork
 ):
     """
     Getting a transformation if things got deleted.
@@ -72,9 +72,9 @@ def get_transformation_alternate(
     raise ValueError(errmsg)
 
 
-def get_transformation(pur: gufe.ProtocolUnitResult):
+def get_transformation(pur: dict) -> tuple[Transformation, str]:
     """
-    Get a transformation out of a PUR
+    Get a transformation out of a PUR dict
 
     Returns
     -------
@@ -83,7 +83,7 @@ def get_transformation(pur: gufe.ProtocolUnitResult):
     phase : str
       Either "complex" or "solvent" depending on the phase type.
     """
-    # We a assume a single result
+    # We assume a single result
     ru_keys = [k for k in pur["protocol_result"]["data"].keys()]
     if len(ru_keys) > 1:
         errmsg = "Too many keys in the Protocol Unit Result file"
@@ -122,7 +122,7 @@ def get_transformation(pur: gufe.ProtocolUnitResult):
 
 def _check_and_deduplicate_transforms(
     transforms_dict: dict[str, list[Transformation]]
-):
+) -> AlchemicalNetwork:
     """
     Traverse through a dictionary of transformations keyed
     by the transformation name.
@@ -398,6 +398,7 @@ def get_settings_charge_changes():
     These settings mostly follow defaults but use longer
     simulation times, more lambda windows and an alchemical ion.
     """
+    from openff.units import unit
     settings = RelativeHybridTopologyProtocol.default_settings()
     settings.engine_settings.compute_platform = "CUDA"
     # Should we use this new OpenFF version or the default?
@@ -584,7 +585,10 @@ def fix_network(
     print("Done!")
 
 
-def cli_fix_network():
+def parse_args(arg_list = None):
+    """
+    Separate parse args function to help with the CLI testing.
+    """
     import argparse
     parser = argparse.ArgumentParser(
         description="Fix broken alchemical network"
@@ -593,7 +597,7 @@ def cli_fix_network():
         "--input_alchem_network_file",
         type=pathlib.Path,
         help="Path to the input alchemical network",
-        required = True,
+        required=True,
     )
     parser.add_argument(
         "--output_extra_transformations",
@@ -607,15 +611,16 @@ def cli_fix_network():
         help="Results JSON file(s)",
         required=True,
     )
+    args = parser.parse_args(arg_list)
+    return args
 
-
-    args = parser.parse_args()
+def cli_fix_network(arg_list = None):
+    args = parse_args(arg_list)
     fix_network(
         result_files=args.result_files,
         input_alchem_network_file=args.input_alchem_network_file,
         output_alchemical_network_folder=args.output_extra_transformations,
     )
-
 
 # main Runs
 if __name__ == "__main__":
