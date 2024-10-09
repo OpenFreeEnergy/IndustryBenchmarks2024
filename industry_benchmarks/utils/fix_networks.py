@@ -175,8 +175,9 @@ def parse_results(
     """
     Create an AlchemicalNetwork from a set of input JSON files.
     """
+    from collections import defaultdict
     # All the transforms, triplicated
-    all_transforms_dict = {}
+    all_transforms_dict = defaultdict(list)
 
     # Fail if we have no inputs
     if len(result_files) == 0:
@@ -417,13 +418,12 @@ def get_fixed_alchemical_network(ducktape_network, alchemical_network):
     Create an alchemical networks with only the missing edges.
     """
     solv = openfe.SolventComponent()
-
+    cofactors = []
     for node in alchemical_network.nodes:
         prot_comps = [isinstance(comp, ProteinComponent) for comp in node.components.values()]
         if len(prot_comps) > 0:
             prot = prot_comps[0]
             # Add cofactors if present
-            cofactors = []
             if len(node.components) > 3:
                 number_cofactors = len(node.components) - 3
                 for i in range(number_cofactors):
@@ -461,12 +461,12 @@ def get_fixed_alchemical_network(ducktape_network, alchemical_network):
             if leg == "complex":
                 sysA_dict["protein"] = prot
                 sysB_dict["protein"] = prot
-                if len(cofactors) > 0:
 
-                    for cofactor, entry in zip(cofactors_smc, string.ascii_lowercase):
-                        cofactor_name = f"cofactor_{entry}"
-                        sysA_dict[cofactor_name] = cofactor
-                        sysB_dict[cofactor_name] = cofactor
+                # add cofactors if present
+                for i, cofactor in enumerate(cofactors):
+                    cofactor_name = f"cofactor_{i}"
+                    sysA_dict[cofactor_name] = cofactor
+                    sysB_dict[cofactor_name] = cofactor
 
             sysA = openfe.ChemicalSystem(sysA_dict)
             sysB = openfe.ChemicalSystem(sysB_dict)
