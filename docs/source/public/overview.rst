@@ -12,7 +12,7 @@ Overview
 ********
 
 
-The Public Benmarking Study concentrates on validating the use of the `OpenFE Toolkit <https://docs.openfree.energy/en/stable/>`_
+The Public Benchmarking Study concentrates on validating the use of the `OpenFE Toolkit <https://docs.openfree.energy/en/stable/>`_
 on publicly available protein-ligand binding datasets. Specifically we concentrate
 on re-calculating the `Schrodinger public binding free energy benchmark set <https://github.com/schrodinger/public_binding_free_energy_benchmark>`_
 from the `2023 large scale study by Ross et al. <https://www.nature.com/articles/s42004-023-01019-9>`_.
@@ -125,7 +125,7 @@ All remediated inputs will be deposited in the `OpenFE 2024 benchmark repository
 Doing this will involve a lightweight review process by the OpenFE team, which will allow them to:
 
 1. Gather preparation conditions to be included in relevant publications
-2. Check-in with industry partners and gather feedback on the the input preparation experience
+2. Check-in with industry partners and gather feedback on the input preparation experience
 3. Allow for the OpenFE team to help with any unanticipated issues
 
 
@@ -252,7 +252,31 @@ You should follow this strategy for dealing with those failures:
 
   * Add a new edge to the network. We are currently working on a script that will automatically find a suitable new edge.
  
+Identifying Failed Edges
+------------------------
 
+Failed edges can be identified in a few different ways:
+
+1. Assuming you have no jobs running, there should be a 1-1 mapping between result ``json`` files and job work directories, for example:
+
+.. code-block:: bash
+
+   $ ls
+   easy_rbfe_lig_ejm_31_complex_lig_ejm_46_complex/
+   easy_rbfe_lig_ejm_31_complex_lig_ejm_46_complex.json
+   easy_rbfe_lig_ejm_31_complex_lig_ejm_47_complex/
+   easy_rbfe_lig_ejm_31_complex_lig_ejm_47_complex.json
+   easy_rbfe_lig_ejm_31_complex_lig_ejm_48_complex/
+   easy_rbfe_lig_ejm_31_complex_lig_ejm_48_complex.json
+   easy_rbfe_lig_ejm_31_complex_lig_ejm_50_complex/
+   easy_rbfe_lig_ejm_31_complex_lig_ejm_50_complex.json
+   easy_rbfe_lig_ejm_31_solvent_lig_ejm_42_solvent/
+   easy_rbfe_lig_ejm_31_solvent_lig_ejm_42_solvent.json
+
+If a directory like ``easy_rbfe_lig_ejm_31_solvent_lig_ejm_42_solvent/`` exists but the corresponding ``json`` file doesn't (``easy_rbfe_lig_ejm_31_solvent_lig_ejm_42_solvent.json``) then we know the edge failed.
+The directory should be removed and the job should be resubmitted (depending on the failure type as discussed above).
+
+2. The extract results script mentioned :ref:`here <inspecting results>` and the cleanup script mentioned :ref:`here <post-simulation cleanup>` both include output of which folder(s) and ``json`` file(s) contain errors and can be removed prior to starting new jobs.
 
 Inspecting Results
 ==================
