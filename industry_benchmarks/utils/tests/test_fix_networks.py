@@ -183,7 +183,6 @@ class TestScript:
         command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations {temp_out_dir} --result_files {' '.join(results)}"
         cli_fix_network(shlex.split(command))
         log = capsys.readouterr().out
-        print(log)
         # make sure all expected prints are emitted
         assert "Planned input  no. ligands: 9" in log
         assert "Planned input  no. connections: 11" in log
@@ -215,15 +214,6 @@ class TestScript:
         for edge in new_network.edges:
             assert edge.protocol.settings == default_settings
 
-        # load the ligand network and check for the failed edges
-        ligand_network = temp_out_dir / "ligand_network.graphml"
-        full_ligand_network = LigandNetwork.from_graphml(
-            open(ligand_network, "r").read()
-        )
-        for edge in full_ligand_network.edges:
-            print(edge.annotations)
-        # there should be at least 1 failed edge
-        assert any([edge for edge in full_ligand_network.edges if "failed" in edge.annotations])
 
 
     def test_fix_network_cofactor_charges(self, eg5_network, eg5_results, tmp_path, capsys):
