@@ -345,13 +345,17 @@ def get_new_network_connections(
     # We work by pruning, so the edges towards the end (better scored) will
     # be more likely to be added
     tape_edges = []
+    tape_nodes = []
     for edge in sorted_usable_edges:
         for net in connections_sub_networks:
             if edge in net:
                 if len(net) <= 2 and edge not in tape_edges:
                     tape_edges.append(edge)
+                    tape_nodes.append(edge.componentA)
+                    tape_nodes.append(edge.componentB)
                 else:
                     net.remove(edge)
+    tape_nodes = set(tape_nodes)
 
     # Get a list of the old edges (from the broken network)
     old_edges = [list(net.edges) for net in ligand_sub_networks if len(net.edges) > 0]
@@ -369,7 +373,7 @@ def get_new_network_connections(
             "Please contact the OpenFE team if you experience this."
         )
 
-    return LigandNetwork(edges=tape_edges)
+    return LigandNetwork(nodes= tape_nodes, edges=tape_edges)
 
 
 def get_alchemical_charge_difference(mapping: openfe.LigandAtomMapping) -> int:
@@ -513,28 +517,6 @@ def get_fixed_alchemical_network(ducktape_network, alchemical_network):
     return alchemical_network
 
 
-def get_full_ligand_network(
-    input_ligand_network: LigandNetwork,
-    result_ligand_network: LigandNetwork,
-    new_ligand_network: LigandNetwork,
-) -> LigandNetwork:
-    # get the failed edges
-    failed_edges = list(
-        input_ligand_network.edges.difference(result_ligand_network.edges)
-    )
-    # Add annotation "failed" to the failed edges
-    annotated_failed_edges = [edge.with_annotations({"failed": True}) for edge in failed_edges]
-    # Get a list of all the edges
-    full_edges = [
-        *annotated_failed_edges,
-        *list(result_ligand_network.edges),
-        *list(new_ligand_network.edges),
-    ]
-    # Create the full LigandNetwork
-    full_network = LigandNetwork(nodes=input_ligand_network.nodes, edges=full_edges)
-
-    return full_network
-
 def fix_network(
     result_files: list[str],
     input_alchem_network_file: pathlib.Path,
@@ -627,10 +609,9 @@ def fix_network(
     for transform in taped_alchemical_network.edges:
         transform.dump(transforms_dir / f"{transform.name}.json")
 
-    full_ligand_network = get_full_ligand_network(input_ligand_network, res_ligand_network, network_connections)
     ln_fname = "ligand_network.graphml"
     with open(output_alchemical_network_folder / ln_fname, mode='w') as f:
-        f.write(full_ligand_network.to_graphml())
+        f.write(network_connections.to_graphml())
 
     print("Done!")
 
