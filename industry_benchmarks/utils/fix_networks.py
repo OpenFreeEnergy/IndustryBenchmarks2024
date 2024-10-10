@@ -4,6 +4,7 @@ import pathlib
 import networkx as nx
 import warnings
 from rdkit import Chem
+import string
 
 import gufe
 from gufe.tokenization import JSON_HANDLER
@@ -427,9 +428,8 @@ def get_fixed_alchemical_network(ducktape_network, alchemical_network):
             if len(node.components) > 3:
                 # assuming solvent, protein and ligand are the other components
                 number_cofactors = len(node.components) - 3
-                # are cofactors indexed from 1 always like in eg5?
-                for i in range(1, number_cofactors + 1):
-                    cofactor_name = f"cofactor_{i}"
+                for i in range(number_cofactors):
+                    cofactor_name = f"cofactor_{string.ascii_lowercase[i]}"
                     cofactors.append(node.components[cofactor_name])
             break
 
@@ -465,8 +465,8 @@ def get_fixed_alchemical_network(ducktape_network, alchemical_network):
                 sysB_dict["protein"] = prot
 
                 # add cofactors if present
-                for i, cofactor in enumerate(cofactors, start=1):
-                    cofactor_name = f"cofactor_{i}"
+                for cofactor, entry in zip(cofactors, string.ascii_lowercase):
+                    cofactor_name = f"cofactor_{entry}"
                     sysA_dict[cofactor_name] = cofactor
                     sysB_dict[cofactor_name] = cofactor
 

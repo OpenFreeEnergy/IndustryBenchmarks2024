@@ -215,8 +215,8 @@ class TestScript:
         log = capsys.readouterr().out
         # make sure the network is fixed and the message is emitted
         assert "Planned input  no. ligands: 4" in log
-        assert "Disconnected networks which need patching: 2" in log
-        assert "Ligands in each disconnected network: [3, 1]" in log
+        assert "Disconnected networks which need patching: 3" in log
+        assert "Ligands in each disconnected network: [2, 1, 1]" in log
         assert "LOG: finding additional connections to merge the broken networks:" in log
         # load the networks and check the protocol settings for each leg
         output_alchemical_network = temp_out_dir / 'alchemical_network.json'
