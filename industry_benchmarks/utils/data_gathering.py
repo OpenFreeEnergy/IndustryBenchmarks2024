@@ -1,5 +1,6 @@
 import click
 import pathlib
+import json
 from rdkit import Chem
 import gufe
 import openfe
@@ -187,18 +188,23 @@ def gather_ligand_scores(
     dict[str, dict[str, int]]
       Dictionary of the ligand name and a dictionary of score name and value.
     """
+    all_ligand_scores = {}
     for node in input_ligand_network.nodes:
-        print(node.name)
+        name = f'ligand_{node.name}'
+        all_ligand_scores[name] = {}
+        ligand_scores = {}
         num_rotatable_bonds = get_number_rotatable_bonds(node)
+        ligand_scores["num_rotatable_bonds"] = num_rotatable_bonds
         num_rings = get_number_ring_systems(node)
+        ligand_scores["num_rings"] = num_rings
         num_heavy_atoms = get_number_heavy_atoms(node)
+        ligand_scores["num_heavy_atoms"] = num_heavy_atoms
         num_elements = get_system_element_count(node)
-        print(num_rotatable_bonds)
-        print(num_rings)
-        print(num_heavy_atoms)
-        print(num_elements)
+        ligand_scores["num_elements"] = num_elements
 
-    return
+        all_ligand_scores[name] = ligand_scores
+
+    return all_ligand_scores
 
 
 @click.command
@@ -210,18 +216,43 @@ def gather_ligand_scores(
     help=("Path to the ligand_network.graphml file that was used to run these "
          "simulations."),
 )
+@click.option(
+    '--output_scores',
+    type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
+    default=pathlib.Path("./scores.json"),
+    required=True,
+    help=("Path to the JSON file that stores all the scores and metrics for "
+          "this dataset."),
+)
+@click.option(
+    '--fixed_ligand_network',
+    type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
+    default=pathlib.Path("./ligand_network.graphml"),
+    required=False,
+    help=("Only needed when a broken network was fixed with additional edges. "
+          "Path to the ligand_network.graphml file that was used to run the "
+         "simulations of fixing the network."),
+)
 def gather_data(
-    input_ligand_network
+    input_ligand_network,
+    output_scores,
+    fixed_ligand_network,
 ):
     """
     Function that gathers all the data.
     """
     ligand_network = parse_ligand_network(input_ligand_network)
     transformation_scores = gather_transformation_scores(ligand_network)
-    # Save this to json
-
     ligand_scores = gather_ligand_scores(ligand_network)
+    # Create a single dict of all scores
+    scores = {
+        "transformation_scores": transformation_scores,
+        "ligand_scores": ligand_scores,
+    }
     # Save this to json
+    file = pathlib.Path(output_scores)
+    with open(file, mode='w') as f:
+        json.dump(scores, f)
 
 
 if __name__ == "__main__":
