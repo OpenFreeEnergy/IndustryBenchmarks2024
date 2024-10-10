@@ -18,7 +18,8 @@ from ..fix_networks import (
     get_settings,
     get_settings_charge_changes,
     decompose_disconnected_ligand_network,
-    get_alchemical_charge_difference
+    get_alchemical_charge_difference,
+    get_transformation_alternate
 )
 
 @pytest.fixture
@@ -98,6 +99,12 @@ def eg5_results():
     with resources.files("utils.tests.data") as d:
         yield glob.glob(f"{str(d)}/eg5_results/results_[0-9]/*.json")
 
+@pytest.fixture
+def bace_cleaned_result():
+    with resources.files("utils.tests.data.bace_results") as d:
+        yield str(d / "cleaned_results/complex_spiro10_spiro6.json")
+
+
 
 def test_parse_alchemical_network(input_alchemical_network):
     alchem_network = parse_alchemical_network(input_alchemical_network)
@@ -132,6 +139,20 @@ def test_decompose_network(results, input_alchemical_network):
     result_ligand_network = alchemical_network_to_ligand_network(result_alchem_network)
     ligand_sub_networks = decompose_disconnected_ligand_network(result_ligand_network)
     assert [len(sb.nodes) for sb in ligand_sub_networks] == [6]
+
+def test_get_transform_alternate(input_alchemical_network, bace_cleaned_result):
+    """Test we can rebuild the transform if we cleaned it up too much"""
+    result = json.load(
+        open(bace_cleaned_result, "r"),
+        cls=JSON_HANDLER.decoder
+    )
+    alchemical_network = AlchemicalNetwork.from_dict(
+        json.load(open(input_alchemical_network, "r"),
+        cls=JSON_HANDLER.decoder
+    ))
+    transform, phase = get_transformation_alternate(pur=result, alchemical_network=alchemical_network)
+    assert phase == "complex"
+
 
 
 class TestScript:

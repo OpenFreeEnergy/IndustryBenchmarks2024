@@ -60,17 +60,38 @@ def _get_check_results_json(filename: str) -> None | dict:
 
 
 def get_transformation_alternate(
-    pur: dict, ligand_network: LigandNetwork
-):
+    pur: dict, alchemical_network: AlchemicalNetwork
+) -> tuple[Transformation, str]:
     """
     Getting a transformation if things got deleted.
+
+    We do this by looking up the gufe-key of the inputs stored in the unit result
     """
-    # The way this was being done in PR #144 doesn't work because
-    # it would lead to either a solvent or vacuum simulation, not a
-    # complex one!
-    errmsg = ("The transformation data is not available, "
-              "please contact the OpenFE team")
-    raise ValueError(errmsg)
+    # grab the gufe key of the chemical systems used in the inputs
+    unit_result = list(pur["unit_results"].values())[0]
+    state_a_key = unit_result["inputs"]["stateA"][":gufe-key:"]
+    state_b_key = unit_result["inputs"]["stateB"][":gufe-key:"]
+    mapping_key = unit_result["inputs"]["ligandmapping"][":gufe-key:"]
+    # work out which system this is in the alchemical network
+    system_look_up = dict((str(node.key), node) for node in alchemical_network.nodes)
+    mapping_look_up = dict((str(edge.mapping.key), edge.mapping) for edge in alchemical_network.edges)
+    # build the transform
+    if any([isinstance(comp, gufe.ProteinComponent) for comp in system_look_up[state_a_key].components.values()]):
+        phase = "complex"
+    else:
+        phase = "solvent"
+
+    ligmap = mapping_look_up[mapping_key]
+
+    name = f"{phase}_{ligmap.componentA.name}_{ligmap.componentB.name}"
+    transform = Transformation(
+        stateA=system_look_up[state_a_key],
+        stateB=system_look_up[state_b_key],
+        mapping=mapping_look_up[mapping_key],
+        protocol=None,
+        name=name
+    )
+    return transform, phase
 
 
 def get_transformation(pur: dict) -> tuple[Transformation, str]:
