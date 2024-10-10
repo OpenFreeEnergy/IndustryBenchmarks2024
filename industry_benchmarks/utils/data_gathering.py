@@ -2,6 +2,7 @@ import click
 import pathlib
 import json
 from rdkit import Chem
+from rdkit.Chem import AllChem
 import gufe
 import openfe
 from openfe import LigandNetwork
@@ -82,8 +83,53 @@ def get_mapping_RMSD_score(mapping):
     return score
 
 
-def get_number_heavy_dummy_heavy_core_atoms():
-    return
+def get_number_heavy_dummy_heavy_core_atoms(mapping):
+    molA = mapping.componentA.to_rdkit()
+    molB = mapping.componentB.to_rdkit()
+    mapped_atomIDs = mapping.componentA_to_componentB
+
+    heavy_core_A = []
+    heavy_dummy_A = []
+    heavy_core_B = []
+    heavy_dummy_B = []
+
+    for atom in molA.GetAtoms():
+        # For heavy core: Heavy atom indices that are in the mapping:
+        if atom.GetIdx() in mapped_atomIDs.keys() and atom.GetAtomicNum() != 1:
+            # Check if the atom is mapped to a hydrogen atom
+            index_mapping = list(mapped_atomIDs.keys()).index(atom.GetIdx())
+            index_atomB = list(mapped_atomIDs.values())[index_mapping]
+            atomic_number_mapped_atom_B = molB.GetAtoms()[index_atomB].GetAtomicNum()
+            # If the mapped atom in ligand B is a hydrogen, these atoms are unmapped.
+            # Therefore we will could the heavy atom as a dummy atom, not core
+            if atomic_number_mapped_atom_B == 1:
+                heavy_dummy_A.append(atom.GetIdx())
+            else:
+                heavy_core_A.append(atom.GetIdx())
+        # For heavy dummy: Heavy atom indices that are not in the mapping:
+        if atom.GetIdx() not in mapped_atomIDs.keys() and atom.GetAtomicNum() != 1:
+            heavy_dummy_A.append(atom.GetIdx())
+
+    for atom in molB.GetAtoms():
+        # For heavy core: Heavy atom indices that are in the mapping:
+        if atom.GetIdx() in mapped_atomIDs.values() and atom.GetAtomicNum() != 1:
+            # Check if the atom is mapped to a hydrogen atom
+            index_mapping = list(mapped_atomIDs.values()).index(atom.GetIdx())
+            index_atomA = list(mapped_atomIDs.keys())[index_mapping]
+            atomic_number_mapped_atom_A = molA.GetAtoms()[index_atomA].GetAtomicNum()
+            # If the mapped atom in ligand B is a hydrogen, these atoms are unmapped.
+            # Therefore we will could the heavy atom as a dummy atom, not core
+            if atomic_number_mapped_atom_A == 1:
+                heavy_dummy_B.append(atom.GetIdx())
+            else:
+                heavy_core_B.append(atom.GetIdx())
+        # For heavy dummy: Heavy atom indices that are not in the mapping:
+        if atom.GetIdx() not in mapped_atomIDs.values() and atom.GetAtomicNum() != 1:
+            heavy_dummy_B.append(atom.GetIdx())
+
+    assert len(heavy_core_A) == len(heavy_core_B)
+
+    return len(heavy_core_A), len(heavy_dummy_A), len(heavy_dummy_B)
 
 
 def get_fingerprint_similarity_score():
@@ -131,6 +177,7 @@ def gather_transformation_scores(
     for edge in input_ligand_network.edges:
 
         name = f'edge_{edge.componentA.name}_{edge.componentB.name}'
+        print(name)
         transformations_scores[name] = {}
         edge_scores = {}
         lomap_score = get_lomap_score(edge)
@@ -143,7 +190,10 @@ def gather_transformation_scores(
         edge_scores["volume_score"] = volume_score
         mapping_rmsd_score = get_mapping_RMSD_score(edge)
         edge_scores["mapping_rmsd_score"] = mapping_rmsd_score
-
+        num_heavy_core, num_heavy_dummy_A, num_heavy_dummy_B = get_number_heavy_dummy_heavy_core_atoms(edge)
+        edge_scores["num_heavy_core"] = num_heavy_core
+        edge_scores["num_heavy_dummy_A"] = num_heavy_dummy_A
+        edge_scores["num_heavy_dummy_B"] = num_heavy_dummy_B
         transformations_scores[name] = edge_scores
 
     return transformations_scores
