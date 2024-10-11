@@ -250,7 +250,7 @@ You should follow this strategy for dealing with those failures:
 
 * If this is a non-redundant edge (meaning that removing this edge would lead to a disconnected graph):
 
-  * Add a new edge to the network. We are currently working on a script that will automatically find a suitable new edge.
+  * Add a new edge to the network. We provide a script that will automatically find a suitable new edge, more information can be found :ref:`here <fix_networks>`.
  
 Identifying Failed Edges
 ------------------------
@@ -277,6 +277,8 @@ If a directory like ``easy_rbfe_lig_ejm_31_solvent_lig_ejm_42_solvent/`` exists 
 The directory should be removed and the job should be resubmitted (depending on the failure type as discussed above).
 
 2. The extract results script mentioned :ref:`here <inspecting results>` and the cleanup script mentioned :ref:`here <post-simulation cleanup>` both include output of which folder(s) and ``json`` file(s) contain errors and can be removed prior to starting new jobs.
+
+.. _fix_networks:
 
 Fixing broken networks
 ----------------------
