@@ -255,7 +255,7 @@ class TestScript:
             )
         )
         default_charge_settings = get_settings_charge_changes()
-        defaullt_settings = get_settings()
+        default_settings = get_settings()
         # make sure that charge change edges have the correct settings
         total_cofactors = 0
         for edge in new_network.edges:
