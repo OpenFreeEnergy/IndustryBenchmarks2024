@@ -7,7 +7,7 @@ import os
 import glob
 import shlex
 
-from gufe import LigandNetwork, AlchemicalNetwork
+from gufe import AlchemicalNetwork
 from gufe.tokenization import JSON_HANDLER
 
 from ..fix_networks import (
@@ -19,7 +19,8 @@ from ..fix_networks import (
     get_settings_charge_changes,
     decompose_disconnected_ligand_network,
     get_alchemical_charge_difference,
-    get_transformation_alternate
+    get_transformation_alternate,
+    get_fixed_alchemical_network,
 )
 
 @pytest.fixture
@@ -90,9 +91,14 @@ def cmet_network():
 
 
 @pytest.fixture
-def eg5_network():
+def eg5_network_subset():
     with resources.files("utils.tests.data") as d:
-        yield str(d / "eg5_results/subset_alchemical_network.json")
+        yield str(d / "eg5_inputs/alchemicalNetwork/subset_alchemical_network.json")
+
+@pytest.fixture
+def eg5_charge_change():
+    with resources.files("utils.tests.data") as d:
+        yield str(d / "eg5_inputs/alchemicalNetwork/charge_alchemical_network.json")
 
 @pytest.fixture
 def eg5_results():
@@ -153,6 +159,18 @@ def test_get_transform_alternate(input_alchemical_network, bace_cleaned_result):
     transform, phase = get_transformation_alternate(pur=result, alchemical_network=alchemical_network)
     assert phase == "complex"
 
+def test_charge_settings(eg5_charge_change):
+    """Make sure a warning is raised if we fix a network with charge changes."""
+    alchemical_network = AlchemicalNetwork.from_dict(
+        json.load(open(eg5_charge_change, "r"),
+        cls=JSON_HANDLER.decoder
+    ))
+    ligand_network = alchemical_network_to_ligand_network(alchemical_network)
+    # mock the data
+    with pytest.warns(UserWarning, match="Charge changing transformation between ligands"):
+        _ = get_fixed_alchemical_network(
+            ligand_network, alchemical_network
+        )
 
 
 class TestScript:
@@ -216,12 +234,11 @@ class TestScript:
 
 
 
-    def test_fix_network_cofactor_charges(self, eg5_network, eg5_results, tmp_path, capsys):
-        """Make sure we can fix networks with cofactors and charge changes."""
+    def test_fix_network_cofactor(self, eg5_network_subset, eg5_results, tmp_path, capsys):
+        """Make sure we can fix networks with cofactors"""
 
         temp_out_dir = tmp_path / "eg5_tranformations"
-        command = f"--input_alchem_network_file {eg5_network} --output_extra_transformations {temp_out_dir} --result_files {' '.join(eg5_results)}"
-        # TODO change the results to trigger the charge warning
+        command = f"--input_alchem_network_file {eg5_network_subset} --output_extra_transformations {temp_out_dir} --result_files {' '.join(eg5_results)}"
         cli_fix_network(shlex.split(command))
         log = capsys.readouterr().out
         # make sure the network is fixed and the message is emitted

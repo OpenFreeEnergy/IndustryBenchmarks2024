@@ -439,7 +439,7 @@ def get_settings_charge_changes():
     return settings
 
 
-def get_fixed_alchemical_network(ducktape_network, alchemical_network):
+def get_fixed_alchemical_network(ducktape_network: LigandNetwork, alchemical_network: AlchemicalNetwork) -> AlchemicalNetwork:
     """
     Create an alchemical networks with only the missing edges.
     """
