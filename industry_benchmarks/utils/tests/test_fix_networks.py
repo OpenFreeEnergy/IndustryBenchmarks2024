@@ -263,7 +263,7 @@ class TestScript:
             if charge_diff != 0:
                 assert edge.protocol.settings == default_charge_settings
             else:
-                assert edge.protocol.settings == defaullt_settings
+                assert edge.protocol.settings == default_settings
             # make sure the cofactor was added to the edge
             if "protein" in edge.stateA.components:
                 assert "cofactor_a" in edge.stateA.components
