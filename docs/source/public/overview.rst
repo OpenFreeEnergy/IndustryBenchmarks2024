@@ -284,7 +284,7 @@ Fixing broken networks
 ----------------------
 
 If removing a reproducibly failing edge leads to a disconnected graph, new edges need to be added in order to fix the broken network.
-The fixing of disconnected networks is carried out using the script provided under
+This can be achieved using the script provided under
 `utils/fix_networks.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/fix_networks.py>`_.
 
 The script finds new edges to repair the disconnected network and produces the inputs necessary to run those additional edges.
