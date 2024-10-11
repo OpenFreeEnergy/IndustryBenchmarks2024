@@ -7,7 +7,7 @@ import os
 import glob
 import shlex
 
-from gufe import AlchemicalNetwork
+from gufe import AlchemicalNetwork, ProteinComponent
 from gufe.tokenization import JSON_HANDLER
 
 from ..fix_networks import (
@@ -268,5 +268,7 @@ class TestScript:
             if "protein" in edge.stateA.components:
                 assert "cofactor_a" in edge.stateA.components
                 assert "cofactor_a" in edge.stateB.components
+                assert isinstance(edge.stateA.components["protein"], ProteinComponent)
+                assert isinstance(edge.stateB.components["protein"], ProteinComponent)
                 total_cofactors += 1
         assert total_cofactors == 3
