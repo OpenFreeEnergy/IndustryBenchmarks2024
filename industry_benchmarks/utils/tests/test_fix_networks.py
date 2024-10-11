@@ -257,9 +257,16 @@ class TestScript:
         default_charge_settings = get_settings_charge_changes()
         defaullt_settings = get_settings()
         # make sure that charge change edges have the correct settings
+        total_cofactors = 0
         for edge in new_network.edges:
             charge_diff = get_alchemical_charge_difference(edge.mapping)
             if charge_diff != 0:
                 assert edge.protocol.settings == default_charge_settings
             else:
                 assert edge.protocol.settings == defaullt_settings
+            # make sure the cofactor was added to the edge
+            if "protein" in edge.stateA.components:
+                assert "cofactor_a" in edge.stateA.components
+                assert "cofactor_a" in edge.stateB.components
+                total_cofactors += 1
+        assert total_cofactors == 3
