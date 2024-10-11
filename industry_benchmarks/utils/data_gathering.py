@@ -38,6 +38,31 @@ def get_blinded_transformation_network(
     return blinded_network
 
 
+def get_number_rotatable_bonds(smc):
+    m = smc.to_rdkit()
+    Chem.SanitizeMol(m)
+    num_rotatable_bonds = Chem.rdMolDescriptors.CalcNumRotatableBonds(m, strict=True)
+    return num_rotatable_bonds
+
+def get_number_ring_systems(smc):
+    m = smc.to_rdkit()
+    Chem.SanitizeMol(m)
+    num_rings = Chem.rdMolDescriptors.CalcNumRings(m)
+    return num_rings
+
+def get_number_heavy_atoms(smc):
+    m = smc.to_rdkit()
+    Chem.SanitizeMol(m)
+    num_heavy_atoms = Chem.rdMolDescriptors.CalcNumHeavyAtoms(m)
+    return num_heavy_atoms
+
+def get_system_element_count(smc):
+    m = smc.to_rdkit()
+    Chem.SanitizeMol(m)
+    atomic_numbers = [atom.GetAtomicNum() for atom in m.GetAtoms()]
+    return len(set(atomic_numbers))
+
+
 def get_lomap_score(mapping):
     score = openfe.setup.lomap_scorers.default_lomap_score(mapping)
     return score
@@ -142,18 +167,24 @@ def get_fingerprint_similarity_score():
     return
 
 
-def get_changing_number_rotatable_bonds():
+def get_changing_number_rotatable_bonds(mapping):
     """
     Number of rotatable bonds in the non-core region
     """
-    return
+    num_rot_bonds_A = get_number_rotatable_bonds(mapping.componentA)
+    num_rot_bonds_B = get_number_rotatable_bonds(mapping.componentB)
+
+    return abs(num_rot_bonds_A - num_rot_bonds_B)
 
 
-def get_changing_number_rings():
+def get_changing_number_rings(mapping):
     """
     Number of ring systems in the non-core region
     """
-    return
+    num_rings_A = get_number_ring_systems(mapping.componentA)
+    num_rings_B = get_number_ring_systems(mapping.componentB)
+
+    return abs(num_rings_A - num_rings_B)
 
 
 def gather_transformation_scores(
@@ -197,33 +228,15 @@ def gather_transformation_scores(
         edge_scores["num_heavy_dummy_A"] = num_heavy_dummy_A
         edge_scores["num_heavy_dummy_B"] = num_heavy_dummy_B
         transformations_scores[name] = edge_scores
+        diff_rings_AB = get_changing_number_rings(edge)
+        diff_rot_bonds_AB = get_changing_number_rotatable_bonds(edge)
+        edge_scores["difference_num_rings_AB"] = diff_rings_AB
+        edge_scores["difference_num_rot_bonds_AB"] = diff_rot_bonds_AB
+
+
 
     return transformations_scores
 
-
-def get_number_rotatable_bonds(smc):
-    m = smc.to_rdkit()
-    Chem.SanitizeMol(m)
-    num_rotatable_bonds = Chem.rdMolDescriptors.CalcNumRotatableBonds(m, strict=True)
-    return num_rotatable_bonds
-
-def get_number_ring_systems(smc):
-    m = smc.to_rdkit()
-    Chem.SanitizeMol(m)
-    num_rings = Chem.rdMolDescriptors.CalcNumRings(m)
-    return num_rings
-
-def get_number_heavy_atoms(smc):
-    m = smc.to_rdkit()
-    Chem.SanitizeMol(m)
-    num_heavy_atoms = Chem.rdMolDescriptors.CalcNumHeavyAtoms(m)
-    return num_heavy_atoms
-
-def get_system_element_count(smc):
-    m = smc.to_rdkit()
-    Chem.SanitizeMol(m)
-    atomic_numbers = [atom.GetAtomicNum() for atom in m.GetAtoms()]
-    return len(set(atomic_numbers))
 
 def gather_ligand_scores(
     input_ligand_network: LigandNetwork,
