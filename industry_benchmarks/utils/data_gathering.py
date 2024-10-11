@@ -31,8 +31,11 @@ def get_blinded_transformation_network(
     Blinded transformation network: Names of nodes and how they are connected.
     Remove smcs, mappings
     """
+    blinded_network = {}
+    blinded_network["nodes"] = [node.name for node in input_ligand_network.nodes]
+    blinded_network["edge"] = [(edge.componentA.name, edge.componentB.name) for edge in input_ligand_network.edges]
 
-    return
+    return blinded_network
 
 
 def get_lomap_score(mapping):
@@ -177,7 +180,6 @@ def gather_transformation_scores(
     for edge in input_ligand_network.edges:
 
         name = f'edge_{edge.componentA.name}_{edge.componentB.name}'
-        print(name)
         transformations_scores[name] = {}
         edge_scores = {}
         lomap_score = get_lomap_score(edge)
@@ -267,12 +269,11 @@ def gather_ligand_scores(
          "simulations."),
 )
 @click.option(
-    '--output_scores',
-    type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
-    default=pathlib.Path("./scores.json"),
+    '--output_dir',
+    type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
+    default=pathlib.Path("./"),
     required=True,
-    help=("Path to the JSON file that stores all the scores and metrics for "
-          "this dataset."),
+    help="Path to the output directory that stores all data.",
 )
 @click.option(
     '--fixed_ligand_network',
@@ -285,12 +286,15 @@ def gather_ligand_scores(
 )
 def gather_data(
     input_ligand_network,
-    output_scores,
+    output_dir,
     fixed_ligand_network,
 ):
     """
     Function that gathers all the data.
     """
+    # Make folder for outputs
+    output_dir.mkdir(exist_ok=False, parents=True)
+
     ligand_network = parse_ligand_network(input_ligand_network)
     transformation_scores = gather_transformation_scores(ligand_network)
     ligand_scores = gather_ligand_scores(ligand_network)
@@ -300,9 +304,15 @@ def gather_data(
         "ligand_scores": ligand_scores,
     }
     # Save this to json
-    file = pathlib.Path(output_scores)
+    file = pathlib.Path(output_dir / 'scores.json')
     with open(file, mode='w') as f:
         json.dump(scores, f)
+
+    blinded_network = get_blinded_transformation_network(ligand_network)
+    # Save this to json
+    file = pathlib.Path(output_dir / 'blinded_network.json')
+    with open(file, mode='w') as f:
+        json.dump(blinded_network, f)
 
 
 if __name__ == "__main__":
