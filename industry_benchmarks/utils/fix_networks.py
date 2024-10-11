@@ -121,7 +121,8 @@ def get_transformation(pur: gufe.ProtocolUnitResult):
 
 
 def _check_and_deduplicate_transforms(
-    transforms_dict: dict[str, list[Transformation]]
+    transforms_dict: dict[str, list[Transformation]],
+    allow_missing: bool,
 ):
     """
     Traverse through a dictionary of transformations keyed
@@ -131,8 +132,8 @@ def _check_and_deduplicate_transforms(
       * There are a total of 3 transformations per entry
       * The 3 transformations are the same
 
-    This removed transformations where only one leg of the cycle, either the
-    solvent or the complex, finished successfully.
+    Remove partially complete transformations where only one leg of the cycle, either the
+    solvent or the complex, finished successfully if `allow_missing` is `True` else raise an error.
 
     Returns
     -------
@@ -144,13 +145,19 @@ def _check_and_deduplicate_transforms(
     for t_name, t_list in transforms_dict.items():
         if len(t_list) != 3:
             # TODO: we can turn this into a warning message if it's too painful
-            errmsg = (
-                f"Too few transformations found for {t_name} "
-                "this indicates a partially completed set of results. "
-                "Please ensure that your input network is finished and "
-                "any reproducible partial failures have been removed."
-            )
-            raise ValueError(errmsg)
+            if allow_missing:
+                errmsg = (f"Too few transformations found for {t_name}"
+                          f"this indicates a partially complete set of results."
+                          f"This edge will be replaced.")
+                print(errmsg)
+            else:
+                errmsg = (
+                    f"Too few transformations found for {t_name} "
+                    "this indicates a partially completed set of results. "
+                    "Please ensure that your input network is finished and "
+                    "any reproducible partial failures have been removed."
+                )
+                raise ValueError(errmsg)
         if not all(a == t_list[0] for a in t_list):
             errmsg = (
                 f"Transformations for {t_name} do not match "
@@ -497,6 +504,7 @@ def fix_network(
     result_files: list[str],
     input_alchem_network_file: pathlib.Path,
     output_alchemical_network_folder: pathlib.Path,
+    allow_missing: bool,
 ):
     print("Parsing input files:")
     # Parse Ligand Network
@@ -615,6 +623,11 @@ def cli_fix_network():
         help="Results JSON file(s)",
         required=True,
     )
+    parser.add_argument(
+        "--allow-missing",
+        help="If we should ignore partially complete or missing edges and fix the network rather than fail",
+        action="store_true"
+    )
 
 
     args = parser.parse_args()
@@ -622,6 +635,7 @@ def cli_fix_network():
         result_files=args.result_files,
         input_alchem_network_file=args.input_alchem_network_file,
         output_alchemical_network_folder=args.output_extra_transformations,
+        allow_missing=args.allow_missing,
     )
 
 
