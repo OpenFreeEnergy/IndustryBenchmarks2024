@@ -283,7 +283,7 @@ The directory should be removed and the job should be resubmitted (depending on 
 Fixing broken networks
 ----------------------
 
-If removing of a reproducibly failing edge leads to a disconnected graph, new edges need to be added in order to fix the broken network.
+If removing a reproducibly failing edge leads to a disconnected graph, new edges need to be added in order to fix the broken network.
 The fixing of disconnected networks is carried out using the script provided under
 `utils/fix_networks.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/fix_networks.py>`_.
 
