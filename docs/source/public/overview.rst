@@ -289,7 +289,7 @@ There are different ways to detect broken networks:
 * You experienced failures during the plotting script (e.g. ``ValueError: Computational results are not fully connected``)
 * The number of ligands in the output ``dg.tsv`` file of the ``extract_results.py`` script is lower than the number of ligands the dataset should have
 
-The fixing of disconnected networks is carried out using the script provided under
+This can be achieved using the script provided under
 `utils/fix_networks.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/fix_networks.py>`_.
 
 The script finds new edges to repair the disconnected network
