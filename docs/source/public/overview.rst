@@ -286,7 +286,7 @@ Fixing broken networks
 If removing a reproducibly failing edge leads to a disconnected graph, new edges need to be added in order to fix the broken network.
 There are different ways to detect broken networks:
 
-* You experienced failures during the plotting script (e.g. ``ValueError: Computational results are not fully connected``)
+* You experienced failures during the plotting script or the script for extracting results (e.g. ``ValueError: Computational results are not fully connected``)
 * The number of ligands in the output ``dg.tsv`` file of the ``extract_results.py`` script is lower than the number of ligands the dataset should have
 
 This can be achieved using the script provided under
