@@ -287,6 +287,8 @@ If removing a reproducibly failing edge leads to a disconnected graph, new edges
 The fixing of disconnected networks is carried out using the script provided under
 `utils/fix_networks.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/fix_networks.py>`_.
 
+The script finds new edges to repair the disconnected network and produces the inputs necessary to run those additional edges.
+
 Note that the script will throw an error if at least one repeat completed successfully. In that case (non-reproducible failure) we recommend re-running the failed jobs (see :ref:`Handling failed edges <failed_edges>`
 
 Here an example of how to run the script:
@@ -297,7 +299,7 @@ Here an example of how to run the script:
 
 The script takes as inputs the ``AlchemicalNetwork`` from the original setup, the result ``.json`` files, and the folder name for storing the outputs.
 This command will create a folder (named ``new_edges`` as specified using the ``--output_extra_transformations`` flag) that contains a ``transformations`` folder with a separate .json file for the solvent and complex legs for every new edge connecting the previously broken network.
-The ``new_edges`` folder also contains a ``ligand_network.graphml`` file that is a serialized version of the full LigandNetwork (combining the old and the new ``LigandNetwork`` s) as well as an ``alchemical_network.json`` file containing the serialized version of the new ``AlchemicalNetwork``.
+The ``new_edges`` folder also contains a ``ligand_network.graphml`` file as well as an ``alchemical_network.json`` file containing the serialized version of the new ``LigandNetwork`` and ``AlchemicalNetwork``, respectively.
 
 Once the inputs for the edges to fix the broken network have been created, you can submit those calculations as described in the :ref:`Simulation execution section <simulation_execution>`.
 Note that you will have to update the filepath to point to the new input .json files, e.g.
