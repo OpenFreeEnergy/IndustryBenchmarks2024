@@ -462,7 +462,9 @@ def get_fixed_alchemical_network(ducktape_network: LigandNetwork, alchemical_net
     solv = openfe.SolventComponent()
     cofactors = []
     for node in alchemical_network.nodes:
-        prot_comps = [isinstance(comp, ProteinComponent) for comp in node.components.values()]
+        print(node)
+        prot_comps = [comp for comp in node.components.values() if isinstance(comp, ProteinComponent)]
+        print(prot_comps)
         if len(prot_comps) > 0:
             prot = prot_comps[0]
             # Add cofactors if present
