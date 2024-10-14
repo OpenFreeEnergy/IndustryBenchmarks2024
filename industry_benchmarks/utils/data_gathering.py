@@ -171,7 +171,7 @@ def get_fingerprint_similarity_score(mapping):
     Chem.SanitizeMol(molB)
 
     # Morgan Fingerprint
-    fpgen_morgan = AllChem.GetMorganGenerator(radius=2)
+    fpgen_morgan = AllChem.GetMorganGenerator(radius=3)
     # Get Fingerprint as bit vector
     fpA = fpgen_morgan.GetFingerprint(molA)
     fpB = fpgen_morgan.GetFingerprint(molB)
