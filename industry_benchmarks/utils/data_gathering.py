@@ -29,8 +29,7 @@ def get_blinded_transformation_network(
     input_ligand_network: LigandNetwork,
 ):
     """
-    Blinded transformation network: Names of nodes and how they are connected.
-    Remove smcs, mappings
+    Blinded transformation network: Names of ligands and how they are connected.
     """
     blinded_network = {}
     blinded_network["nodes"] = [node.name for node in input_ligand_network.nodes]
@@ -40,31 +39,56 @@ def get_blinded_transformation_network(
 
 
 def get_number_rotatable_bonds(smc):
+    """
+    Calculates the number of rotatable bonds in a molecule.
+    """
     m = smc.to_rdkit()
     Chem.SanitizeMol(m)
     num_rotatable_bonds = Chem.rdMolDescriptors.CalcNumRotatableBonds(m, strict=True)
     return num_rotatable_bonds
 
 def get_number_ring_systems(smc):
+    """
+    Calculates the number of ring systems in a molecule.
+    """
     m = smc.to_rdkit()
     Chem.SanitizeMol(m)
     num_rings = Chem.rdMolDescriptors.CalcNumRings(m)
     return num_rings
 
 def get_number_heavy_atoms(smc):
+    """
+    Calculates the number of heavy atoms in a molecule.
+    """
     m = smc.to_rdkit()
     Chem.SanitizeMol(m)
     num_heavy_atoms = Chem.rdMolDescriptors.CalcNumHeavyAtoms(m)
     return num_heavy_atoms
 
 def get_system_element_count(smc):
+    """
+    Calculates the number of unique elements in a molecule.
+    """
     m = smc.to_rdkit()
     Chem.SanitizeMol(m)
     atomic_numbers = [atom.GetAtomicNum() for atom in m.GetAtoms()]
     return len(set(atomic_numbers))
 
+def get_solvent_accessible_surface_area(smc):
+    """
+    Calculates the solvent accessible surface area of a molecule.
+    """
+    m = smc.to_rdkit()
+    Chem.SanitizeMol(m)
+    radii = Chem.rdFreeSASA.classifyAtoms(m)
+    sasa = Chem.rdFreeSASA.CalcSASA(m, radii)
+    return sasa
+
 
 def get_lomap_score(mapping):
+    """
+    Calculates the LOMAP score of a LigandAtomMapping.
+    """
     score = openfe.setup.lomap_scorers.default_lomap_score(mapping)
     return score
 
@@ -95,24 +119,52 @@ def get_alchemical_charge_difference(mapping) -> int:
 
 
 def get_shape_score(mapping):
+    """
+    This function calculates the ShapeTanimoto distance (as implemented in RDKIt)
+    for a given ligand pair.
+    """
     shape_scorer = MappingShapeOverlapScorer()
     score = shape_scorer(mapping=mapping)
     return score
 
 
 def get_volume_score(mapping):
+    """
+    This function calculates a Volume ratio based score
+    returns a normalized value between 0 and 1, where 0 is the best
+    and 1 ist the worst score.
+    """
     volume_scorer = MappingVolumeRatioScorer()
     score = volume_scorer(mapping=mapping)
     return score
 
 
 def get_mapping_RMSD_score(mapping):
+    """
+    This function calculates a mapping RMSD based score. The RMSD between
+    mapped atoms of the edge is calculated.
+    The score is a normalized value between 0 and 1, where 1.0 is the best
+    and 0.0 is the worst score.
+    """
     rmsd_scorer = MappingRMSDScorer()
     score = rmsd_scorer(mapping=mapping)
     return score
 
 
 def get_number_heavy_dummy_heavy_core_atoms(mapping):
+    """
+    This function calculates the size of the mapped and unmapped regions of
+    an edge.
+
+    Returns
+    -------
+    size_core: int
+      The number of heavy atoms in the mapped (core) region of the hybrid topology.
+    size_dummy_A: int
+      The number of heavy atoms in the unmapped (dummy) region of compound A
+    size_dummy_B: int
+      The number of heavy atoms in the unmapped (dummy) region of compound B
+    """
     molA = mapping.componentA.to_rdkit()
     molB = mapping.componentB.to_rdkit()
     mapped_atomIDs = mapping.componentA_to_componentB
@@ -158,7 +210,11 @@ def get_number_heavy_dummy_heavy_core_atoms(mapping):
 
     assert len(heavy_core_A) == len(heavy_core_B)
 
-    return len(heavy_core_A), len(heavy_dummy_A), len(heavy_dummy_B)
+    size_core = len(heavy_core_A)
+    size_dummy_A = len(heavy_dummy_A)
+    size_dummy_B = len(heavy_dummy_B)
+
+    return size_core, size_dummy_A, size_dummy_B
 
 
 def get_fingerprint_similarity_score(mapping):
@@ -201,6 +257,16 @@ def get_changing_number_rings(mapping):
     return abs(num_rings_A - num_rings_B)
 
 
+def get_difference_solvent_accessible_surface_area(mapping):
+    """
+    Difference in solvent accessible surface area between two ligands
+    """
+    sasa_A = get_solvent_accessible_surface_area(mapping.componentA)
+    sasa_B = get_solvent_accessible_surface_area(mapping.componentB)
+
+    return abs(sasa_A - sasa_B)
+
+
 def gather_transformation_scores(
     input_ligand_network: LigandNetwork,
 ) -> dict[str, dict[str, int]]:
@@ -237,16 +303,18 @@ def gather_transformation_scores(
         edge_scores["volume_score"] = volume_score
         mapping_rmsd_score = get_mapping_RMSD_score(edge)
         edge_scores["mapping_rmsd_score"] = mapping_rmsd_score
-        num_heavy_core, num_heavy_dummy_A, num_heavy_dummy_B = get_number_heavy_dummy_heavy_core_atoms(edge)
-        edge_scores["num_heavy_core"] = num_heavy_core
-        edge_scores["num_heavy_dummy_A"] = num_heavy_dummy_A
-        edge_scores["num_heavy_dummy_B"] = num_heavy_dummy_B
+        size_core, size_dummy_A, size_dummy_B = get_number_heavy_dummy_heavy_core_atoms(edge)
+        edge_scores["num_heavy_core"] = size_core
+        edge_scores["num_heavy_dummy_A"] = size_dummy_A
+        edge_scores["num_heavy_dummy_B"] = size_dummy_B
         diff_rings_AB = get_changing_number_rings(edge)
         diff_rot_bonds_AB = get_changing_number_rotatable_bonds(edge)
         edge_scores["difference_num_rings_AB"] = diff_rings_AB
         edge_scores["difference_num_rot_bonds_AB"] = diff_rot_bonds_AB
         morgan_fp_score = get_fingerprint_similarity_score(edge)
         edge_scores["morgan_tanimoto_similarity"] = morgan_fp_score
+        diff_sasa_AB = get_difference_solvent_accessible_surface_area(edge)
+        edge_scores["difference_solvent_accessible_surface_area"] = diff_sasa_AB
 
         transformations_scores[name] = edge_scores
 
@@ -281,6 +349,8 @@ def gather_ligand_scores(
         ligand_scores["num_heavy_atoms"] = num_heavy_atoms
         num_elements = get_system_element_count(node)
         ligand_scores["num_elements"] = num_elements
+        sasa = get_solvent_accessible_surface_area(node)
+        ligand_scores["solvent_accessible_surface_area"] = sasa
 
         all_ligand_scores[name] = ligand_scores
 
