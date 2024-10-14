@@ -4,6 +4,7 @@ import pathlib
 import networkx as nx
 import warnings
 from rdkit import Chem
+import string
 
 import gufe
 from gufe.tokenization import JSON_HANDLER
@@ -31,7 +32,7 @@ def parse_alchemical_network(
     return alchem_network
 
 
-def _get_check_results_json(filename: str):
+def _get_check_results_json(filename: str) -> None | dict:
     """
     Get a json file, open it, check it's
     a results json, and return it.
@@ -59,22 +60,43 @@ def _get_check_results_json(filename: str):
 
 
 def get_transformation_alternate(
-    pur: gufe.ProtocolUnitResult, ligand_network: LigandNetwork
-):
+    pur: dict, alchemical_network: AlchemicalNetwork
+) -> tuple[Transformation, str]:
     """
     Getting a transformation if things got deleted.
+
+    We do this by looking up the gufe-key of the inputs stored in the unit result
     """
-    # The way this was being done in PR #144 doesn't work because
-    # it would lead to either a solvent or vacuum simulation, not a
-    # complex one!
-    errmsg = ("The transformation data is not available, "
-              "please contact the OpenFE team")
-    raise ValueError(errmsg)
+    # grab the gufe key of the chemical systems used in the inputs
+    unit_result = list(pur["unit_results"].values())[0]
+    state_a_key = unit_result["inputs"]["stateA"][":gufe-key:"]
+    state_b_key = unit_result["inputs"]["stateB"][":gufe-key:"]
+    mapping_key = unit_result["inputs"]["ligandmapping"][":gufe-key:"]
+    # work out which system this is in the alchemical network
+    system_look_up = dict((str(node.key), node) for node in alchemical_network.nodes)
+    mapping_look_up = dict((str(edge.mapping.key), edge.mapping) for edge in alchemical_network.edges)
+    # build the transform
+    if any([isinstance(comp, gufe.ProteinComponent) for comp in system_look_up[state_a_key].components.values()]):
+        phase = "complex"
+    else:
+        phase = "solvent"
+
+    ligmap = mapping_look_up[mapping_key]
+
+    name = f"{phase}_{ligmap.componentA.name}_{ligmap.componentB.name}"
+    transform = Transformation(
+        stateA=system_look_up[state_a_key],
+        stateB=system_look_up[state_b_key],
+        mapping=mapping_look_up[mapping_key],
+        protocol=None,
+        name=name
+    )
+    return transform, phase
 
 
-def get_transformation(pur: gufe.ProtocolUnitResult):
+def get_transformation(pur: dict) -> tuple[Transformation, str]:
     """
-    Get a transformation out of a PUR
+    Get a transformation out of a PUR dict
 
     Returns
     -------
@@ -83,7 +105,7 @@ def get_transformation(pur: gufe.ProtocolUnitResult):
     phase : str
       Either "complex" or "solvent" depending on the phase type.
     """
-    # We a assume a single result
+    # We assume a single result
     ru_keys = [k for k in pur["protocol_result"]["data"].keys()]
     if len(ru_keys) > 1:
         errmsg = "Too many keys in the Protocol Unit Result file"
@@ -122,7 +144,7 @@ def get_transformation(pur: gufe.ProtocolUnitResult):
 
 def _check_and_deduplicate_transforms(
     transforms_dict: dict[str, list[Transformation]]
-):
+) -> AlchemicalNetwork:
     """
     Traverse through a dictionary of transformations keyed
     by the transformation name.
@@ -175,8 +197,9 @@ def parse_results(
     """
     Create an AlchemicalNetwork from a set of input JSON files.
     """
+    from collections import defaultdict
     # All the transforms, triplicated
-    all_transforms_dict = {}
+    all_transforms_dict = defaultdict(list)
 
     # Fail if we have no inputs
     if len(result_files) == 0:
@@ -353,7 +376,7 @@ def get_new_network_connections(
     return LigandNetwork(nodes= tape_nodes, edges=tape_edges)
 
 
-def get_alchemical_charge_difference(mapping) -> int:
+def get_alchemical_charge_difference(mapping: openfe.LigandAtomMapping) -> int:
     """
     Checks and returns the difference in formal charge between state A and B.
 
@@ -402,6 +425,7 @@ def get_settings_charge_changes():
     These settings mostly follow defaults but use longer
     simulation times, more lambda windows and an alchemical ion.
     """
+    from openff.units import unit
     settings = RelativeHybridTopologyProtocol.default_settings()
     settings.engine_settings.compute_platform = "CUDA"
     # Should we use this new OpenFF version or the default?
@@ -415,22 +439,22 @@ def get_settings_charge_changes():
     return settings
 
 
-def get_fixed_alchemical_network(ducktape_network, alchemical_network):
+def get_fixed_alchemical_network(ducktape_network: LigandNetwork, alchemical_network: AlchemicalNetwork) -> AlchemicalNetwork:
     """
     Create an alchemical networks with only the missing edges.
     """
     solv = openfe.SolventComponent()
-
+    cofactors = []
     for node in alchemical_network.nodes:
         prot_comps = [isinstance(comp, ProteinComponent) for comp in node.components.values()]
         if len(prot_comps) > 0:
             prot = prot_comps[0]
             # Add cofactors if present
-            cofactors = []
             if len(node.components) > 3:
+                # assuming solvent, protein and ligand are the other components
                 number_cofactors = len(node.components) - 3
                 for i in range(number_cofactors):
-                    cofactor_name = f"cofactor_{i}"
+                    cofactor_name = f"cofactor_{string.ascii_lowercase[i]}"
                     cofactors.append(node.components[cofactor_name])
             break
 
@@ -464,12 +488,12 @@ def get_fixed_alchemical_network(ducktape_network, alchemical_network):
             if leg == "complex":
                 sysA_dict["protein"] = prot
                 sysB_dict["protein"] = prot
-                if len(cofactors) > 0:
 
-                    for cofactor, entry in zip(cofactors_smc, string.ascii_lowercase):
-                        cofactor_name = f"cofactor_{entry}"
-                        sysA_dict[cofactor_name] = cofactor
-                        sysB_dict[cofactor_name] = cofactor
+                # add cofactors if present
+                for cofactor, entry in zip(cofactors, string.ascii_lowercase):
+                    cofactor_name = f"cofactor_{entry}"
+                    sysA_dict[cofactor_name] = cofactor
+                    sysB_dict[cofactor_name] = cofactor
 
             sysA = openfe.ChemicalSystem(sysA_dict)
             sysB = openfe.ChemicalSystem(sysB_dict)
@@ -592,7 +616,10 @@ def fix_network(
     print("Done!")
 
 
-def cli_fix_network():
+def parse_args(arg_list = None):
+    """
+    Separate parse args function to help with the CLI testing.
+    """
     import argparse
     parser = argparse.ArgumentParser(
         description="Fix broken alchemical network"
@@ -601,7 +628,7 @@ def cli_fix_network():
         "--input_alchem_network_file",
         type=pathlib.Path,
         help="Path to the input alchemical network",
-        required = True,
+        required=True,
     )
     parser.add_argument(
         "--output_extra_transformations",
@@ -615,15 +642,16 @@ def cli_fix_network():
         help="Results JSON file(s)",
         required=True,
     )
+    args = parser.parse_args(arg_list)
+    return args
 
-
-    args = parser.parse_args()
+def cli_fix_network(arg_list = None):
+    args = parse_args(arg_list)
     fix_network(
         result_files=args.result_files,
         input_alchem_network_file=args.input_alchem_network_file,
         output_alchemical_network_folder=args.output_extra_transformations,
     )
-
 
 # main Runs
 if __name__ == "__main__":
