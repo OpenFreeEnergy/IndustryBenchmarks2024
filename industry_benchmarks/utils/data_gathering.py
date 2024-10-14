@@ -1,6 +1,7 @@
 import click
 import pathlib
 import json
+import rdkit
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import gufe
@@ -160,11 +161,24 @@ def get_number_heavy_dummy_heavy_core_atoms(mapping):
     return len(heavy_core_A), len(heavy_dummy_A), len(heavy_dummy_B)
 
 
-def get_fingerprint_similarity_score():
+def get_fingerprint_similarity_score(mapping):
     """
-    2/3D fingerprint similarity scores (e.g. Tanimoto)
+    Morgan fingerprint Tanimoto similarity scores.
     """
-    return
+    molA = mapping.componentA.to_rdkit()
+    molB = mapping.componentB.to_rdkit()
+    Chem.SanitizeMol(molA)
+    Chem.SanitizeMol(molB)
+
+    # Morgan Fingerprint
+    fpgen_morgan = AllChem.GetMorganGenerator(radius=2)
+    # Get Fingerprint as bit vector
+    fpA = fpgen_morgan.GetFingerprint(molA)
+    fpB = fpgen_morgan.GetFingerprint(molB)
+    # Get Tanimoto similarity
+    morgan_fp_score = rdkit.DataStructs.TanimotoSimilarity(fpA, fpB)
+
+    return morgan_fp_score
 
 
 def get_changing_number_rotatable_bonds(mapping):
@@ -227,13 +241,14 @@ def gather_transformation_scores(
         edge_scores["num_heavy_core"] = num_heavy_core
         edge_scores["num_heavy_dummy_A"] = num_heavy_dummy_A
         edge_scores["num_heavy_dummy_B"] = num_heavy_dummy_B
-        transformations_scores[name] = edge_scores
         diff_rings_AB = get_changing_number_rings(edge)
         diff_rot_bonds_AB = get_changing_number_rotatable_bonds(edge)
         edge_scores["difference_num_rings_AB"] = diff_rings_AB
         edge_scores["difference_num_rot_bonds_AB"] = diff_rot_bonds_AB
+        morgan_fp_score = get_fingerprint_similarity_score(edge)
+        edge_scores["morgan_tanimoto_similarity"] = morgan_fp_score
 
-
+        transformations_scores[name] = edge_scores
 
     return transformations_scores
 
