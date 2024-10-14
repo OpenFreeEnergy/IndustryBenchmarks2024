@@ -184,8 +184,24 @@ def _check_and_deduplicate_transforms(
 
     # Only adds transformations if mappings are present twice, meaning both
     # solvent and complex phases are present in the transform_list
+    # Check if both solvent and complex legs finished
     mappings = [t.mapping for t in transform_list]
-    transform_list = [e for inx, e in enumerate(transform_list) if mappings.count(mappings[inx]) == 2]
+    for inx, e in enumerate(transform_list):
+        if mappings.count(mappings[inx]) != 2:
+            errmsg = (
+                "Only results from one leg (either complex or solvent) found "
+                f"for {t_name}. This indicates a partially completed set of "
+                "results. All three repeats from one leg finished successfully"
+                " while no results have been found for the other leg. Please "
+                "ensure that your input network is finished "
+                "and any reproducible partial failures have been removed."
+            )
+            raise ValueError(errmsg)
+
+    # If we want to allow partial results (here: allow results from only one repeat
+    # would mean we treat the edge as completely failed, we'd have to add this
+    # in order to not add it to the "successful" edges:
+    # transform_list = [e for inx, e in enumerate(transform_list) if mappings.count(mappings[inx]) == 2]
 
     return AlchemicalNetwork(transform_list)
 
