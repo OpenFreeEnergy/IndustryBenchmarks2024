@@ -324,6 +324,11 @@ def gather_data(
     output_dir.mkdir(exist_ok=False, parents=True)
 
     ligand_network = parse_ligand_network(input_ligand_network)
+    # Combine old + new LigandNetwork if a fixed network is provided
+    if fixed_ligand_network:
+        fixed_network = parse_ligand_network(fixed_ligand_network)
+        ligand_network = ligand_network.enlarge_graph(
+            edges=fixed_network.edges, nodes=fixed_network.nodes)
     transformation_scores = gather_transformation_scores(ligand_network)
     ligand_scores = gather_ligand_scores(ligand_network)
     # Create a single dict of all scores
