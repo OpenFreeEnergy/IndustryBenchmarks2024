@@ -13,7 +13,8 @@ from ..data_gathering import (
     get_system_element_count,
     gather_ligand_scores,
     get_changing_number_rings,
-    get_changing_number_rotatable_bonds
+    get_changing_number_rotatable_bonds,
+    get_fingerprint_similarity_score
 )
 import pytest
 from importlib import resources
@@ -78,6 +79,7 @@ def test_gather_transfer_info(cmet_ligand_network):
         assert "num_heavy_dummy_B" in edge_info
         assert "difference_num_rings_AB" in edge_info
         assert "difference_num_rot_bonds_AB" in edge_info
+        assert "morgan_tanimoto_similarity" in edge_info
 
 
 def test_number_of_rotor_bonds(cmet_ligand_network):
@@ -119,3 +121,9 @@ def test_changing_number_of_rotatable_bonds(cmet_ligand_network):
     expected_rotor_changes = [1, 1, 1, 3]
     rotor_changes = sorted([get_changing_number_rotatable_bonds(edge) for edge in cmet_ligand_network.edges])
     assert np.allclose(rotor_changes, expected_rotor_changes)
+
+
+def test_fingerprint_similarity(cmet_ligand_network):
+    expected_similarity = [0.45217391, 0.48543689, 0.50505051, 0.81927711]
+    similarity = sorted([get_fingerprint_similarity_score(edge) for edge in cmet_ligand_network.edges])
+    assert np.allclose(similarity, expected_similarity)
