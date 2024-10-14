@@ -14,7 +14,8 @@ from ..data_gathering import (
     gather_ligand_scores,
     get_changing_number_rings,
     get_changing_number_rotatable_bonds,
-    get_fingerprint_similarity_score
+    get_fingerprint_similarity_score,
+    get_difference_solvent_accessible_surface_area,
 )
 import pytest
 from importlib import resources
@@ -80,6 +81,7 @@ def test_gather_transfer_info(cmet_ligand_network):
         assert "difference_num_rings_AB" in edge_info
         assert "difference_num_rot_bonds_AB" in edge_info
         assert "morgan_tanimoto_similarity" in edge_info
+        assert "difference_solvent_accessible_surface_area" in edge_info
 
 
 def test_number_of_rotor_bonds(cmet_ligand_network):
@@ -110,6 +112,7 @@ def test_gather_ligand_scores(cmet_ligand_network):
         assert "num_rings" in ligand_data
         assert "num_heavy_atoms" in ligand_data
         assert "num_elements" in ligand_data
+        assert "solvent_accessible_surface_area" in ligand_data
 
 
 def test_changing_number_of_rings(cmet_ligand_network):
@@ -127,3 +130,9 @@ def test_fingerprint_similarity(cmet_ligand_network):
     expected_similarity = [0.45217391, 0.48543689, 0.50505051, 0.81927711]
     similarity = sorted([get_fingerprint_similarity_score(edge) for edge in cmet_ligand_network.edges])
     assert np.allclose(similarity, expected_similarity)
+
+
+def test_get_sasa_diff(cmet_ligand_network):
+    expected_sasa_diff = [1.3761717, 14.20480967, 28.02287447, 148.0369631]
+    sasa_diff = sorted([get_difference_solvent_accessible_surface_area(edge) for edge in cmet_ligand_network.edges])
+    assert np.allclose(sasa_diff, expected_sasa_diff)

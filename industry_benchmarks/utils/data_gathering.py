@@ -4,6 +4,7 @@ import json
 import rdkit
 from rdkit import Chem
 from rdkit.Chem import AllChem
+from rdkit.Chem import rdFreeSASA
 import gufe
 import openfe
 from openfe import LigandNetwork
