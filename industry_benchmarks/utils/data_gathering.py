@@ -26,7 +26,7 @@ def parse_ligand_network(
     return network
 
 
-def get_blinded_transformation_network(
+def get_transformation_network_map(
     input_ligand_network: LigandNetwork,
 ):
     """
