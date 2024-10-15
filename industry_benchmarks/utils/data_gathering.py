@@ -393,6 +393,7 @@ def gather_data(
     # Make folder for outputs
     output_dir.mkdir(exist_ok=False, parents=True)
 
+# GATHER Input based information
     ligand_network = parse_ligand_network(input_ligand_network)
     # Combine old + new LigandNetwork if a fixed network is provided
     if fixed_ligand_network:
