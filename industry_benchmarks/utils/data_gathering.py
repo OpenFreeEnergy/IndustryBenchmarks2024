@@ -385,7 +385,7 @@ def gather_ligand_scores(
 def gather_data(
     input_ligand_network,
     output_dir,
-    fixed_ligand_network,
+    fixed_ligand_network: str =None,
 ):
     """
     Function that gathers all the data.
