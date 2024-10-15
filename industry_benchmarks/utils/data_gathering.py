@@ -75,7 +75,7 @@ def get_system_element_count(smc: SmallMoleculeComponent)->int:
     atomic_numbers = [atom.GetAtomicNum() for atom in m.GetAtoms()]
     return len(set(atomic_numbers))
 
-def get_solvent_accessible_surface_area(smc):
+def get_solvent_accessible_surface_area(smc: SmallMoleculeComponent)->float:
     """
     Calculates the solvent accessible surface area of a molecule.
     """
