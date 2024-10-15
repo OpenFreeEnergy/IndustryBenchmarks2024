@@ -2,6 +2,7 @@ import click
 import pathlib
 import json
 import rdkit
+import tqdm
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import gufe
@@ -356,14 +357,210 @@ def gather_ligand_scores(
 
     return all_ligand_scores
 
+def load_results_file(file_name: pathlib.Path) -> None | dict:
+    """Try and load the JSON file as a results file and check that the cleanup script has been used.
+
+    Raises
+    ------
+        ValueError: If the results clean up script has not been run.
+    """
+    with open(file_name, "r") as f:
+        results = json.load(f)
+
+    # First we check if someone passed in a network_setup.json
+    if results.get("__qualname__") == "AlchemicalNetwork":
+        print(f"{file_name} is a network_setup.json, skipping")
+        return None
+
+    #  Now  we check if someome passed in an input json
+    if results.get("__qualname__") == "Transformation":
+        print(f"{file_name} is an input json, skipping")
+        return None
+
+    # Check to see if we have already cleaned  up this result
+    result_key = next(k for k in results["protocol_result"]["data"].keys())
+    if (
+            "structural_analysis"
+            in results["protocol_result"]["data"][result_key][0]["outputs"]
+    ):
+        raise ValueError(f"{file_name} has not been clean up please make sure you run the `results_cleanup.py` script first.")
+
+    # Check to make sure we don't have more than one proto result
+    # We might have ProtocolUnitResult-* and ProtocolUnitFailure-*
+    # We only handle the case where we have one ProtocolUnitResult
+    protocol_unit_result_count = len(
+        [
+            k
+            for k in results["unit_results"].keys()
+            if k.startswith("ProtocolUnitResult")
+        ]
+    )
+
+    # Check to make sure we don't just have failures
+    # if all failures, tell user to re-run
+    if protocol_unit_result_count == 0:
+        print(f"{file_name} failed to run, traceback and exception below, this will not be included in the results. \n")
+        proto_failures = [
+            k
+            for k in results["unit_results"].keys()
+            if k.startswith("ProtocolUnitFailure")
+        ]
+        for proto_failure in proto_failures:
+            print("\n")
+            print(results["unit_results"][proto_failure]["traceback"])
+            print(results["unit_results"][proto_failure]["exception"])
+            print("\n")
+        return None
+
+    return results
+
+def remove_first_reversed_sequential_duplicate_from_path(path: pathlib.Path) -> pathlib.Path:
+    """
+    Remove the first duplicated directory from path
+    We reverse the path so we remove the first sequential
+    duplicated directory starting from the deepest part of the path
+    """
+
+    # reverse the path parts so we start from the deepest part first
+    reversed_path_parts = list(reversed(path.parts))
+    max_idx = len(reversed_path_parts)
+
+    # find index of first dupe
+    for idx in range(max_idx - 1):
+        if reversed_path_parts[idx] == reversed_path_parts[idx + 1]:
+            break
+    # no dupes
+    else:
+        print("Path didn't have any dupes")
+        return path
+
+    del reversed_path_parts[idx]
+    return pathlib.Path(*reversed(reversed_path_parts))
+
+
+def find_data_folder(result: dict) -> None | pathlib.Path:
+    """
+    Find the path to the cleaned up results file for this transformation result.
+    """
+    # get the name of the key which is a gufe token
+    # for the only ProtocolUnitResult-* in unit_results
+    # this means we can grab the first that matches since there is only
+    # one ProtocolUnitResult-*
+    proto_key = next(
+        k
+        for k in result["unit_results"].keys()
+        if k.startswith("ProtocolUnitResult")
+    )
+    results_dir = (
+        pathlib.Path(result["unit_results"][proto_key]["outputs"]["nc"]["path"])
+        .resolve()
+        .parent
+    )
+    # if the dir doesn't exist, we should try and fix it
+    if not results_dir.is_dir():
+        print("Fixing path to results dir")
+        # Depending on the relative location to the result dir, we might have
+        # to fix a duplicate folder, see this post for more details
+        # https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/pull/83#discussion_r1689003616
+        results_dir = remove_first_reversed_sequential_duplicate_from_path(
+            results_dir
+        )
+        # Now we should check if the dir exists
+        if not results_dir.is_dir():
+            print("Can't find results directory, skipping")
+            return None
+
+    # now check that all of the results files can be found in the folder
+    for f_name in [
+        "structural_analysis_data.npz",
+        "energy_replica_state.npz",
+        "simulation_real_time_analysis",
+        "info.yaml"
+    ]:
+        if not results_dir.joinpath(f_name).exists():
+            print("Can't find cleaned results files for ")
+
+    return results_dir
+
+def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork) -> str:
+    """
+    Get the name of this transformation, taking into account that the inputs might have accidentally been deleted.
+    """
+    # grab the gufe key of the chemical systems used in the inputs
+    unit_result = list(result["unit_results"].values())[0]
+    state_a_key = unit_result["inputs"]["stateA"][":gufe-key:"]
+    mapping_key = unit_result["inputs"]["ligandmapping"][":gufe-key:"]
+    # work out which system this is in the alchemical network
+    system_look_up = dict((str(node.key), node) for node in alchemical_network.nodes)
+    mapping_look_up = dict((str(edge.mapping.key), edge.mapping) for edge in alchemical_network.edges)
+    # build the transform
+    if any([isinstance(comp, gufe.ProteinComponent) for comp in system_look_up[state_a_key].components.values()]):
+        phase = "complex"
+    else:
+        phase = "solvent"
+
+    ligmap = mapping_look_up[mapping_key]
+
+    name = f"{phase}_{ligmap.componentA.name}_{ligmap.componentB.name}"
+    return name
+
+
+def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork):
+    """
+    Loop over the results folders extracting the required information and moving it to the output folder.
+    """
+    # workout the expected number of results
+    # assuming 3 repeats of each solvent and complex transformation
+    all_results = {}
+    for edge in alchemical_network.edges:
+        for phase in ["complex", "solvent"]:
+            all_results[f"{phase}_{edge.stateA.components['ligand'].name}-{edge.stateB.components['ligand'].name}"] = []
+    expected_results = len(all_results) * 3
+
+    # generate a list of all results json files
+    for results_folder in results_folders:
+        for results_file in results_folder.glob("*.json"):
+            # run checks on the end results
+            result = load_results_file(file_name=results_file)
+            if result is not None:
+                # find the cleaned up results file
+                simulation_data_file = find_data_folder(result=result)
+                # work out the name of the transform and add it to the dict
+                transformation_name = get_transform_name(result=result, alchemical_network=alchemical_network)
+                # collect the paths to the results files and the structural
+                if transformation_name in all_results:
+                    all_results[transformation_name].append((results_file, simulation_data_file))
+                else:
+                    print(f"Found a result for {transformation_name} which was not expected")
+                    continue
+    # make sure we found the expected number of results
+    assert sum([len(v) for v in all_results.values()]) == expected_results
+    # move the results to the output folder and compress?
+
+def parse_alchemical_network(file_name: pathlib.Path) -> gufe.AlchemicalNetwork:
+    j_dict = json.load(
+        open(file_name, "r"), cls=gufe.tokenization.JSON_HANDLER.decoder
+    )
+    alchem_network = gufe.AlchemicalNetwork.from_dict(j_dict)
+    return alchem_network
+
+def extract_ligand_network(alchemical_network: gufe.AlchemicalNetwork) -> LigandNetwork:
+    """Extract a ligand network from an alchemical_network"""
+    edges = []
+    for e in alchemical_network.edges:
+        edges.append(e.mapping)
+
+    network = LigandNetwork(edges=set(edges))
+    return network
+
 
 @click.command
 @click.option(
-    '--input_ligand_network',
+    '--input_alchemical_network',
     type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
-    default=pathlib.Path("./alchemicalNetwork/ligand_network.graphml"),
+    default=pathlib.Path("./alchemicalNetwork/alchemical_network.json"),
     required=True,
-    help=("Path to the ligand_network.graphml file that was used to run these "
+    help=("Path to the alchemical_network.json file that was used to run these "
          "simulations."),
 )
 @click.option(
@@ -374,31 +571,41 @@ def gather_ligand_scores(
     help="Path to the output directory that stores all data.",
 )
 @click.option(
-    '--fixed_ligand_network',
+    '--fixed_alchemical_network',
     type=click.Path(dir_okay=False, file_okay=True, path_type=pathlib.Path),
-    default=pathlib.Path("./ligand_network.graphml"),
+    default=None,
     required=False,
     help=("Only needed when a broken network was fixed with additional edges. "
-          "Path to the ligand_network.graphml file that was used to run the "
+          "Path to the alchemical_network.json file that was used to run the "
          "simulations of fixing the network."),
 )
+@click.option(
+    "--results-folder",
+    type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
+    multipule=True,
+    help="The path to the directory which contains transformation results, can be supplied multipule times for each repeat folder."
+)
 def gather_data(
-    input_ligand_network,
-    output_dir,
-    fixed_ligand_network,
+    input_alchemical_network: pathlib.Path,
+    output_dir: pathlib.Path,
+    fixed_alchemical_network: None | pathlib.Path,
+    results_folder: list[pathlib.Path],
 ):
     """
     Function that gathers all the data.
     """
     # Make folder for outputs
     output_dir.mkdir(exist_ok=False, parents=True)
-
-    ligand_network = parse_ligand_network(input_ligand_network)
+    alchemical_network = parse_alchemical_network(input_alchemical_network)
+    ligand_network = extract_ligand_network(alchemical_network)
     # Combine old + new LigandNetwork if a fixed network is provided
-    if fixed_ligand_network:
-        fixed_network = parse_ligand_network(fixed_ligand_network)
+    if fixed_alchemical_network is not None:
+        fixed_alchemical_network = parse_alchemical_network(fixed_alchemical_network)
+        fixed_network = extract_ligand_network(fixed_alchemical_network)
         ligand_network = ligand_network.enlarge_graph(
             edges=fixed_network.edges, nodes=fixed_network.nodes)
+        # combine the alchemical networks
+        alchemical_network = gufe.AlchemicalNetwork(edges=[*alchemical_network.edges, *fixed_alchemical_network.edges])
     transformation_scores = gather_transformation_scores(ligand_network)
     ligand_scores = gather_ligand_scores(ligand_network)
     # Create a single dict of all scores
@@ -416,6 +623,9 @@ def gather_data(
     file = pathlib.Path(output_dir / 'blinded_network.json')
     with open(file, mode='w') as f:
         json.dump(blinded_network, f)
+
+    # process the results one by one
+    process_results(results_folder, output_dir, alchemical_network)
 
 
 if __name__ == "__main__":
