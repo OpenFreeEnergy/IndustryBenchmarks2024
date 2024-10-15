@@ -28,7 +28,7 @@ def parse_ligand_network(
 
 def get_transformation_network_map(
     input_ligand_network: LigandNetwork,
-):
+)->dict:
     """
     Blinded transformation network: Names of ligands and how they are connected.
     """
