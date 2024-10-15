@@ -257,7 +257,7 @@ def get_changing_number_rings(mapping):
     return abs(num_rings_A - num_rings_B)
 
 
-def get_difference_solvent_accessible_surface_area(mapping):
+def get_difference_solvent_accessible_surface_area(mapping: LigandAtomMapping)-> float:
     """
     Difference in solvent accessible surface area between two ligands
     """
