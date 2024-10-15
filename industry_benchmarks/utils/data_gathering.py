@@ -152,7 +152,7 @@ def get_mapping_RMSD_score(mapping: LigandAtomMapping)-> float:
     return score
 
 
-def get_number_heavy_dummy_heavy_core_atoms(mapping):
+def get_number_heavy_dummy_heavy_core_atoms(mapping: LigandAtomMapping)-> int:
     """
     This function calculates the size of the mapped and unmapped regions of
     an edge.
