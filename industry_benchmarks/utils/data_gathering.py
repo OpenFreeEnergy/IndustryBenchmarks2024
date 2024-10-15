@@ -5,6 +5,7 @@ import rdkit
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import gufe
+import gufe import SmallMoleculeComponent, LigandAtomMapping
 import openfe
 from openfe import LigandNetwork
 from kartograf.atom_mapping_scorer import (
