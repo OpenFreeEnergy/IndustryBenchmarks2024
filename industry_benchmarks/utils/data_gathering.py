@@ -57,7 +57,7 @@ def get_number_ring_systems(smc):
     num_rings = Chem.rdMolDescriptors.CalcNumRings(m)
     return num_rings
 
-def get_number_heavy_atoms(smc):
+def get_number_heavy_atoms(smc: SmallMoleculeComponent)->int:
     """
     Calculates the number of heavy atoms in a molecule.
     """
