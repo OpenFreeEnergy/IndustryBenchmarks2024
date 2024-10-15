@@ -16,12 +16,14 @@ from ..data_gathering import (
     get_changing_number_rotatable_bonds,
     get_fingerprint_similarity_score,
     get_difference_solvent_accessible_surface_area,
-    get_charge_score
+    get_charge_score,
+    get_alchemical_charge_difference,
 )
 import pytest
 from importlib import resources
-from gufe import LigandNetwork
+from gufe import LigandNetwork, LigandAtomMapping, SmallMoleculeComponent
 import numpy as np
+from rdkit import Chem
 
 @pytest.fixture
 def cmet_ligand_network() -> LigandNetwork:
@@ -143,3 +145,9 @@ def test_get_sasa_diff(cmet_ligand_network):
     expected_sasa_diff = [1.3761717, 14.20480967, 28.02287447, 148.0369631]
     sasa_diff = sorted([get_difference_solvent_accessible_surface_area(edge) for edge in cmet_ligand_network.edges])
     assert np.allclose(sasa_diff, expected_sasa_diff)
+
+
+def test_charge_diff_no_diff(cmet_ligand_network):
+    expected_diff = [0, 0, 0, 0]
+    charge_diff = sorted([get_alchemical_charge_difference(edge) for edge in cmet_ligand_network.edges])
+    assert np.allclose(charge_diff, expected_diff)
