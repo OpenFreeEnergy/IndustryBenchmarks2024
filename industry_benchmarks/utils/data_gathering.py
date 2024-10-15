@@ -140,7 +140,7 @@ def get_volume_score(mapping: LigandAtomMapping)->float:
     return score
 
 
-def get_mapping_RMSD_score(mapping):
+def get_mapping_RMSD_score(mapping: LigandAtomMapping)-> float:
     """
     This function calculates a mapping RMSD based score. The RMSD between
     mapped atoms of the edge is calculated.
