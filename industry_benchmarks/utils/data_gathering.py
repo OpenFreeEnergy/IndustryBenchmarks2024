@@ -6,13 +6,13 @@ import tqdm
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import gufe
-import gufe import SmallMoleculeComponent, LigandAtomMapping
+from gufe import SmallMoleculeComponent, LigandAtomMapping, AtomMapping
 import openfe
 from openfe import LigandNetwork
 from kartograf.atom_mapping_scorer import (
     MappingRMSDScorer, MappingShapeOverlapScorer, MappingVolumeRatioScorer,
 )
-
+import abc
 
 class AtomMappingScorer(abc.ABC):
     """A generic class for scoring Atom mappings.
@@ -567,6 +567,7 @@ def find_data_folder(result: dict) -> None | pathlib.Path:
     ]:
         if not results_dir.joinpath(f_name).exists():
             print("Can't find cleaned results files for ")
+            return None
 
     return results_dir
 
@@ -593,21 +594,27 @@ def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork)
     return name
 
 
-def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork):
+def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork) -> list[str]:
     """
     Loop over the results folders extracting the required information and moving it to the output folder.
+
+    Returns
+    -------
+        failed_results: list[str]
+        A list of edge names which have missing results
     """
     # workout the expected number of results
     # assuming 3 repeats of each solvent and complex transformation
+    missing_results = []
     all_results = {}
     for edge in alchemical_network.edges:
         for phase in ["complex", "solvent"]:
             all_results[f"{phase}_{edge.stateA.components['ligand'].name}-{edge.stateB.components['ligand'].name}"] = []
     expected_results = len(all_results) * 3
 
-    # generate a list of all results json files
+    # map the transformation to the results files
     for results_folder in results_folders:
-        for results_file in results_folder.glob("*.json"):
+        for results_file in tqdm.tqdm(results_folder.glob("*.json"), desc=f"Processing results in {results_folder}", ncols=80):
             # run checks on the end results
             result = load_results_file(file_name=results_file)
             if result is not None:
@@ -616,14 +623,21 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
                 # work out the name of the transform and add it to the dict
                 transformation_name = get_transform_name(result=result, alchemical_network=alchemical_network)
                 # collect the paths to the results files and the structural
-                if transformation_name in all_results:
+                if transformation_name in all_results and simulation_data_file is not None:
                     all_results[transformation_name].append((results_file, simulation_data_file))
-                else:
+                elif transformation_name not in all_results:
                     print(f"Found a result for {transformation_name} which was not expected")
                     continue
     # make sure we found the expected number of results
     assert sum([len(v) for v in all_results.values()]) == expected_results
     # move the results to the output folder and compress?
+
+    # workout which edges must have failed
+    for name, results in all_results.items():
+        if len(results) != 3:
+            missing_results.append(name.split("_")[-1])
+
+    return missing_results
 
 def parse_alchemical_network(file_name: pathlib.Path) -> gufe.AlchemicalNetwork:
     j_dict = json.load(
@@ -698,6 +712,13 @@ def gather_data(
         alchemical_network = gufe.AlchemicalNetwork(edges=[*alchemical_network.edges, *fixed_alchemical_network.edges])
     transformation_scores = gather_transformation_scores(ligand_network)
     ligand_scores = gather_ligand_scores(ligand_network)
+
+    # process the results one by one
+    failed_transforms = process_results(results_folder, output_dir, alchemical_network)
+    # annotate the failed edges only
+    for failed_edge in failed_transforms:
+        transformation_scores[failed_edge]["failed"] = True
+
     # Create a single dict of all scores
     scores = {
         "transformation_scores": transformation_scores,
@@ -714,8 +735,6 @@ def gather_data(
     with open(file, mode='w') as f:
         json.dump(blinded_network, f)
 
-    # process the results one by one
-    process_results(results_folder, output_dir, alchemical_network)
 
 
 if __name__ == "__main__":
