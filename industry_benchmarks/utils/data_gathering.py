@@ -407,7 +407,7 @@ def gather_data(
         "ligand_scores": ligand_scores,
     }
     # Save this to json
-    file = pathlib.Path(output_dir / 'scores.json')
+    file = pathlib.Path(output_dir / 'all_network_properties.json')
     with open(file, mode='w') as f:
         json.dump(scores, f)
 
