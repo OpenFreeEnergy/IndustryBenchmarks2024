@@ -39,7 +39,7 @@ def get_transformation_network_map(
     return blinded_network
 
 
-def get_number_rotatable_bonds(smc):
+def get_number_rotatable_bonds(smc: SmallMoleculeComponent)->int:
     """
     Calculates the number of rotatable bonds in a molecule.
     """
