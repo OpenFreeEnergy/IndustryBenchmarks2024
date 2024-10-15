@@ -238,7 +238,7 @@ def get_fingerprint_similarity_score(mapping: LigandAtomMapping)-> float:
     return morgan_fp_score
 
 
-def get_changing_number_rotatable_bonds(mapping):
+def get_changing_number_rotatable_bonds(mapping: LigandAtomMapping)-> int:
     """
     Number of rotatable bonds in the non-core region
     """
