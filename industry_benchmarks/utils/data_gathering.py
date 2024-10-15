@@ -248,7 +248,7 @@ def get_changing_number_rotatable_bonds(mapping: LigandAtomMapping)-> int:
     return abs(num_rot_bonds_A - num_rot_bonds_B)
 
 
-def get_changing_number_rings(mapping):
+def get_changing_number_rings(mapping: LigandAtomMapping)-> int:
     """
     Number of ring systems in the non-core region
     """
