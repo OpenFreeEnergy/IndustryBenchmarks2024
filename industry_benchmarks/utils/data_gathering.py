@@ -66,7 +66,7 @@ def get_number_heavy_atoms(smc: SmallMoleculeComponent)->int:
     num_heavy_atoms = Chem.rdMolDescriptors.CalcNumHeavyAtoms(m)
     return num_heavy_atoms
 
-def get_system_element_count(smc):
+def get_system_element_count(smc: SmallMoleculeComponent)->int:
     """
     Calculates the number of unique elements in a molecule.
     """
