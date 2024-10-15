@@ -6,13 +6,13 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import rdFreeSASA
 import gufe
-import gufe import SmallMoleculeComponent, LigandAtomMapping
+from gufe import SmallMoleculeComponent, LigandAtomMapping, AtomMapping
 import openfe
 from openfe import LigandNetwork
 from kartograf.atom_mapping_scorer import (
     MappingRMSDScorer, MappingShapeOverlapScorer, MappingVolumeRatioScorer,
 )
-
+import abc
 
 class AtomMappingScorer(abc.ABC):
     """A generic class for scoring Atom mappings.

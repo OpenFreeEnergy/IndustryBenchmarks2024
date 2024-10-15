@@ -1,6 +1,6 @@
 from ..data_gathering import (
     get_lomap_score,
-    get_blinded_transformation_network,
+    get_transformation_network_map,
     parse_ligand_network,
     get_shape_score,
     get_volume_score,
@@ -16,6 +16,7 @@ from ..data_gathering import (
     get_changing_number_rotatable_bonds,
     get_fingerprint_similarity_score,
     get_difference_solvent_accessible_surface_area,
+    get_charge_score
 )
 import pytest
 from importlib import resources
@@ -30,7 +31,7 @@ def cmet_ligand_network() -> LigandNetwork:
 # test all metrics independently
 def test_blinded_network(cmet_ligand_network):
     """Test extracting blinded data from the ligand network, this is just the names of nodes and the edges."""
-    transform_info = get_blinded_transformation_network(cmet_ligand_network)
+    transform_info = get_transformation_network_map(cmet_ligand_network)
     for node in cmet_ligand_network.nodes:
         assert node.name in transform_info["nodes"]
     for edge in cmet_ligand_network.edges:
@@ -63,6 +64,11 @@ def test_get_lomap_score(cmet_ligand_network):
     scores = sorted([get_lomap_score(edge) for edge in cmet_ligand_network.edges])
     assert np.allclose(scores, expected_scores)
 
+def test_get_charge_score(cmet_ligand_network):
+    expected_scores = [1, 1, 1, 1]
+    scores = sorted([get_charge_score(edge) for edge in cmet_ligand_network.edges])
+    assert np.allclose(scores, expected_scores)
+
 def test_gather_transfer_info(cmet_ligand_network):
     """Test gathering all of the scores for a network"""
     transformation_scores = gather_transformation_scores(cmet_ligand_network)
@@ -82,6 +88,7 @@ def test_gather_transfer_info(cmet_ligand_network):
         assert "difference_num_rot_bonds_AB" in edge_info
         assert "morgan_tanimoto_similarity" in edge_info
         assert "difference_solvent_accessible_surface_area" in edge_info
+        assert "charge_score" in edge_info
 
 
 def test_number_of_rotor_bonds(cmet_ligand_network):
