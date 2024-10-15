@@ -566,7 +566,7 @@ def find_data_folder(result: dict) -> None | pathlib.Path:
         "info.yaml"
     ]:
         if not results_dir.joinpath(f_name).exists():
-            print("Can't find cleaned results files for ")
+            print(f"Can't find cleaned results files for {f_name}")
             return None
 
     return results_dir
