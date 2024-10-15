@@ -94,7 +94,7 @@ def get_lomap_score(mapping: SmallMoleculeComponent)->float:
     return score
 
 
-def get_alchemical_charge_difference(mapping) -> int:
+def get_alchemical_charge_difference(mapping: LigandAtomMapping) -> int:
     """
     Checks and returns the difference in formal charge between state A and B.
 
