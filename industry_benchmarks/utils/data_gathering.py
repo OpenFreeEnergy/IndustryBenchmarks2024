@@ -129,7 +129,7 @@ def get_shape_score(mapping: LigandAtomMapping)->float:
     return score
 
 
-def get_volume_score(mapping):
+def get_volume_score(mapping: LigandAtomMapping)->float:
     """
     This function calculates a Volume ratio based score
     returns a normalized value between 0 and 1, where 0 is the best
