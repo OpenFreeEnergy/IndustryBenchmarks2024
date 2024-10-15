@@ -24,9 +24,23 @@ from ..fix_networks import (
 )
 
 @pytest.fixture
-def results():
+def bace_results_partial():
     with resources.files("utils.tests.data.bace_results") as d:
         yield glob.glob(f"{str(d)}/results_*_remove_edges/*json")
+
+
+@pytest.fixture
+def bace_results_subset():
+    with resources.files("utils.tests.data.bace_results") as d:
+        remove_edges = ["solvent_spiro10_spiro15.json",
+                        "solvent_spiro10_spiro6.json",
+                        "solvent_spiro16_spiro15.json",
+                        "solvent_spiro3_spiro15.json",
+                        "solvent_spiro6_spiro15.json"]
+        files =  glob.glob(f"{str(d)}/results_*_remove_edges/*json")
+        files = [f for f in files if f.split("/")[-1] not in remove_edges]
+        yield files
+
 
 @pytest.fixture
 def bace_complete_results():
@@ -95,21 +109,23 @@ def eg5_network_subset():
     with resources.files("utils.tests.data") as d:
         yield str(d / "eg5_inputs/alchemicalNetwork/subset_alchemical_network.json")
 
+
 @pytest.fixture
 def eg5_charge_change():
     with resources.files("utils.tests.data") as d:
         yield str(d / "eg5_inputs/alchemicalNetwork/charge_alchemical_network.json")
+
 
 @pytest.fixture
 def eg5_results():
     with resources.files("utils.tests.data") as d:
         yield glob.glob(f"{str(d)}/eg5_results/results_[0-9]/*.json")
 
+
 @pytest.fixture
 def bace_cleaned_result():
     with resources.files("utils.tests.data.bace_results") as d:
         yield str(d / "cleaned_results/complex_spiro10_spiro6.json")
-
 
 
 def test_parse_alchemical_network(input_alchemical_network):
@@ -119,9 +135,9 @@ def test_parse_alchemical_network(input_alchemical_network):
     assert len(alchem_network.edges) == 22
 
 
-def test_parse_results_missing(results, input_alchemical_network):
+def test_parse_results_missing(bace_results_subset, input_alchemical_network):
     """Test parsing the results files with missing results"""
-    result_alchem_network = parse_results(results, input_alchemical_network)
+    result_alchem_network = parse_results(bace_results_subset, input_alchemical_network)
     assert isinstance(result_alchem_network, gufe.AlchemicalNetwork)
     # only 6 edges (12 transformations) had completed successfully
     assert len(result_alchem_network.edges) == 12
@@ -129,6 +145,7 @@ def test_parse_results_missing(results, input_alchemical_network):
     assert isinstance(ligand_network, gufe.LigandNetwork)
     # The resulting LigandNetwork should have 6 edges
     assert len(ligand_network.edges) == 6
+
 
 def test_parse_results_complete(bace_complete_results, input_alchemical_network):
     """Make sure all results can be extracted for a complete network"""
@@ -139,12 +156,14 @@ def test_parse_results_complete(bace_complete_results, input_alchemical_network)
     ligand_network = alchemical_network_to_ligand_network(result_alchem_network)
     assert len(ligand_network.edges) == 11
 
-def test_decompose_network(results, input_alchemical_network):
+
+def test_decompose_network(bace_results_subset, input_alchemical_network):
     """Make sure we can correctly identify the subnetworks in a failed network"""
-    result_alchem_network = parse_results(results, input_alchemical_network)
+    result_alchem_network = parse_results(bace_results_subset, input_alchemical_network)
     result_ligand_network = alchemical_network_to_ligand_network(result_alchem_network)
     ligand_sub_networks = decompose_disconnected_ligand_network(result_ligand_network)
     assert [len(sb.nodes) for sb in ligand_sub_networks] == [6]
+
 
 def test_get_transform_alternate(input_alchemical_network, bace_cleaned_result):
     """Test we can rebuild the transform if we cleaned it up too much"""
@@ -158,6 +177,7 @@ def test_get_transform_alternate(input_alchemical_network, bace_cleaned_result):
     ))
     transform, phase = get_transformation_alternate(pur=result, alchemical_network=alchemical_network)
     assert phase == "complex"
+
 
 def test_charge_settings(eg5_charge_change):
     """Make sure a warning is raised if we fix a network with charge changes."""
@@ -181,12 +201,20 @@ class TestScript:
             cli_fix_network(shlex.split(command))
 
 
+    def test_only_one_leg(self, input_alchemical_network, bace_results_partial):
+        """Make sure an error is raised if we have results only from one leg."""
+        command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations ./ --result_files {' '.join(bace_results_partial)}"
+        with pytest.raises(ValueError, match="Only results from one leg found. Found results for solvent_spiro6_spiro15, but not for complex_spiro6_spiro15."):
+            cli_fix_network(shlex.split(command))
+
+
     def test_detect_failed_simulation(self, cmet_network, complete_cmet_results, capsys):
         """Make sure a message is printed when a simulation fails."""
         command = f"--input_alchem_network_file {cmet_network} --output_extra_transformations ./ --result_files {' '.join(complete_cmet_results)}"
         with pytest.raises(ValueError, match="Too few transformations found for solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402744_300_4"):
             cli_fix_network(shlex.split(command))
         assert "lig_CHEMBL3402745_200_5_solvent_lig_CHEMBL3402744_300_4_solvent_solvent.json is a failed simulation" in capsys.readouterr().out
+
 
     def test_do_nothing(self, bace_complete_results, input_alchemical_network, output_dir, tmp_path, capsys):
         """Make sure we can detect when there is nothing to do to the network"""
@@ -196,9 +224,10 @@ class TestScript:
         log = capsys.readouterr().out
         assert "Did not find disconnected components in alchemical network, nothing to do here!" in log
 
-    def test_fix_network_default(self, capsys, results, input_alchemical_network, output_dir, tmp_path, expected_transformations):
+
+    def test_fix_network_default(self, capsys, bace_results_subset, input_alchemical_network, output_dir, tmp_path, expected_transformations):
         temp_out_dir = tmp_path / output_dir
-        command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations {temp_out_dir} --result_files {' '.join(results)}"
+        command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations {temp_out_dir} --result_files {' '.join(bace_results_subset)}"
         cli_fix_network(shlex.split(command))
         log = capsys.readouterr().out
         # make sure all expected prints are emitted
@@ -231,7 +260,6 @@ class TestScript:
         default_settings = get_settings()
         for edge in new_network.edges:
             assert edge.protocol.settings == default_settings
-
 
 
     def test_fix_network_cofactor(self, eg5_network_subset, eg5_results, tmp_path, capsys):
