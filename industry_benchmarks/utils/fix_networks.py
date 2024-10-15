@@ -60,7 +60,8 @@ def _get_check_results_json(filename: str) -> None | dict:
 
 
 def get_transformation_alternate(
-    pur: dict, alchemical_network: AlchemicalNetwork
+    pur: dict,
+    alchemical_network: AlchemicalNetwork
 ) -> tuple[Transformation, str]:
     """
     Getting a transformation if things got deleted.
@@ -143,7 +144,8 @@ def get_transformation(pur: dict) -> tuple[Transformation, str]:
 
 
 def _check_and_deduplicate_transforms(
-    transforms_dict: dict[str, list[Transformation]]
+    transforms_dict: dict[str, list[Transformation]],
+    input_alchemical_network,
 ) -> AlchemicalNetwork:
     """
     Traverse through a dictionary of transformations keyed
@@ -188,15 +190,21 @@ def _check_and_deduplicate_transforms(
     mappings = [t.mapping for t in transform_list]
     for inx, e in enumerate(transform_list):
         if mappings.count(mappings[inx]) != 2:
-            errmsg = (
-                "Only results from one leg (either complex or solvent) found "
-                f"for {t_name}. This indicates a partially completed set of "
-                "results. All three repeats from one leg finished successfully"
-                " while no results have been found for the other leg. Please "
-                "ensure that your input network is finished "
-                "and any reproducible partial failures have been removed."
-            )
-            raise ValueError(errmsg)
+            for t in input_alchemical_network.edges:
+                # Find the transformation where the mapping is the same, but
+                # the components are different (different leg in the cycle).
+                if t.mapping == e.mapping and t.stateA.components != e.stateA.components:
+                    missing_name = t.name
+                    errmsg = (
+                        "Only results from one leg found. Found results for "
+                        f"{e.name}, but not for {missing_name}. This indicates "
+                        "a partially completed set of results. "
+                        "All three repeats from one leg finished successfully"
+                        " while no results have been found for the other leg. Please "
+                        "ensure that your input network is finished "
+                        "and any reproducible partial failures have been removed."
+                    )
+                    raise ValueError(errmsg)
 
     # If we want to allow partial results (here: allow results from only one repeat
     # would mean we treat the edge as completely failed, we'd have to add this
@@ -208,7 +216,7 @@ def _check_and_deduplicate_transforms(
 
 def parse_results(
     result_files: list[str],
-    input_ligand_network: LigandNetwork,
+    input_alchem_network: AlchemicalNetwork,
 ) -> AlchemicalNetwork:
     """
     Create an AlchemicalNetwork from a set of input JSON files.
@@ -234,7 +242,7 @@ def parse_results(
         if transform is None:
             # We delete the inputs data
             transform, phase = get_transformation_alternate(
-                ru, input_ligand_network
+                ru, input_alchem_network
             )
 
         if transform.name in all_transforms_dict:
@@ -242,7 +250,7 @@ def parse_results(
         else:
             all_transforms_dict[transform.name] = [transform]
 
-    alchemical_network = _check_and_deduplicate_transforms(all_transforms_dict)
+    alchemical_network = _check_and_deduplicate_transforms(all_transforms_dict, input_alchem_network)
 
     return alchemical_network
 
@@ -546,7 +554,7 @@ def fix_network(
 
     # Parse Alchemical Network
     print("LOG: Reading alchemical network result files")
-    res_alchemical_network = parse_results(result_files, input_ligand_network)
+    res_alchemical_network = parse_results(result_files, input_alchem_network)
     res_ligand_network = alchemical_network_to_ligand_network(
         res_alchemical_network
     )

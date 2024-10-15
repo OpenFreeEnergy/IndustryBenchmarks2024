@@ -204,7 +204,7 @@ class TestScript:
     def test_only_one_leg(self, input_alchemical_network, bace_results_partial):
         """Make sure an error is raised if we have results only from one leg."""
         command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations ./ --result_files {' '.join(bace_results_partial)}"
-        with pytest.raises(ValueError, match="found for solvent_spiro2_spiro3. This indicates a partially completed set of results"):
+        with pytest.raises(ValueError, match="Only results from one leg found. Found results for solvent_spiro6_spiro15, but not for complex_spiro6_spiro15."):
             cli_fix_network(shlex.split(command))
 
 
