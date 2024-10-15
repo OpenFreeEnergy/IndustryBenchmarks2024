@@ -218,7 +218,7 @@ def get_number_heavy_dummy_heavy_core_atoms(mapping: LigandAtomMapping)-> int:
     return size_core, size_dummy_A, size_dummy_B
 
 
-def get_fingerprint_similarity_score(mapping):
+def get_fingerprint_similarity_score(mapping: LigandAtomMapping)-> float:
     """
     Morgan fingerprint Tanimoto similarity scores.
     """
