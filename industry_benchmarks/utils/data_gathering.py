@@ -412,7 +412,7 @@ def gather_data(
     with open(file, mode='w') as f:
         json.dump(scores, f)
 
-    blinded_network = get_blinded_transformation_network(ligand_network)
+    blinded_network = get_transformation_network_map(ligand_network)
     # Save this to json
     file = pathlib.Path(output_dir / 'blinded_network.json')
     with open(file, mode='w') as f:
