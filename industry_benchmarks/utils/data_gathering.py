@@ -48,7 +48,7 @@ def get_number_rotatable_bonds(smc: SmallMoleculeComponent)->int:
     num_rotatable_bonds = Chem.rdMolDescriptors.CalcNumRotatableBonds(m, strict=True)
     return num_rotatable_bonds
 
-def get_number_ring_systems(smc):
+def get_number_ring_systems(smc: SmallMoleculeComponent)->int:
     """
     Calculates the number of ring systems in a molecule.
     """
