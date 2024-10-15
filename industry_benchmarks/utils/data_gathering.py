@@ -119,7 +119,7 @@ def get_alchemical_charge_difference(mapping: LigandAtomMapping) -> int:
     return chg_A - chg_B
 
 
-def get_shape_score(mapping):
+def get_shape_score(mapping: LigandAtomMapping)->float:
     """
     This function calculates the ShapeTanimoto distance (as implemented in RDKIt)
     for a given ligand pair.
