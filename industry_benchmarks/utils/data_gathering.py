@@ -6,11 +6,88 @@ import tqdm
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import gufe
+import gufe import SmallMoleculeComponent, LigandAtomMapping
 import openfe
 from openfe import LigandNetwork
 from kartograf.atom_mapping_scorer import (
     MappingRMSDScorer, MappingShapeOverlapScorer, MappingVolumeRatioScorer,
 )
+
+
+class AtomMappingScorer(abc.ABC):
+    """A generic class for scoring Atom mappings.
+    this class can be used for example to build graph algorithm based networks.
+
+    Implementations of this class can require an arbitrary and non-standardised
+    number of input arguments to create.
+
+    Implementations of this class provide the :meth:`.get_score` method
+
+    """
+
+    def __call__(self, mapping: AtomMapping) -> float:
+        return self.get_score(mapping)
+
+    @abc.abstractmethod
+    def get_score(self, mapping: AtomMapping) -> float:
+        """ calculate the score for an  :class:`.AtomMapping`
+            the scoring function returns a value between 0 and 1.
+            a value close to 1.0 indicates a small distance, a score close
+            to zero indicates a large cost/error.
+
+        Parameters
+        ----------
+        mapping: AtomMapping
+            the mapping to be scored
+        args
+        kwargs
+
+        Returns
+        -------
+        float
+            a value between [0,1] where one is a very bad score and 0 a very
+            good one.
+
+        """
+        pass
+
+
+class MoleculeChargeScorer(AtomMappingScorer):
+
+    def __init__(self, charge_class_change_punishment_factor: float = 0.1,
+                 smoothing_factor: float = 3.5):
+        self.charge_class_change_punishment_factor = charge_class_change_punishment_factor
+        self.smoothing_factor = smoothing_factor
+
+    @staticmethod
+    def charge_metric(chargeA: float, chargeB: float,
+                      charge_class_change_punishment_factor: float = 0.1,
+                      smoothing_factor: float = 3.5) -> float:
+        def get_charge_class(charge: float) -> int:
+            if charge > 0:
+                return 1
+            elif charge == 0:
+                return 2
+            else:
+                return 3
+
+        if get_charge_class(chargeA) == get_charge_class(chargeB):
+            dist = min(1, abs((chargeA - chargeB) / smoothing_factor))
+        elif abs(get_charge_class(chargeA) - get_charge_class(chargeB)) == 1:
+            dist = min(1, charge_class_change_punishment_factor + abs(
+                (chargeA - chargeB) / smoothing_factor))
+        else:
+            dist = min(1, 2 * charge_class_change_punishment_factor + abs(
+                (chargeA - chargeB) / smoothing_factor))
+
+        return 1 - dist
+
+    def get_score(self, atom_mapping: AtomMapping) -> float:
+        chargeA = Chem.GetFormalCharge(atom_mapping.componentA.to_rdkit())
+        chargeB = Chem.GetFormalCharge(atom_mapping.componentB.to_rdkit())
+        return self.charge_metric(chargeA=chargeA, chargeB=chargeB,
+                                  smoothing_factor=self.smoothing_factor,
+                                  charge_class_change_punishment_factor=self.charge_class_change_punishment_factor)
 
 
 def parse_ligand_network(
@@ -26,9 +103,9 @@ def parse_ligand_network(
     return network
 
 
-def get_blinded_transformation_network(
+def get_transformation_network_map(
     input_ligand_network: LigandNetwork,
-):
+) -> dict:
     """
     Blinded transformation network: Names of ligands and how they are connected.
     """
@@ -39,7 +116,7 @@ def get_blinded_transformation_network(
     return blinded_network
 
 
-def get_number_rotatable_bonds(smc):
+def get_number_rotatable_bonds(smc: SmallMoleculeComponent) -> int:
     """
     Calculates the number of rotatable bonds in a molecule.
     """
@@ -48,7 +125,7 @@ def get_number_rotatable_bonds(smc):
     num_rotatable_bonds = Chem.rdMolDescriptors.CalcNumRotatableBonds(m, strict=True)
     return num_rotatable_bonds
 
-def get_number_ring_systems(smc):
+def get_number_ring_systems(smc: SmallMoleculeComponent) -> int:
     """
     Calculates the number of ring systems in a molecule.
     """
@@ -57,7 +134,7 @@ def get_number_ring_systems(smc):
     num_rings = Chem.rdMolDescriptors.CalcNumRings(m)
     return num_rings
 
-def get_number_heavy_atoms(smc):
+def get_number_heavy_atoms(smc: SmallMoleculeComponent) -> int:
     """
     Calculates the number of heavy atoms in a molecule.
     """
@@ -66,7 +143,7 @@ def get_number_heavy_atoms(smc):
     num_heavy_atoms = Chem.rdMolDescriptors.CalcNumHeavyAtoms(m)
     return num_heavy_atoms
 
-def get_system_element_count(smc):
+def get_system_element_count(smc: SmallMoleculeComponent) -> int:
     """
     Calculates the number of unique elements in a molecule.
     """
@@ -75,7 +152,7 @@ def get_system_element_count(smc):
     atomic_numbers = [atom.GetAtomicNum() for atom in m.GetAtoms()]
     return len(set(atomic_numbers))
 
-def get_solvent_accessible_surface_area(smc):
+def get_solvent_accessible_surface_area(smc: SmallMoleculeComponent) -> float:
     """
     Calculates the solvent accessible surface area of a molecule.
     """
@@ -86,7 +163,7 @@ def get_solvent_accessible_surface_area(smc):
     return sasa
 
 
-def get_lomap_score(mapping):
+def get_lomap_score(mapping: SmallMoleculeComponent) -> float:
     """
     Calculates the LOMAP score of a LigandAtomMapping.
     """
@@ -94,7 +171,7 @@ def get_lomap_score(mapping):
     return score
 
 
-def get_alchemical_charge_difference(mapping) -> int:
+def get_alchemical_charge_difference(mapping: LigandAtomMapping) -> int:
     """
     Checks and returns the difference in formal charge between state A and B.
 
@@ -119,7 +196,16 @@ def get_alchemical_charge_difference(mapping) -> int:
     return chg_A - chg_B
 
 
-def get_shape_score(mapping):
+def get_charge_score(mapping: LigandAtomMapping) -> float:
+    """
+    This function calculates the Charge score of a ligand pair.
+    """
+    charge_scorer = MoleculeChargeScorer()
+    score = charge_scorer(mapping=mapping)
+    return score
+
+
+def get_shape_score(mapping: LigandAtomMapping) -> float:
     """
     This function calculates the ShapeTanimoto distance (as implemented in RDKIt)
     for a given ligand pair.
@@ -129,7 +215,7 @@ def get_shape_score(mapping):
     return score
 
 
-def get_volume_score(mapping):
+def get_volume_score(mapping: LigandAtomMapping) -> float:
     """
     This function calculates a Volume ratio based score
     returns a normalized value between 0 and 1, where 0 is the best
@@ -140,7 +226,7 @@ def get_volume_score(mapping):
     return score
 
 
-def get_mapping_RMSD_score(mapping):
+def get_mapping_RMSD_score(mapping: LigandAtomMapping) -> float:
     """
     This function calculates a mapping RMSD based score. The RMSD between
     mapped atoms of the edge is calculated.
@@ -152,7 +238,7 @@ def get_mapping_RMSD_score(mapping):
     return score
 
 
-def get_number_heavy_dummy_heavy_core_atoms(mapping):
+def get_number_heavy_dummy_heavy_core_atoms(mapping: LigandAtomMapping) -> int:
     """
     This function calculates the size of the mapped and unmapped regions of
     an edge.
@@ -218,7 +304,7 @@ def get_number_heavy_dummy_heavy_core_atoms(mapping):
     return size_core, size_dummy_A, size_dummy_B
 
 
-def get_fingerprint_similarity_score(mapping):
+def get_fingerprint_similarity_score(mapping: LigandAtomMapping) -> float:
     """
     Morgan fingerprint Tanimoto similarity scores.
     """
@@ -238,7 +324,7 @@ def get_fingerprint_similarity_score(mapping):
     return morgan_fp_score
 
 
-def get_changing_number_rotatable_bonds(mapping):
+def get_changing_number_rotatable_bonds(mapping: LigandAtomMapping) -> int:
     """
     Number of rotatable bonds in the non-core region
     """
@@ -248,7 +334,7 @@ def get_changing_number_rotatable_bonds(mapping):
     return abs(num_rot_bonds_A - num_rot_bonds_B)
 
 
-def get_changing_number_rings(mapping):
+def get_changing_number_rings(mapping: LigandAtomMapping) -> int:
     """
     Number of ring systems in the non-core region
     """
@@ -258,7 +344,7 @@ def get_changing_number_rings(mapping):
     return abs(num_rings_A - num_rings_B)
 
 
-def get_difference_solvent_accessible_surface_area(mapping):
+def get_difference_solvent_accessible_surface_area(mapping: LigandAtomMapping) -> float:
     """
     Difference in solvent accessible surface area between two ligands
     """
@@ -298,6 +384,8 @@ def gather_transformation_scores(
         edge_scores["lomap_score"] = lomap_score
         alchemical_charge_difference = get_alchemical_charge_difference(edge)
         edge_scores["alchemical_charge_difference"] = alchemical_charge_difference
+        charge_score = get_charge_score(edge)
+        edge_scores["charge_score"] = charge_score
         shape_score = get_shape_score(edge)
         edge_scores["shape_score"] = shape_score
         volume_score = get_volume_score(edge)
@@ -596,6 +684,8 @@ def gather_data(
     """
     # Make folder for outputs
     output_dir.mkdir(exist_ok=False, parents=True)
+
+    # GATHER Input based information
     alchemical_network = parse_alchemical_network(input_alchemical_network)
     ligand_network = extract_ligand_network(alchemical_network)
     # Combine old + new LigandNetwork if a fixed network is provided
@@ -614,13 +704,13 @@ def gather_data(
         "ligand_scores": ligand_scores,
     }
     # Save this to json
-    file = pathlib.Path(output_dir / 'scores.json')
+    file = pathlib.Path(output_dir / 'all_network_properties.json')
     with open(file, mode='w') as f:
         json.dump(scores, f)
 
-    blinded_network = get_blinded_transformation_network(ligand_network)
+    blinded_network = get_transformation_network_map(ligand_network)
     # Save this to json
-    file = pathlib.Path(output_dir / 'blinded_network.json')
+    file = pathlib.Path(output_dir / 'network_map.json')
     with open(file, mode='w') as f:
         json.dump(blinded_network, f)
 
