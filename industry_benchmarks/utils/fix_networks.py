@@ -145,7 +145,8 @@ def get_transformation(pur: dict) -> tuple[Transformation, str]:
 
 def _check_and_deduplicate_transforms(
     transforms_dict: dict[str, list[Transformation]],
-    input_alchemical_network,
+    input_alchemical_network: AlchemicalNetwork,
+    allow_missing: bool,
 ) -> AlchemicalNetwork:
     """
     Traverse through a dictionary of transformations keyed
@@ -155,8 +156,8 @@ def _check_and_deduplicate_transforms(
       * There are a total of 3 transformations per entry
       * The 3 transformations are the same
 
-    This removed transformations where only one leg of the cycle, either the
-    solvent or the complex, finished successfully.
+    Remove partially complete transformations where only one leg of the cycle, either the
+    solvent or the complex, finished successfully if `allow_missing` is `True` else raise an error.
 
     Returns
     -------
@@ -167,14 +168,22 @@ def _check_and_deduplicate_transforms(
 
     for t_name, t_list in transforms_dict.items():
         if len(t_list) != 3:
-            # TODO: we can turn this into a warning message if it's too painful
-            errmsg = (
-                f"Too few transformations found for {t_name} "
-                "this indicates a partially completed set of results. "
-                "Please ensure that your input network is finished and "
-                "any reproducible partial failures have been removed."
-            )
-            raise ValueError(errmsg)
+            # print a message if we want to allow missing repeats
+            if allow_missing:
+                errmsg = (f"Too few transformations found for {t_name} "
+                          f"this indicates a partially complete set of results. "
+                          f"This edge will be ignored, meaning it will be treated as if it had failed.")
+                print(errmsg)
+                # skip this edge
+                continue
+            else:
+                errmsg = (
+                    f"Too few transformations found for {t_name} "
+                    "this indicates a partially completed set of results. "
+                    "Please ensure that your input network is finished and "
+                    "any reproducible partial failures have been removed."
+                )
+                raise ValueError(errmsg)
         if not all(a == t_list[0] for a in t_list):
             errmsg = (
                 f"Transformations for {t_name} do not match "
@@ -184,32 +193,36 @@ def _check_and_deduplicate_transforms(
             raise ValueError(errmsg)
         transform_list.append(t_list[0])
 
-    # Only adds transformations if mappings are present twice, meaning both
-    # solvent and complex phases are present in the transform_list
-    # Check if both solvent and complex legs finished
+    # create a list of all mappings
+    # perfect results would have two mappings per edge, one for each phase
     mappings = [t.mapping for t in transform_list]
-    for inx, e in enumerate(transform_list):
-        if mappings.count(mappings[inx]) != 2:
-            for t in input_alchemical_network.edges:
-                # Find the transformation where the mapping is the same, but
-                # the components are different (different leg in the cycle).
-                if t.mapping == e.mapping and t.stateA.components != e.stateA.components:
-                    missing_name = t.name
-                    errmsg = (
-                        "Only results from one leg found. Found results for "
-                        f"{e.name}, but not for {missing_name}. This indicates "
-                        "a partially completed set of results. "
-                        "All three repeats from one leg finished successfully"
-                        " while no results have been found for the other leg. Please "
-                        "ensure that your input network is finished "
-                        "and any reproducible partial failures have been removed."
-                    )
-                    raise ValueError(errmsg)
 
-    # If we want to allow partial results (here: allow results from only one repeat
-    # would mean we treat the edge as completely failed, we'd have to add this
-    # in order to not add it to the "successful" edges:
-    # transform_list = [e for inx, e in enumerate(transform_list) if mappings.count(mappings[inx]) == 2]
+    if allow_missing:
+        # If we want to allow partial results (here: allow results from only one repeat
+        # would mean we treat the edge as completely failed, we'd have to add this
+        # in order to not add it to the "successful" edges:
+        transform_list = [e for inx, e in enumerate(transform_list) if mappings.count(mappings[inx]) == 2]
+    else:
+        # Only adds transformations if mappings are present twice, meaning both
+        # solvent and complex phases are present in the transform_list
+        # Check if both solvent and complex legs finished
+        for inx, e in enumerate(transform_list):
+            if mappings.count(mappings[inx]) != 2:
+                for t in input_alchemical_network.edges:
+                    # Find the transformation where the mapping is the same, but
+                    # the components are different (different leg in the cycle).
+                    if t.mapping == e.mapping and t.stateA.components != e.stateA.components:
+                        missing_name = t.name
+                        errmsg = (
+                            "Only results from one leg found. Found results for "
+                            f"{e.name}, but not for {missing_name}. This indicates "
+                            "a partially completed set of results. "
+                            "All three repeats from one leg finished successfully"
+                            " while no results have been found for the other leg. Please "
+                            "ensure that your input network is finished "
+                            "and any reproducible partial failures have been removed."
+                        )
+                        raise ValueError(errmsg)
 
     return AlchemicalNetwork(transform_list)
 
@@ -217,6 +230,7 @@ def _check_and_deduplicate_transforms(
 def parse_results(
     result_files: list[str],
     input_alchem_network: AlchemicalNetwork,
+    allow_missing: bool
 ) -> AlchemicalNetwork:
     """
     Create an AlchemicalNetwork from a set of input JSON files.
@@ -250,7 +264,7 @@ def parse_results(
         else:
             all_transforms_dict[transform.name] = [transform]
 
-    alchemical_network = _check_and_deduplicate_transforms(all_transforms_dict, input_alchem_network)
+    alchemical_network = _check_and_deduplicate_transforms(all_transforms_dict, input_alchem_network, allow_missing)
 
     return alchemical_network
 
@@ -545,6 +559,7 @@ def fix_network(
     result_files: list[str],
     input_alchem_network_file: pathlib.Path,
     output_alchemical_network_folder: pathlib.Path,
+    allow_missing: bool,
 ):
     print("Parsing input files:")
     # Parse Ligand Network
@@ -554,7 +569,7 @@ def fix_network(
 
     # Parse Alchemical Network
     print("LOG: Reading alchemical network result files")
-    res_alchemical_network = parse_results(result_files, input_alchem_network)
+    res_alchemical_network = parse_results(result_files, input_alchem_network, allow_missing)
     res_ligand_network = alchemical_network_to_ligand_network(
         res_alchemical_network
     )
@@ -666,6 +681,13 @@ def parse_args(arg_list = None):
         help="Results JSON file(s)",
         required=True,
     )
+    parser.add_argument(
+        "--allow-missing",
+        help="If we should ignore partially complete or missing edges and fix the network "
+             "rather than fail. By default this flag is set to `False`, meaning the script will raise an error if results are incomplete.",
+        action="store_true",
+        default=False,
+    )
     args = parser.parse_args(arg_list)
     return args
 
@@ -675,6 +697,7 @@ def cli_fix_network(arg_list = None):
         result_files=args.result_files,
         input_alchem_network_file=args.input_alchem_network_file,
         output_alchemical_network_folder=args.output_extra_transformations,
+        allow_missing=args.allow_missing,
     )
 
 # main Runs

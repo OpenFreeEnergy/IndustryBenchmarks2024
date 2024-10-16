@@ -137,7 +137,8 @@ def test_parse_alchemical_network(input_alchemical_network):
 
 def test_parse_results_missing(bace_results_subset, input_alchemical_network):
     """Test parsing the results files with missing results"""
-    result_alchem_network = parse_results(bace_results_subset, input_alchemical_network)
+    alchem_network = parse_alchemical_network(input_alchemical_network)
+    result_alchem_network = parse_results(bace_results_subset, alchem_network, allow_missing=True)
     assert isinstance(result_alchem_network, gufe.AlchemicalNetwork)
     # only 6 edges (12 transformations) had completed successfully
     assert len(result_alchem_network.edges) == 12
@@ -147,9 +148,24 @@ def test_parse_results_missing(bace_results_subset, input_alchemical_network):
     assert len(ligand_network.edges) == 6
 
 
+def test_parse_results_missing_repeats(bace_results_subset, input_alchemical_network):
+    """Make sure an error is raised when collecting incomplete results."""
+    alchem_network = parse_alchemical_network(input_alchemical_network)
+    with pytest.raises(ValueError, match="Too few transformations found for solvent_spiro2_spiro1"):
+        _ = parse_results(bace_results_subset[:1], alchem_network, allow_missing=False)
+
+
+def test_parse_results_missing_phase(bace_results_partial, input_alchemical_network):
+    """Make sure an error is raised if we have a missing phase."""
+    alchem_network = parse_alchemical_network(input_alchemical_network)
+    with pytest.raises(ValueError, match="Only results from one leg found."):
+        _ = parse_results(bace_results_partial, alchem_network, allow_missing=False)
+
+
 def test_parse_results_complete(bace_complete_results, input_alchemical_network):
     """Make sure all results can be extracted for a complete network"""
-    result_alchem_network = parse_results(bace_complete_results, input_alchemical_network)
+    alchem_network = parse_alchemical_network(input_alchemical_network)
+    result_alchem_network = parse_results(bace_complete_results, alchem_network, allow_missing=False)
     # all edges should have finished for this network
     # 11 edges with two legs should be 22 transformations
     assert len(result_alchem_network.edges) == 22
@@ -159,7 +175,8 @@ def test_parse_results_complete(bace_complete_results, input_alchemical_network)
 
 def test_decompose_network(bace_results_subset, input_alchemical_network):
     """Make sure we can correctly identify the subnetworks in a failed network"""
-    result_alchem_network = parse_results(bace_results_subset, input_alchemical_network)
+    alchem_network = parse_alchemical_network(input_alchemical_network)
+    result_alchem_network = parse_results(bace_results_subset, alchem_network, allow_missing=False)
     result_ligand_network = alchemical_network_to_ligand_network(result_alchem_network)
     ligand_sub_networks = decompose_disconnected_ligand_network(result_ligand_network)
     assert [len(sb.nodes) for sb in ligand_sub_networks] == [6]
@@ -171,20 +188,14 @@ def test_get_transform_alternate(input_alchemical_network, bace_cleaned_result):
         open(bace_cleaned_result, "r"),
         cls=JSON_HANDLER.decoder
     )
-    alchemical_network = AlchemicalNetwork.from_dict(
-        json.load(open(input_alchemical_network, "r"),
-        cls=JSON_HANDLER.decoder
-    ))
+    alchemical_network = parse_alchemical_network(input_alchemical_network)
     transform, phase = get_transformation_alternate(pur=result, alchemical_network=alchemical_network)
     assert phase == "complex"
 
 
 def test_charge_settings(eg5_charge_change):
     """Make sure a warning is raised if we fix a network with charge changes."""
-    alchemical_network = AlchemicalNetwork.from_dict(
-        json.load(open(eg5_charge_change, "r"),
-        cls=JSON_HANDLER.decoder
-    ))
+    alchemical_network = parse_alchemical_network(eg5_charge_change)
     ligand_network = alchemical_network_to_ligand_network(alchemical_network)
     # mock the data
     with pytest.warns(UserWarning, match="Charge changing transformation between ligands"):
@@ -206,6 +217,17 @@ class TestScript:
         command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations ./ --result_files {' '.join(bace_results_partial)}"
         with pytest.raises(ValueError, match="Only results from one leg found. Found results for solvent_spiro6_spiro15, but not for complex_spiro6_spiro15."):
             cli_fix_network(shlex.split(command))
+
+    def test_allow_missing(self, input_alchemical_network, bace_results_partial, tmp_path, capsys, output_dir):
+        """Make sure the errors are turned off when we allow missing results and check the correct messages are displayed."""
+        temp_out_dir = tmp_path / output_dir
+        command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations {temp_out_dir} --result_files {' '.join(bace_results_partial[1:])} --allow-missing"
+        cli_fix_network(shlex.split(command))
+        log = capsys.readouterr().out
+        # make sure we triggerd the message about too few transformations
+        assert "Too few transformations found for solvent_spiro2_spiro1 this indicates a partially complete set of results." in log
+        assert "This edge will be ignored, meaning it will be treated as if it had failed." in log
+
 
 
     def test_detect_failed_simulation(self, cmet_network, complete_cmet_results, capsys):
@@ -300,3 +322,4 @@ class TestScript:
                 assert isinstance(edge.stateB.components["protein"], ProteinComponent)
                 total_cofactors += 1
         assert total_cofactors == 3
+
