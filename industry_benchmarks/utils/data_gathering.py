@@ -15,6 +15,24 @@ from kartograf.atom_mapping_scorer import (
 import abc
 import shutil
 
+
+# define all the result files we want to collect
+RESULT_FILES = [
+    # data files
+    "structural_analysis_data.npz",
+    "energy_replica_state.npz",
+    "simulation_real_time_analysis",
+    "info.yaml",
+    # png analysis files,
+    "forward_reverse_convergence.png",
+    "ligand_COM_drift.png",
+    "ligand_RMSD.png",
+    "mbar_overlap_matrix.png",
+    "protein_2D_RMSD.png",
+    "replica_exchange_matrix.png",
+    "replica_state_timeseries.png"
+]
+
 class AtomMappingScorer(abc.ABC):
     """A generic class for scoring Atom mappings.
     this class can be used for example to build graph algorithm based networks.
@@ -560,14 +578,9 @@ def find_data_folder(result: dict) -> None | pathlib.Path:
             return None
 
     # now check that all of the results files can be found in the folder
-    for f_name in [
-        "structural_analysis_data.npz",
-        "energy_replica_state.npz",
-        "simulation_real_time_analysis",
-        "info.yaml"
-    ]:
+    for f_name in RESULT_FILES:
         if not results_dir.joinpath(f_name).exists():
-            print(f"Can't find cleaned results files for {f_name}")
+            print(f"Can't find cleaned results files for {f_name} in {results_dir}")
             return None
 
     return results_dir
@@ -641,12 +654,7 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
             output_path.mkdir(parents=True, exist_ok=False)
             result_file: pathlib.Path
             shutil.copy(result_file, output_path.joinpath(result_file.name))
-            for f_name in [
-                "structural_analysis_data.npz",
-                "energy_replica_state.npz",
-                "simulation_real_time_analysis",
-                "info.yaml"
-            ]:
+            for f_name in RESULT_FILES:
                 shutil.copy(results_dir.joinpath(f_name), output_path.joinpath(f_name))
 
     # workout which edges must have failed
