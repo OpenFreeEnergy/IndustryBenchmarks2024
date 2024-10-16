@@ -174,6 +174,8 @@ def _check_and_deduplicate_transforms(
                           f"this indicates a partially complete set of results."
                           f"This edge will be ignored.")
                 print(errmsg)
+                # skip this edge
+                continue
             else:
                 errmsg = (
                     f"Too few transformations found for {t_name} "
@@ -681,8 +683,10 @@ def parse_args(arg_list = None):
     )
     parser.add_argument(
         "--allow-missing",
-        help="If we should ignore partially complete or missing edges and fix the network rather than fail",
-        action="store_true"
+        help="If we should ignore partially complete or missing edges and fix the network "
+             "rather than fail by default this is `False` and will raise an error.",
+        action="store_true",
+        default=False,
     )
     args = parser.parse_args(arg_list)
     return args
