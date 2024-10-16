@@ -3,6 +3,7 @@ import pathlib
 import json
 import rdkit
 import tqdm
+from openmmtools.alchemy import AlchemicalState
 from rdkit import Chem
 from rdkit.Chem import AllChem
 import gufe
@@ -15,6 +16,7 @@ from kartograf.atom_mapping_scorer import (
 import abc
 import shutil
 
+from industry_benchmarks.utils.tests.test_extract_results import ligand_network
 
 # define all the result files we want to collect
 RESULT_FILES = [
@@ -608,6 +610,18 @@ def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork)
     name = f"{phase}_{ligmap.componentA.name}_{ligmap.componentB.name}"
     return name
 
+def check_network_is_connected(results_data: dict, alchemical_network: gufe.AlchemicalNetwork) -> bool:
+    """Build a network from the results and check the network is connected."""
+    edges = []
+    for transform in alchemical_network.edges:
+        if transform.name in results_data and len(results_data[transform.name]) == 3:
+            edges.append(transform)
+
+    # extract the ligand network and check its connected
+    result_network = gufe.AlchemicalNetwork(edges=edges)
+    ligand_network = extract_ligand_network(result_network)
+    return ligand_network.is_connected()
+
 
 def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork) -> list[str]:
     """
@@ -647,6 +661,11 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
     # Write stats on the number of transformations found
     found_results = sum([len(v) for v in all_results.values()])
     print(f"Total results found {found_results}/{expected_results} indicating {expected_results - found_results} failed transformations.")
+    # check we have a connected network
+    if not check_network_is_connected(results_data=all_results, alchemical_network=alchemical_network):
+        raise ValueError(f"The network built from the complete results is disconnected, some simulations may still be"
+                         f"running or needed restarting. Reproducible edge failures may require extract edges which "
+                         f"can be generated using the `fix_networks.py` script.")
     # move the results to the output folder
     for transformation_name, results in tqdm.tqdm(all_results.items(), desc="Collecting files", total=len(all_results), ncols=80):
         for i, result_file, results_dir in enumerate(results):
