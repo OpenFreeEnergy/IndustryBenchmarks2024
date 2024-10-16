@@ -13,6 +13,7 @@ from kartograf.atom_mapping_scorer import (
     MappingRMSDScorer, MappingShapeOverlapScorer, MappingVolumeRatioScorer,
 )
 import abc
+import shutil
 
 class AtomMappingScorer(abc.ABC):
     """A generic class for scoring Atom mappings.
@@ -626,11 +627,27 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
                 if transformation_name in all_results and simulation_data_file is not None:
                     all_results[transformation_name].append((results_file, simulation_data_file))
                 elif transformation_name not in all_results:
-                    print(f"Found a result for {transformation_name} which was not expected")
-                    continue
-    # make sure we found the expected number of results
-    assert sum([len(v) for v in all_results.values()]) == expected_results
+                    error_message = (f"Found a result for {transformation_name} which was not expected "
+                                     f"from the alchemical network.")
+                    raise ValueError(error_message)
+
+    # Write stats on the number of transformations found
+    found_results = sum([len(v) for v in all_results.values()])
+    print(f"Total results found {found_results}/{expected_results} indicating {expected_results - found_results} failed transformations.")
     # move the results to the output folder and compress?
+    for transformation_name, results in tqdm.tqdm(all_results.items(), desc="Collecting files", total=len(all_results), ncols=80):
+        for i, result_file, results_dir in enumerate(results):
+            output_path = output_dir.joinpath(transformation_name, f"repeat_{i}")
+            output_path.mkdir(parents=True, exist_ok=False)
+            result_file: pathlib.Path
+            shutil.copy(result_file, output_path.joinpath(result_file.name))
+            for f_name in [
+                "structural_analysis_data.npz",
+                "energy_replica_state.npz",
+                "simulation_real_time_analysis",
+                "info.yaml"
+            ]:
+                shutil.copy(results_dir.joinpath(f_name), output_path.joinpath(f_name))
 
     # workout which edges must have failed
     for name, results in all_results.items():
@@ -734,6 +751,9 @@ def gather_data(
     file = pathlib.Path(output_dir / 'network_map.json')
     with open(file, mode='w') as f:
         json.dump(blinded_network, f)
+
+    # finally zip the folder
+    shutil.make_archive("all_results.zip", "zip", output_dir.as_posix())
 
 
 
