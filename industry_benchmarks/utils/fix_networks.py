@@ -684,7 +684,7 @@ def parse_args(arg_list = None):
     parser.add_argument(
         "--allow-missing",
         help="If we should ignore partially complete or missing edges and fix the network "
-             "rather than fail by default this is `False` and will raise an error.",
+             "rather than fail. By default this flag is set to `False`, meaning the script will raise an error if results are incomplete.",
         action="store_true",
         default=False,
     )
