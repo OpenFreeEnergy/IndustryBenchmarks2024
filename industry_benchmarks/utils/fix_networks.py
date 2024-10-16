@@ -170,8 +170,8 @@ def _check_and_deduplicate_transforms(
         if len(t_list) != 3:
             # print a message if we want to allow missing repeats
             if allow_missing:
-                errmsg = (f"Too few transformations found for {t_name}"
-                          f"this indicates a partially complete set of results."
+                errmsg = (f"Too few transformations found for {t_name} "
+                          f"this indicates a partially complete set of results. "
                           f"This edge will be ignored, meaning it will be treated as if it had failed.")
                 print(errmsg)
                 # skip this edge

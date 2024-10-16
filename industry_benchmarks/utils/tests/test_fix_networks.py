@@ -218,6 +218,17 @@ class TestScript:
         with pytest.raises(ValueError, match="Only results from one leg found. Found results for solvent_spiro6_spiro15, but not for complex_spiro6_spiro15."):
             cli_fix_network(shlex.split(command))
 
+    def test_allow_missing(self, input_alchemical_network, bace_results_partial, tmp_path, capsys, output_dir):
+        """Make sure the errors are turned off when we allow missing results and check the correct messages are displayed."""
+        temp_out_dir = tmp_path / output_dir
+        command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations {temp_out_dir} --result_files {' '.join(bace_results_partial[1:])} --allow-missing"
+        cli_fix_network(shlex.split(command))
+        log = capsys.readouterr().out
+        # make sure we triggerd the message about too few transformations
+        assert "Too few transformations found for solvent_spiro2_spiro1 this indicates a partially complete set of results." in log
+        assert "This edge will be ignored, meaning it will be treated as if it had failed." in log
+
+
 
     def test_detect_failed_simulation(self, cmet_network, complete_cmet_results, capsys):
         """Make sure a message is printed when a simulation fails."""
@@ -311,3 +322,4 @@ class TestScript:
                 assert isinstance(edge.stateB.components["protein"], ProteinComponent)
                 total_cofactors += 1
         assert total_cofactors == 3
+
