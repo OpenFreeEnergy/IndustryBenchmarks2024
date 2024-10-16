@@ -574,14 +574,15 @@ def find_data_folder(result: dict) -> None | pathlib.Path:
         )
         # Now we should check if the dir exists
         if not results_dir.is_dir():
-            print("Can't find results directory, skipping")
-            return None
+            error_message = f"Can't find results directory: {results_dir}"
+            raise FileNotFoundError(error_message)
 
     # now check that all of the results files can be found in the folder
     for f_name in RESULT_FILES:
         if not results_dir.joinpath(f_name).exists():
-            print(f"Can't find cleaned results files for {f_name} in {results_dir}")
-            return None
+            error_message = f"Can't find cleaned results files for {f_name} in {results_dir}"
+            raise FileNotFoundError(error_message)
+
 
     return results_dir
 
@@ -622,8 +623,7 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
     missing_results = []
     all_results = {}
     for edge in alchemical_network.edges:
-        for phase in ["complex", "solvent"]:
-            all_results[f"{phase}_{edge.stateA.components['ligand'].name}-{edge.stateB.components['ligand'].name}"] = []
+        all_results[edge.name] = []
     expected_results = len(all_results) * 3
 
     # map the transformation to the results files
@@ -647,7 +647,7 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
     # Write stats on the number of transformations found
     found_results = sum([len(v) for v in all_results.values()])
     print(f"Total results found {found_results}/{expected_results} indicating {expected_results - found_results} failed transformations.")
-    # move the results to the output folder and compress?
+    # move the results to the output folder
     for transformation_name, results in tqdm.tqdm(all_results.items(), desc="Collecting files", total=len(all_results), ncols=80):
         for i, result_file, results_dir in enumerate(results):
             output_path = output_dir.joinpath(transformation_name, f"repeat_{i}")
