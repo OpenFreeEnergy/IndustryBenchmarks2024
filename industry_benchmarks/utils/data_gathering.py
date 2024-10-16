@@ -170,7 +170,14 @@ def get_lomap_score(mapping: SmallMoleculeComponent) -> float:
     return score
 
 
-def get_alchemical_charge_difference(mapping: LigandAtomMapping) -> int:
+def get_formal_charge(smc: openfe.SmallMoleculeComponent) -> int:
+    """
+    Return the formal charge of a molecule
+    """
+    return Chem.rdmolops.GetFormalCharge(smc.to_rdkit())
+
+
+def get_alchemical_charge_difference(mapping) -> int:
     """
     Checks and returns the difference in formal charge between state A and B.
 
@@ -185,12 +192,8 @@ def get_alchemical_charge_difference(mapping: LigandAtomMapping) -> int:
       The formal charge difference between states A and B.
       This is defined as sum(charge state A) - sum(charge state B)
     """
-    chg_A = Chem.rdmolops.GetFormalCharge(
-        mapping.componentA.to_rdkit()
-    )
-    chg_B = Chem.rdmolops.GetFormalCharge(
-        mapping.componentB.to_rdkit()
-    )
+    chg_A = get_formal_charge(mapping.componentA)
+    chg_B = get_formal_charge(mapping.componentB)
 
     return chg_A - chg_B
 
@@ -419,6 +422,8 @@ def gather_ligand_scores(
         Number of rings
         Number of heavy atoms
         system element counts
+        solvent accessible surface area
+        formal charge
     Returns
     -------
     dict[str, dict[str, int]]
@@ -439,6 +444,8 @@ def gather_ligand_scores(
         ligand_scores["num_elements"] = num_elements
         sasa = get_solvent_accessible_surface_area(node)
         ligand_scores["solvent_accessible_surface_area"] = sasa
+        formal_charge = get_formal_charge(node)
+        ligand_scores["formal_charge"] = formal_charge
 
         all_ligand_scores[name] = ligand_scores
 
