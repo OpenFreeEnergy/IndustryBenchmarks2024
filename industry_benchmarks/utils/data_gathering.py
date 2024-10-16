@@ -164,7 +164,7 @@ def get_solvent_accessible_surface_area(smc: SmallMoleculeComponent) -> float:
     return sasa
 
 
-def get_lomap_score(mapping: SmallMoleculeComponent) -> float:
+def get_lomap_score(mapping: LigandAtomMapping) -> float:
     """
     Calculates the LOMAP score of a LigandAtomMapping.
     """
