@@ -13,7 +13,7 @@ from openfe import LigandNetwork
 from kartograf.atom_mapping_scorer import (
     MappingRMSDScorer, MappingShapeOverlapScorer, MappingVolumeRatioScorer,
 )
-
+import abc
 
 class AtomMappingScorer(abc.ABC):
     """A generic class for scoring Atom mappings.
