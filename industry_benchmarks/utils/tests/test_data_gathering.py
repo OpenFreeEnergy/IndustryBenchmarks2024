@@ -18,12 +18,12 @@ from ..data_gathering import (
     get_difference_solvent_accessible_surface_area,
     get_charge_score,
     get_alchemical_charge_difference,
+    get_formal_charge,
 )
 import pytest
 from importlib import resources
-from gufe import LigandNetwork, LigandAtomMapping, SmallMoleculeComponent
+from gufe import LigandNetwork
 import numpy as np
-from rdkit import Chem
 
 @pytest.fixture
 def cmet_ligand_network() -> LigandNetwork:
@@ -113,6 +113,11 @@ def test_number_of_elements(cmet_ligand_network):
     element_numbers = sorted([get_system_element_count(node) for node in cmet_ligand_network.nodes])
     assert np.allclose(element_numbers, expected_element_numbers)
 
+def test_formal_charge(cmet_ligand_network):
+    expected_charges = [0, 0, 0, 0, 0]
+    charges = sorted([get_formal_charge(node) for node in cmet_ligand_network.nodes])
+    assert np.allclose(charges, expected_charges)
+
 def test_gather_ligand_scores(cmet_ligand_network):
     all_ligand_scores = gather_ligand_scores(cmet_ligand_network)
     assert len(all_ligand_scores) == 5
@@ -122,6 +127,7 @@ def test_gather_ligand_scores(cmet_ligand_network):
         assert "num_heavy_atoms" in ligand_data
         assert "num_elements" in ligand_data
         assert "solvent_accessible_surface_area" in ligand_data
+        assert "formal_charge" in ligand_data
 
 
 def test_changing_number_of_rings(cmet_ligand_network):
