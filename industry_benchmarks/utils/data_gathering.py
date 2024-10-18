@@ -1,11 +1,12 @@
 import click
 import pathlib
 import json
+import abc
 import rdkit
 import tqdm
-from openmmtools.alchemy import AlchemicalState
 from rdkit import Chem
 from rdkit.Chem import AllChem
+from rdkit.Chem import rdFreeSASA
 import gufe
 from gufe import SmallMoleculeComponent, LigandAtomMapping, AtomMapping
 import openfe
@@ -13,7 +14,6 @@ from openfe import LigandNetwork
 from kartograf.atom_mapping_scorer import (
     MappingRMSDScorer, MappingShapeOverlapScorer, MappingVolumeRatioScorer,
 )
-import abc
 import shutil
 
 from industry_benchmarks.utils.tests.test_extract_results import ligand_network
@@ -34,6 +34,7 @@ RESULT_FILES = [
     "replica_exchange_matrix.png",
     "replica_state_timeseries.png"
 ]
+import abc
 
 class AtomMappingScorer(abc.ABC):
     """A generic class for scoring Atom mappings.
@@ -184,7 +185,7 @@ def get_solvent_accessible_surface_area(smc: SmallMoleculeComponent) -> float:
     return sasa
 
 
-def get_lomap_score(mapping: SmallMoleculeComponent) -> float:
+def get_lomap_score(mapping: LigandAtomMapping) -> float:
     """
     Calculates the LOMAP score of a LigandAtomMapping.
     """
@@ -192,7 +193,14 @@ def get_lomap_score(mapping: SmallMoleculeComponent) -> float:
     return score
 
 
-def get_alchemical_charge_difference(mapping: LigandAtomMapping) -> int:
+def get_formal_charge(smc: SmallMoleculeComponent) -> int:
+    """
+    Return the formal charge of a molecule
+    """
+    return Chem.rdmolops.GetFormalCharge(smc.to_rdkit())
+
+
+def get_alchemical_charge_difference(mapping) -> int:
     """
     Checks and returns the difference in formal charge between state A and B.
 
@@ -207,12 +215,8 @@ def get_alchemical_charge_difference(mapping: LigandAtomMapping) -> int:
       The formal charge difference between states A and B.
       This is defined as sum(charge state A) - sum(charge state B)
     """
-    chg_A = Chem.rdmolops.GetFormalCharge(
-        mapping.componentA.to_rdkit()
-    )
-    chg_B = Chem.rdmolops.GetFormalCharge(
-        mapping.componentB.to_rdkit()
-    )
+    chg_A = get_formal_charge(mapping.componentA)
+    chg_B = get_formal_charge(mapping.componentB)
 
     return chg_A - chg_B
 
@@ -441,6 +445,8 @@ def gather_ligand_scores(
         Number of rings
         Number of heavy atoms
         system element counts
+        solvent accessible surface area
+        formal charge
     Returns
     -------
     dict[str, dict[str, int]]
@@ -461,6 +467,8 @@ def gather_ligand_scores(
         ligand_scores["num_elements"] = num_elements
         sasa = get_solvent_accessible_surface_area(node)
         ligand_scores["solvent_accessible_surface_area"] = sasa
+        formal_charge = get_formal_charge(node)
+        ligand_scores["formal_charge"] = formal_charge
 
         all_ligand_scores[name] = ligand_scores
 
@@ -763,21 +771,17 @@ def gather_data(
     for failed_edge in failed_transforms:
         transformation_scores[failed_edge]["failed"] = True
 
+    blinded_network = get_transformation_network_map(ligand_network)
     # Create a single dict of all scores
-    scores = {
+    network_properties = {
+        "Network_map": blinded_network,
         "transformation_scores": transformation_scores,
         "ligand_scores": ligand_scores,
     }
     # Save this to json
     file = pathlib.Path(output_dir / 'all_network_properties.json')
     with open(file, mode='w') as f:
-        json.dump(scores, f)
-
-    blinded_network = get_transformation_network_map(ligand_network)
-    # Save this to json
-    file = pathlib.Path(output_dir / 'network_map.json')
-    with open(file, mode='w') as f:
-        json.dump(blinded_network, f)
+        json.dump(network_properties, f)
 
     # finally zip the folder
     shutil.make_archive("all_results.zip", "zip", output_dir.as_posix())
