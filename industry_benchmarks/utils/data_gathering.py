@@ -588,10 +588,14 @@ def find_data_folder(result: dict) -> None | pathlib.Path:
             raise FileNotFoundError(error_message)
 
     # now check that all of the results files can be found in the folder
+    # allow skipping of missing png files
     for f_name in RESULT_FILES:
-        if not results_dir.joinpath(f_name).exists():
-            error_message = f"Can't find cleaned results files for {f_name} in {results_dir}"
+        if not results_dir.joinpath(f_name).exists() and ".png" not in f_name:
+            error_message = f"Can't find cleaned results file: {f_name} in {results_dir}"
             raise FileNotFoundError(error_message)
+        else:
+            error_message = f"Can't find cleaned results file: {f_name} in {results_dir} skipping"
+            print(error_message)
 
 
     return results_dir
@@ -674,6 +678,7 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
         raise ValueError(f"The network built from the complete results is disconnected, some simulations may still be"
                          f"running or needed restarting. Reproducible edge failures may require extract edges which "
                          f"can be generated using the `fix_networks.py` script.")
+
     # move the results to the output folder
     for transformation_name, results in tqdm.tqdm(all_results.items(), desc="Collecting files", total=len(all_results), ncols=80):
         for i, result_file, results_dir in enumerate(results):
@@ -682,12 +687,17 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
             result_file: pathlib.Path
             shutil.copy(result_file, output_path.joinpath(result_file.name))
             for f_name in RESULT_FILES:
-                shutil.copy(results_dir.joinpath(f_name), output_path.joinpath(f_name))
+                target_file = results_dir.joinpath(f_name)
+                # we have already done error handling so just try and move files which are present
+                if target_file.exists():
+                    shutil.copy(target_file, output_path.joinpath(f_name))
 
     # workout which edges must have failed
     for name, results in all_results.items():
         if len(results) != 3:
-            missing_results.append(name.split("_")[-1])
+            _, lig_a, lig_b = name.split("_")
+            # use the name format which matches the gather_transformation_scores function
+            missing_results.append(f"edge_{lig_a}_{lig_b}")
 
     return missing_results
 
