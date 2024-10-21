@@ -250,19 +250,15 @@ def parse_results(
         if ru is None:
             continue
 
-        # TODO: fix this, for now this will just fail
         transform, phase = get_transformation(ru)
 
         if transform is None:
-            # We delete the inputs data
+            # Inputs were deleted from the results so use an alternative method to work it out
             transform, phase = get_transformation_alternate(
                 ru, input_alchem_network
             )
 
-        if transform.name in all_transforms_dict:
-            all_transforms_dict[transform.name].append(transform)
-        else:
-            all_transforms_dict[transform.name] = [transform]
+        all_transforms_dict[transform.name].append(transform)
 
     alchemical_network = _check_and_deduplicate_transforms(all_transforms_dict, input_alchem_network, allow_missing)
 
