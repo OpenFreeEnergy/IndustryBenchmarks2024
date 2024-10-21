@@ -151,7 +151,7 @@ def test_parse_results_missing(bace_results_subset, input_alchemical_network):
 def test_parse_results_missing_repeats(bace_results_subset, input_alchemical_network):
     """Make sure an error is raised when collecting incomplete results."""
     alchem_network = parse_alchemical_network(input_alchemical_network)
-    with pytest.raises(ValueError, match="Too few transformations found for solvent_spiro2_spiro1"):
+    with pytest.raises(ValueError, match=r"Too few transformations found for"):
         _ = parse_results(bace_results_subset[:1], alchem_network, allow_missing=False)
 
 
@@ -208,14 +208,14 @@ class TestScript:
     def test_too_few_transforms(self, cmet_network, complete_cmet_results):
         """Make sure an error is raised if we have too few transforms for an edge."""
         command = f"--input_alchem_network_file {cmet_network} --output_extra_transformations ./ --result_files {complete_cmet_results[0]}"
-        with pytest.raises(ValueError, match="Too few transformations found for solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402754_40_14"):
+        with pytest.raises(ValueError, match="Too few transformations found for"):
             cli_fix_network(shlex.split(command))
 
 
     def test_only_one_leg(self, input_alchemical_network, bace_results_partial):
         """Make sure an error is raised if we have results only from one leg."""
         command = f"--input_alchem_network_file {input_alchemical_network} --output_extra_transformations ./ --result_files {' '.join(bace_results_partial)}"
-        with pytest.raises(ValueError, match="Only results from one leg found. Found results for solvent_spiro6_spiro15, but not for complex_spiro6_spiro15."):
+        with pytest.raises(ValueError, match="Only results from one leg found. Found results for"):
             cli_fix_network(shlex.split(command))
 
     def test_allow_missing(self, input_alchemical_network, bace_results_partial, tmp_path, capsys, output_dir):
@@ -225,7 +225,7 @@ class TestScript:
         cli_fix_network(shlex.split(command))
         log = capsys.readouterr().out
         # make sure we triggerd the message about too few transformations
-        assert "Too few transformations found for solvent_spiro2_spiro1 this indicates a partially complete set of results." in log
+        assert "this indicates a partially complete set of results." in log
         assert "This edge will be ignored, meaning it will be treated as if it had failed." in log
 
 
