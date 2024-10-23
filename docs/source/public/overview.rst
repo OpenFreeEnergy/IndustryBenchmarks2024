@@ -250,7 +250,7 @@ You should follow this strategy for dealing with those failures:
 
 * If this is a non-redundant edge (meaning that removing this edge would lead to a disconnected graph):
 
-  * Add a new edge to the network. We are currently working on a script that will automatically find a suitable new edge.
+  * Add a new edge to the network. We provide a script that will automatically find a suitable new edge, more information can be found :ref:`here <fix_networks>`.
  
 Identifying Failed Edges
 ------------------------
@@ -277,6 +277,56 @@ If a directory like ``easy_rbfe_lig_ejm_31_solvent_lig_ejm_42_solvent/`` exists 
 The directory should be removed and the job should be resubmitted (depending on the failure type as discussed above).
 
 2. The extract results script mentioned :ref:`here <inspecting results>` and the cleanup script mentioned :ref:`here <post-simulation cleanup>` both include output of which folder(s) and ``json`` file(s) contain errors and can be removed prior to starting new jobs.
+
+.. _fix_networks:
+
+Fixing broken networks
+----------------------
+
+If removing a reproducibly failing edge leads to a disconnected graph, new edges need to be added in order to fix the broken network.
+There are different ways to detect broken networks:
+
+* You experienced failures during the plotting script or the script for extracting results (e.g. ``ValueError: Computational results are not fully connected``)
+* The number of ligands in the output ``dg.tsv`` file of the ``extract_results.py`` script is lower than the number of ligands the dataset should have
+
+Fixing the disconnected network can be achieved using the script provided under
+`utils/fix_networks.py <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/tree/main/industry_benchmarks/utils/fix_networks.py>`_.
+
+The script finds new edges to repair the disconnected network
+(two edges per disconnected network) and produces the inputs necessary to run those additional edges.
+
+Note that the script will throw an error if at least one repeat completed successfully. In that case (non-reproducible failure) we recommend re-running the failed jobs (see :ref:`Handling failed edges <failed_edges>`
+
+Here an example of how to run the script:
+
+.. code-block:: bash
+
+   python fix_networks.py --input_alchem_network_file network_setup/alchemicalNetwork/alchemical_network.json --result_files results_*/*json --output_extra_transformations new_network_setup
+
+The script takes as inputs the ``AlchemicalNetwork`` from the original setup (e.g. ``network_setup/alchemicalNetwork/alchemical_network.json``), the result ``.json`` files (e.g. ``results_*/*json``, and the folder name for storing the outputs (e.g. ``new_network_setup``).
+This command will create a folder (named ``new_network_setup`` as specified using the ``--output_extra_transformations`` flag) that contains a ``transformations`` folder with a separate .json file for the solvent and complex legs for every new edge connecting the previously broken network.
+The ``new_network_setup`` folder also contains a ``ligand_network.graphml`` file as well as an ``alchemical_network.json`` file containing the serialized version of the new ``LigandNetwork`` and ``AlchemicalNetwork``. These networks only contain the additional edges and not the full new network.
+
+Once the inputs for the edges to fix the broken network have been created, you can submit those calculations as described in the :ref:`Simulation execution section <simulation_execution>`.
+Note that you will have to update the filepath to point to the new input .json files, e.g.
+
+.. code-block:: bash
+
+   for file in new_network_setup/transformations/*.json; do
+     relpath="${file:30}"  # strip off "network_setup/"
+     dirpath=${relpath%.*}  # strip off final ".json"
+     jobpath="new_network_setup/transformations/${dirpath}.job"
+     if [ -f "${jobpath}" ]; then
+       echo "${jobpath} already exists"
+       exit 1
+     fi
+     for repeat in {0..2}; do
+       cmd="openfe quickrun ${file} -o results_${repeat}/${relpath} -d results_${repeat}/${dirpath}"
+       echo -e "#!/usr/bin/env bash\n${cmd}" > "${jobpath}"
+       sbatch "${jobpath}"
+     done
+   done
+
 
 Inspecting Results
 ==================
