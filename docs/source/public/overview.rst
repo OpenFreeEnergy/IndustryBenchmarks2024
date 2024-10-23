@@ -313,7 +313,7 @@ Note that you will have to update the filepath to point to the new input .json f
 .. code-block:: bash
 
    for file in new_network_setup/transformations/*.json; do
-     relpath="${file:30}"  # strip off "network_setup/"
+     relpath="${file:34}"  # strip off "new_network_setup/"
      dirpath=${relpath%.*}  # strip off final ".json"
      jobpath="new_network_setup/transformations/${dirpath}.job"
      if [ -f "${jobpath}" ]; then
