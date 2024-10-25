@@ -252,8 +252,8 @@ def run_inputs(ligands, pdb, cofactors, output):
             sysA = openfe.ChemicalSystem(sysA_dict)
             sysB = openfe.ChemicalSystem(sysB_dict)
 
-            name = (f"{leg}_{mapping.componentA.name}_"
-                    f"{mapping.componentB.name}")
+            name = (f"{leg}_{mapping.componentA.name.replace(' ', '_')}_"
+                    f"{mapping.componentB.name.replace(' ', '_')}")
 
             rbfe_protocol = RelativeHybridTopologyProtocol(settings=rfe_settings)
             transformation = openfe.Transformation(
