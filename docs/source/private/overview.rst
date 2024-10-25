@@ -192,7 +192,7 @@ Handling Failed Edges
 
 You should handle failed edges in the same way as the :ref:`public datasets <failed_edges>`.
 
-A script to try to fix broken networks will soon be provided.
+Reproducible failures which result in broken networks can be fixed using the same method as the :ref:`public datasets <failed_edges>`.
 
 
 Phase 2: Data Gathering
