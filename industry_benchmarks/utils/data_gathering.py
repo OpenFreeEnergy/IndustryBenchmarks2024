@@ -453,6 +453,42 @@ def gather_ligand_scores(
 
     return all_ligand_scores
 
+def replace_ligand_names(ligand_network: LigandNetwork) -> tuple[LigandNetwork, dict[str, str]]:
+    """
+    Replace the names of the ligands in the network with generic names and return a mapping of the current name to
+        the generic one of the form ligand1
+
+    Parameters
+    ----------
+    ligand_network:
+        The ligand network with ligands that should have their name replaced.
+
+    Returns
+    -------
+    A tuple of the new ligand network and a dict mapping the old name to the new ligand name.
+    """
+
+    # store a mapping of names
+    name_mapping = {}
+    # create new small molecules for the network
+    node_mapping = {}
+    # create new names for each ligand
+    for i, node in enumerate(ligand_network.nodes):
+        new_name = f"ligand{i}"
+        name_mapping[node.name] = new_name
+        node_mapping[node.name] = node.copy_with_replacements(name=new_name)
+    edges = []
+    for edge in ligand_network.edges:
+        new_edge = LigandAtomMapping(
+            componentA=node_mapping[edge.componentA.name],
+            componentB=node_mapping[edge.componentB.name],
+            componentA_to_componentB=edge.componentA_to_componentB,
+            annotations=edge.annotations
+        )
+        edges.append(new_edge)
+
+    return LigandNetwork(edges=edges), name_mapping
+
 
 @click.command
 @click.option(
@@ -478,10 +514,18 @@ def gather_ligand_scores(
           "Path to the ligand_network.graphml file that was used to run the "
          "simulations of fixing the network."),
 )
+@click.option(
+    '--hide-ligand-names',
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="If the ligand names should be replaced by generic labels to hide confidential data."
+)
 def gather_data(
     input_ligand_network: pathlib.Path,
     output_dir: pathlib.Path,
-    fixed_ligand_network: str =None,
+    hide_ligand_names: bool,
+    fixed_ligand_network: str = None,
 ):
     """
     Function that gathers all the data.
@@ -496,6 +540,9 @@ def gather_data(
         fixed_network = parse_ligand_network(fixed_ligand_network)
         ligand_network = ligand_network.enlarge_graph(
             edges=fixed_network.edges, nodes=fixed_network.nodes)
+    if hide_ligand_names:
+        ligand_network, name_mapping = replace_ligand_names(ligand_network)
+
     transformation_scores = gather_transformation_scores(ligand_network)
     ligand_scores = gather_ligand_scores(ligand_network)
     blinded_network = get_transformation_network_map(ligand_network)
@@ -505,6 +552,9 @@ def gather_data(
         "transformation_scores": transformation_scores,
         "ligand_scores": ligand_scores,
     }
+    if hide_ligand_names:
+        network_properties["name_mapping"] = name_mapping
+
     # Save this to json
     file = pathlib.Path(output_dir / 'all_network_properties.json')
     with open(file, mode='w') as f:

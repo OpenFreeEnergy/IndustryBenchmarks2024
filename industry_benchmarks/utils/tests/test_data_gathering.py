@@ -19,6 +19,7 @@ from ..data_gathering import (
     get_charge_score,
     get_alchemical_charge_difference,
     get_formal_charge,
+    replace_ligand_names,
 )
 import pytest
 from importlib import resources
@@ -157,3 +158,22 @@ def test_charge_diff_no_diff(cmet_ligand_network):
     expected_diff = [0, 0, 0, 0]
     charge_diff = sorted([get_alchemical_charge_difference(edge) for edge in cmet_ligand_network.edges])
     assert np.allclose(charge_diff, expected_diff)
+
+
+def test_replace_ligand_names(cmet_ligand_network):
+    new_network, name_mapping = replace_ligand_names(ligand_network=cmet_ligand_network)
+    assert len(name_mapping) == 5
+    new_names = sorted(name_mapping.values())
+    assert new_names == [
+        "ligand0",
+        "ligand1",
+        "ligand2",
+        "ligand3",
+        "ligand4"
+    ]
+    # make sure all names have been replaced
+    for node in new_network.nodes:
+        assert node.name not in name_mapping
+    for edge in new_network.edges:
+        assert edge.componentA.name not in name_mapping
+        assert edge.componentB.name not in name_mapping
