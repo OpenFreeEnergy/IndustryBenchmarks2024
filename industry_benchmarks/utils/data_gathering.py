@@ -1,9 +1,10 @@
 import click
 import pathlib
 import json
-import abc
 import rdkit
 import tqdm
+from pydantic.utils import defaultdict
+from pygments.lexer import default
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import rdFreeSASA
@@ -15,8 +16,7 @@ from kartograf.atom_mapping_scorer import (
     MappingRMSDScorer, MappingShapeOverlapScorer, MappingVolumeRatioScorer,
 )
 import shutil
-
-from industry_benchmarks.utils.tests.test_extract_results import ligand_network
+from openff.units import unit
 
 # define all the result files we want to collect
 RESULT_FILES = [
@@ -486,12 +486,12 @@ def load_results_file(file_name: pathlib.Path) -> None | dict:
 
     # First we check if someone passed in a network_setup.json
     if results.get("__qualname__") == "AlchemicalNetwork":
-        print(f"{file_name} is a network_setup.json, skipping")
+        print(f"{file_name} is a AlchemicalNetwork json, skipping")
         return None
 
     #  Now  we check if someome passed in an input json
     if results.get("__qualname__") == "Transformation":
-        print(f"{file_name} is an input json, skipping")
+        print(f"{file_name} is an input Transformation json, skipping")
         return None
 
     # Check to see if we have already cleaned  up this result
@@ -500,7 +500,7 @@ def load_results_file(file_name: pathlib.Path) -> None | dict:
             "structural_analysis"
             in results["protocol_result"]["data"][result_key][0]["outputs"]
     ):
-        raise ValueError(f"{file_name} has not been clean up please make sure you run the `results_cleanup.py` script first.")
+        raise ValueError(f"{file_name} has not been cleaned up please make sure you run the `results_cleanup.py` script first.")
 
     # Check to make sure we don't have more than one proto result
     # We might have ProtocolUnitResult-* and ProtocolUnitFailure-*
@@ -535,7 +535,9 @@ def remove_first_reversed_sequential_duplicate_from_path(path: pathlib.Path) -> 
     """
     Remove the first duplicated directory from path
     We reverse the path so we remove the first sequential
-    duplicated directory starting from the deepest part of the path
+    duplicated directory starting from the deepest part of the path.
+
+    This is taken from the clean up script.
     """
 
     # reverse the path parts so we start from the deepest part first
@@ -634,15 +636,23 @@ def check_network_is_connected(results_data: dict, alchemical_network: gufe.Alch
     ligand_network = extract_ligand_network(result_network)
     return ligand_network.is_connected()
 
+def get_estimate(result: dict) -> tuple[unit.Quantity, unit.Quantity]:
+    """Extract the DDG and error estimate from this run"""
+    ddg = result["estimate"]["magnitude"] * getattr(unit, result["estimate"]["unit"])
+    uncertainty = result["uncertainty"]["magnitude"] * getattr(unit, result["uncertainty"]["unit"])
+    return ddg, uncertainty
 
-def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork) -> list[str]:
+
+def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork) -> dict[str, tuple[unit.Quantity, unit.Quantity]]:
     """
     Loop over the results folders extracting the required information and moving it to the output folder.
 
     Returns
     -------
-        failed_results: list[str]
-        A list of edge names which have missing results
+        results: dict[str, tuple[unit.Quantity, unit.Quantity]]
+        The extracted DDG and uncertainty for each transformation repeat
+        > {"solvent_liganda_ligandb_repeat_0": (ddg, uncertainty) ...
+
     """
     # workout the expected number of results
     # assuming 3 repeats of each solvent and complex transformation
@@ -658,13 +668,15 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
             # run checks on the end results
             result = load_results_file(file_name=results_file)
             if result is not None:
+                # get the estimate which will be saved
+                ddg, uncertainty = get_estimate(result)
                 # find the cleaned up results file
                 simulation_data_file = find_data_folder(result=result)
                 # work out the name of the transform and add it to the dict
                 transformation_name = get_transform_name(result=result, alchemical_network=alchemical_network)
-                # collect the paths to the results files and the structural
+                # collect the paths to the results files and the structural data
                 if transformation_name in all_results and simulation_data_file is not None:
-                    all_results[transformation_name].append((results_file, simulation_data_file))
+                    all_results[transformation_name].append((ddg, uncertainty, simulation_data_file))
                 elif transformation_name not in all_results:
                     error_message = (f"Found a result for {transformation_name} which was not expected "
                                      f"from the alchemical network.")
@@ -675,31 +687,29 @@ def  process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pa
     print(f"Total results found {found_results}/{expected_results} indicating {expected_results - found_results} failed transformations.")
     # check we have a connected network
     if not check_network_is_connected(results_data=all_results, alchemical_network=alchemical_network):
-        raise ValueError(f"The network built from the complete results is disconnected, some simulations may still be"
-                         f"running or needed restarting. Reproducible edge failures may require extract edges which "
-                         f"can be generated using the `fix_networks.py` script.")
+        raise ValueError("The network built from the complete results is disconnected, some simulations may still be"
+                         "running or needed restarting. Reproducible edge failures may require extra edges which "
+                         "can be generated using the `fix_networks.py` script.")
 
-    # move the results to the output folder
+    estimates = {}
+    # move the results to the output folder and collect the estimates
     for transformation_name, results in tqdm.tqdm(all_results.items(), desc="Collecting files", total=len(all_results), ncols=80):
-        for i, result_file, results_dir in enumerate(results):
-            output_path = output_dir.joinpath(transformation_name, f"repeat_{i}")
+        for i, ddg, uncertainty, results_dir in enumerate(results):
+            # store the per repeat estimates
+            repeat = f"repeat_{i}"
+            # the ligand names will be swapped later
+            estimates[f"{transformation_name}_{repeat}"] = (ddg, uncertainty)
+            output_path = output_dir.joinpath(transformation_name, repeat)
             output_path.mkdir(parents=True, exist_ok=False)
-            result_file: pathlib.Path
-            shutil.copy(result_file, output_path.joinpath(result_file.name))
+           # copy the analysis files
             for f_name in RESULT_FILES:
                 target_file = results_dir.joinpath(f_name)
                 # we have already done error handling so just try and move files which are present
                 if target_file.exists():
                     shutil.copy(target_file, output_path.joinpath(f_name))
 
-    # workout which edges must have failed
-    for name, results in all_results.items():
-        if len(results) != 3:
-            _, lig_a, lig_b = name.split("_")
-            # use the name format which matches the gather_transformation_scores function
-            missing_results.append(f"edge_{lig_a}_{lig_b}")
 
-    return missing_results
+    return estimates
 
 def parse_alchemical_network(file_name: pathlib.Path) -> gufe.AlchemicalNetwork:
     j_dict = json.load(
@@ -746,8 +756,8 @@ def extract_ligand_network(alchemical_network: gufe.AlchemicalNetwork) -> Ligand
 @click.option(
     "--results-folder",
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
-    multipule=True,
-    help="The path to the directory which contains transformation results, can be supplied multipule times for each repeat folder."
+    multiple=True,
+    help="The path to the directory which contains transformation results, can be supplied multiple times for each repeat folder."
 )
 def gather_data(
     input_alchemical_network: pathlib.Path,
@@ -772,11 +782,23 @@ def gather_data(
             edges=fixed_network.edges, nodes=fixed_network.nodes)
         # combine the alchemical networks
         alchemical_network = gufe.AlchemicalNetwork(edges=[*alchemical_network.edges, *fixed_alchemical_network.edges])
+
+    # get the ligand and edge scores
     transformation_scores = gather_transformation_scores(ligand_network)
     ligand_scores = gather_ligand_scores(ligand_network)
 
     # process the results one by one
-    failed_transforms = process_results(results_folder, output_dir, alchemical_network)
+    collected_results = process_results(results_folder, output_dir, alchemical_network)
+
+    failed_transforms = []
+    # workout which edges must have failed
+    for name, results in collected_results.items():
+        if len(results) != 3:
+            #TODO how do we handle ligands with _ in the name?
+            _, lig_a, lig_b = name.split("_")
+            # use the name format which matches the gather_transformation_scores function
+            failed_transforms.append(f"edge_{lig_a}_{lig_b}")
+
     # annotate the failed edges only
     for failed_edge in failed_transforms:
         transformation_scores[failed_edge]["failed"] = True
@@ -787,6 +809,7 @@ def gather_data(
         "Network_map": blinded_network,
         "transformation_scores": transformation_scores,
         "ligand_scores": ligand_scores,
+        "DDG_estimates": collected_results
     }
     # Save this to json
     file = pathlib.Path(output_dir / 'all_network_properties.json')

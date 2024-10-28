@@ -19,16 +19,51 @@ from ..data_gathering import (
     get_charge_score,
     get_alchemical_charge_difference,
     get_formal_charge,
+    gather_data,
+    parse_alchemical_network,
+    extract_ligand_network,
+    load_results_file,
+    get_estimate,
+    get_transform_name,
+    check_network_is_connected,
 )
 import pytest
 from importlib import resources
-from gufe import LigandNetwork
+from gufe import LigandNetwork, AlchemicalNetwork
 import numpy as np
+from click.testing import CliRunner
+
 
 @pytest.fixture
 def cmet_ligand_network() -> LigandNetwork:
     with resources.files("utils.tests.data") as d:
         yield parse_ligand_network(str(d / "cmet_results/alchemicalNetwork/ligand_network.graphml"))
+
+@pytest.fixture
+def cmet_results():
+    with resources.files("utils.tests.data.cmet_results") as d:
+        yield d
+
+@pytest.fixture
+def cmet_network():
+    with resources.files("utils.tests.data.cmet_results") as d:
+        yield str(d / "alchemicalNetwork/alchemical_network.json")
+
+@pytest.fixture
+def bace_network():
+    with resources.files("utils.tests.data.bace_results") as d:
+        yield str(d / "alchemicalNetwork/alchemical_network.json")
+
+@pytest.fixture
+def bace_complete_results():
+    with resources.files("utils.tests.data.bace_results") as d:
+        yield d
+
+@pytest.fixture
+def bace_cleaned_result():
+    with resources.files("utils.tests.data.bace_results") as d:
+        yield str(d / "cleaned_results/complex_spiro10_spiro6.json")
+
 
 # test all metrics independently
 def test_blinded_network(cmet_ligand_network):
@@ -157,3 +192,94 @@ def test_charge_diff_no_diff(cmet_ligand_network):
     expected_diff = [0, 0, 0, 0]
     charge_diff = sorted([get_alchemical_charge_difference(edge) for edge in cmet_ligand_network.edges])
     assert np.allclose(charge_diff, expected_diff)
+
+
+def test_parse_alchemical_network(bace_network):
+    network = parse_alchemical_network(bace_network)
+    assert len(network.nodes) == 18
+    assert len(network.edges) == 22
+    assert isinstance(network, AlchemicalNetwork)
+
+
+def test_extract_ligand_network(bace_network):
+    network = parse_alchemical_network(bace_network)
+    ligand_network = extract_ligand_network(network)
+    assert isinstance(ligand_network, LigandNetwork)
+    # make sure they have the correct nodes and edges
+    assert len(network.nodes) == len(ligand_network.nodes) * 2
+    assert len(network.edges) == len(ligand_network.edges) * 2
+
+
+def test_load_results_file_wrong_file(bace_network, capsys):
+    """Make sure None is returned if we try and load the wrong file."""
+    result = load_results_file(bace_network)
+    assert result is None
+    assert "is a AlchemicalNetwork json, skipping" in capsys.readouterr().out
+
+def test_load_results_not_clean(bace_complete_results):
+    """Make sure an error is raised if the results have not been cleaned up."""
+    with pytest.raises(ValueError, match="has not been cleaned up please make sure you run the `results_cleanup.py` script first"):
+        _ = load_results_file(str(bace_complete_results / "results_0" / "solvent_spiro2_spiro1.json"))
+
+
+def test_get_estimate(cmet_results):
+    result = load_results_file(str(cmet_results / "results_0" / "lig_CHEMBL3402745_200_5_solvent_lig_CHEMBL3402744_300_4_solvent_solvent.json"))
+    ddg, error = get_estimate(result)
+    assert pytest.approx(ddg.m) == -13.506009
+    assert pytest.approx(error.m) == 0.0
+
+
+def test_get_transformation_name(bace_network, bace_cleaned_result):
+    cleaned_result = load_results_file(bace_cleaned_result)
+    network = parse_alchemical_network(bace_network)
+    transform_name = get_transform_name(cleaned_result, network)
+    assert transform_name == "complex_spiro10_spiro6"
+
+
+@pytest.mark.parametrize("results_data, expected_output", [
+    pytest.param({"solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402749_500_9": [1, 2, 3], "solvent_lig_CHEMBL3402754_40_14_lig_CHEMBL3402761_1_21": [1, 2, 3]}, False, id="Not connected"),
+    pytest.param({"solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402749_500_9": [1, 2, 3], "solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402754_40_14": [1, 2, 3]}, True, id="Connected")
+])
+def test_check_is_connected(cmet_network, results_data, expected_output):
+    network = parse_alchemical_network(cmet_network)
+    assert check_network_is_connected(results_data=results_data, alchemical_network=network) is expected_output
+
+
+# Full CLI tests
+class TestScript:
+    def test_cli_clean_up_not_ran(self, bace_complete_results, bace_network):
+        """Make sure an error is raised if clean up was not run."""
+
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            with pytest.raises(ValueError, match="has not been cleaned up please make sure you run the `results_cleanup.py` script first"):
+                _ = runner.invoke(
+                    gather_data,
+                    [
+                        "--input_alchemical_network",
+                        bace_network,
+                        "--output_dir",
+                        "testing",
+                        "--results-folder",
+                        str(bace_complete_results / "results_0")
+                    ],
+                    catch_exceptions=False
+                )
+
+    def test_cli_missing_results(self, cmet_network, cmet_results):
+        """Make sure an error is raised if the cleaned results can not be found"""
+        runner = CliRunner()
+        with runner.isolated_filesystem():
+            with pytest.raises(FileNotFoundError, match="Can't find results directory:"):
+                _ = runner.invoke(
+                    gather_data,
+                    [
+                        "--input_alchemical_network",
+                        cmet_network,
+                        "--output_dir",
+                        "testing",
+                        "--results-folder",
+                        str(cmet_results / "results_0_remove_edge")
+                    ],
+                    catch_exceptions=False
+                )
