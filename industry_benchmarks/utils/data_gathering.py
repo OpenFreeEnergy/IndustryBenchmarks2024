@@ -540,8 +540,17 @@ def gather_data(
         fixed_network = parse_ligand_network(fixed_ligand_network)
         ligand_network = ligand_network.enlarge_graph(
             edges=fixed_network.edges, nodes=fixed_network.nodes)
+
     if hide_ligand_names:
         ligand_network, name_mapping = replace_ligand_names(ligand_network)
+        with open(output_dir / "ligand_name_mapping.json", "w") as out:
+            json.dump(name_mapping, out)
+    else:
+        # make some noise that we are not hiding the names
+        import warnings
+        warnings.warn(message="The names of the ligands will be used in the results, if you want to make them anonymous "
+                              "run the script again with the '--hide-ligand-names' flag.")
+
 
     transformation_scores = gather_transformation_scores(ligand_network)
     ligand_scores = gather_ligand_scores(ligand_network)
@@ -552,8 +561,6 @@ def gather_data(
         "transformation_scores": transformation_scores,
         "ligand_scores": ligand_scores,
     }
-    if hide_ligand_names:
-        network_properties["name_mapping"] = name_mapping
 
     # Save this to json
     file = pathlib.Path(output_dir / 'all_network_properties.json')
