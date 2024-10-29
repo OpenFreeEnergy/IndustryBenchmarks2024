@@ -1,3 +1,6 @@
+import json
+import pathlib
+
 from ..data_gathering import (
     get_lomap_score,
     get_transformation_network_map,
@@ -30,6 +33,7 @@ from ..data_gathering import (
 import pytest
 from importlib import resources
 from gufe import LigandNetwork, AlchemicalNetwork
+from gufe.tokenization import JSON_HANDLER
 import numpy as np
 from click.testing import CliRunner
 
@@ -63,6 +67,11 @@ def bace_complete_results():
 def bace_cleaned_result():
     with resources.files("utils.tests.data.bace_results") as d:
         yield str(d / "cleaned_results/complex_spiro10_spiro6.json")
+
+@pytest.fixture
+def bace_full_results():
+    with resources.files("utils.tests.data") as d:
+        yield d / "bace_full_results"
 
 
 # test all metrics independently
@@ -233,12 +242,12 @@ def test_get_transformation_name(bace_network, bace_cleaned_result):
     cleaned_result = load_results_file(bace_cleaned_result)
     network = parse_alchemical_network(bace_network)
     transform_name = get_transform_name(cleaned_result, network)
-    assert transform_name == "complex_spiro10_spiro6"
+    assert transform_name == ("complex", "spiro10", "spiro6")
 
 
 @pytest.mark.parametrize("results_data, expected_output", [
-    pytest.param({"solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402749_500_9": [1, 2, 3], "solvent_lig_CHEMBL3402754_40_14_lig_CHEMBL3402761_1_21": [1, 2, 3]}, False, id="Not connected"),
-    pytest.param({"solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402749_500_9": [1, 2, 3], "solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402754_40_14": [1, 2, 3]}, True, id="Connected")
+    pytest.param({("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3], ("solvent", "lig_CHEMBL3402754_40_14", "lig_CHEMBL3402761_1_21"): [1, 2, 3]}, False, id="Not connected"),
+    pytest.param({("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3], ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402754_40_14"): [1, 2, 3]}, True, id="Connected")
 ])
 def test_check_is_connected(cmet_network, results_data, expected_output):
     network = parse_alchemical_network(cmet_network)
@@ -283,3 +292,90 @@ class TestScript:
                     ],
                     catch_exceptions=False
                 )
+
+    def test_graph_not_connected(self, bace_full_results, tmpdir):
+        """Make sure an error is raised if we gather the results and have a disconnected transformation graph"""
+        runner = CliRunner()
+        with pytest.raises(ValueError, match="The network built from the complete results is disconnected"):
+            _ = runner.invoke(
+                gather_data,
+                [
+                    "--input_alchemical_network",
+                    str(bace_full_results / "alchemicalNetwork" / "alchemical_network.json"),
+                    "--output_dir",
+                    str(tmpdir / "connection_test"),
+                    "--results-folder",
+                    str(bace_full_results / "results_0")
+                ],
+                catch_exceptions=False
+            )
+
+    def test_full_run(self, bace_full_results, tmpdir):
+        """
+        Check a full successful run of the CLI and inspect the returned results.
+        """
+        runner = CliRunner()
+        result = runner.invoke(
+            gather_data,
+            [
+                "--input_alchemical_network",
+                str(bace_full_results / "alchemicalNetwork" / "alchemical_network.json"),
+                "--output_dir",
+                str(tmpdir / "full_test"),
+                "--results-folder",
+                str(bace_full_results / "results_0"),
+                "--results-folder",
+                str(bace_full_results / "results_1"),
+                "--results-folder",
+                str(bace_full_results / "results_2")
+            ]
+        )
+        assert result.exit_code == 0
+        # make sure the missing png file warnings are printed
+        assert "Can't find cleaned results file: forward_reverse_convergence.png" in result.stdout
+        # make sure we have a zip folder
+        archive: pathlib.Path = tmpdir / "full_test.zip"
+        assert archive.exists()
+        # make sure we have the folder made into the archive
+        result_folder = tmpdir / "full_test"
+        assert result_folder.exists()
+        # load the results JSON
+        result_json = json.load(
+            (result_folder / "all_network_properties.json").open(mode="r"),
+            cls=JSON_HANDLER.decoder
+        )
+        # check for the expected keys
+        assert "Network_map" in result_json
+        assert "transformation_scores" in result_json
+        assert "ligand_scores" in result_json
+        assert "DDG_estimates" in result_json
+
+        # do some basic checks
+        # check for 2 ligands and a single edge
+        assert len(result_json["Network_map"]["nodes"]) == 2
+        assert len(result_json["Network_map"]["edge"]) == 1
+        # check the single edge has a score
+        assert len(result_json["transformation_scores"]) == 1
+        assert "edge_spiro2_spiro1" in result_json["transformation_scores"]
+        # check the ligand scores
+        assert len(result_json["ligand_scores"]) == 2
+        assert "ligand_spiro2" in result_json["ligand_scores"]
+        assert "ligand_spiro1" in result_json["ligand_scores"]
+
+        # check the edge estimates
+        assert len(result_json["DDG_estimates"]) == 6
+        for repeat in range(3):
+            for phase in ["solvent", "complex"]:
+                edge_name = f"{phase}_spiro2_spiro1_repeat_{repeat}"
+                assert edge_name in result_json["DDG_estimates"]
+                # make sure the edge folder was created
+                edge_folder = result_folder / edge_name
+                assert edge_folder.exists()
+                # check the files were moved to the directory
+                for f_name in [
+                    "structural_analysis_data.npz",
+                    "energy_replica_state.npz",
+                    "simulation_real_time_analysis.yaml",
+                    "info.yaml"
+                ]:
+                    assert (edge_folder / f_name).exists()

@@ -1,15 +1,15 @@
 import click
+from collections import defaultdict
 import pathlib
 import json
 import rdkit
 import tqdm
-from pydantic.utils import defaultdict
-from pygments.lexer import default
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit.Chem import rdFreeSASA
 import gufe
 from gufe import SmallMoleculeComponent, LigandAtomMapping, AtomMapping
+from gufe.tokenization import JSON_HANDLER
 import openfe
 from openfe import LigandNetwork
 from kartograf.atom_mapping_scorer import (
@@ -23,7 +23,7 @@ RESULT_FILES = [
     # data files
     "structural_analysis_data.npz",
     "energy_replica_state.npz",
-    "simulation_real_time_analysis",
+    "simulation_real_time_analysis.yaml",
     "info.yaml",
     # png analysis files,
     "forward_reverse_convergence.png",
@@ -592,19 +592,24 @@ def find_data_folder(result: dict) -> None | pathlib.Path:
     # now check that all of the results files can be found in the folder
     # allow skipping of missing png files
     for f_name in RESULT_FILES:
-        if not results_dir.joinpath(f_name).exists() and ".png" not in f_name:
-            error_message = f"Can't find cleaned results file: {f_name} in {results_dir}"
-            raise FileNotFoundError(error_message)
-        else:
-            error_message = f"Can't find cleaned results file: {f_name} in {results_dir} skipping"
-            print(error_message)
+        if not results_dir.joinpath(f_name).exists():
+            if ".png" not in f_name:
+                error_message = f"Can't find cleaned results file: {f_name} in {results_dir}"
+                raise FileNotFoundError(error_message)
+            else:
+                error_message = f"Can't find cleaned results file: {f_name} in {results_dir} skipping"
+                print(error_message)
 
 
     return results_dir
 
-def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork) -> str:
+def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork) -> tuple[str, str, str]:
     """
     Get the name of this transformation, taking into account that the inputs might have accidentally been deleted.
+
+    Returns
+    -------
+    The name of the transformation as a tuple of (phase, ligand_a name, ligand_b name)
     """
     # grab the gufe key of the chemical systems used in the inputs
     unit_result = list(result["unit_results"].values())[0]
@@ -620,21 +625,31 @@ def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork)
         phase = "solvent"
 
     ligmap = mapping_look_up[mapping_key]
+    return phase, ligmap.componentA.name, ligmap.componentB.name
 
-    name = f"{phase}_{ligmap.componentA.name}_{ligmap.componentB.name}"
-    return name
-
-def check_network_is_connected(results_data: dict, alchemical_network: gufe.AlchemicalNetwork) -> bool:
+def check_network_is_connected(results_data: dict[tuple[str, str, str], tuple[unit.Quantity, unit.Quantity]], alchemical_network: gufe.AlchemicalNetwork) -> bool:
     """Build a network from the results and check the network is connected."""
+    from networkx.exception import NetworkXPointlessConcept
+
+    # remake the dict using the naming in the network edges
+    results_by_name = dict(
+        (f"{phase}_{ligand_a}_{ligand_b}", value)
+        for (phase, ligand_a, ligand_b), value in results_data.items()
+    )
     edges = []
     for transform in alchemical_network.edges:
-        if transform.name in results_data and len(results_data[transform.name]) == 3:
+        if transform.name in results_by_name and len(results_by_name[transform.name]) == 3:
             edges.append(transform)
 
     # extract the ligand network and check its connected
     result_network = gufe.AlchemicalNetwork(edges=edges)
     ligand_network = extract_ligand_network(result_network)
-    return ligand_network.is_connected()
+    try:
+        is_connected = ligand_network.is_connected()
+    # handle the case where the graph is empty
+    except NetworkXPointlessConcept:
+        is_connected = False
+    return is_connected
 
 def get_estimate(result: dict) -> tuple[unit.Quantity, unit.Quantity]:
     """Extract the DDG and error estimate from this run"""
@@ -643,28 +658,28 @@ def get_estimate(result: dict) -> tuple[unit.Quantity, unit.Quantity]:
     return ddg, uncertainty
 
 
-def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork) -> dict[str, tuple[unit.Quantity, unit.Quantity]]:
+def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork) -> dict[tuple[str, str, str, str], tuple[unit.Quantity, unit.Quantity]]:
     """
     Loop over the results folders extracting the required information and moving it to the output folder.
+
+    TODO take in the name mapping to ensure we swap the ligand name in the filenames
 
     Returns
     -------
         results: dict[str, tuple[unit.Quantity, unit.Quantity]]
         The extracted DDG and uncertainty for each transformation repeat
-        > {"solvent_liganda_ligandb_repeat_0": (ddg, uncertainty) ...
+        > {("solvent", "ligand_a", "ligand_b", "repeat_0"): (ddg, uncertainty) ...
 
     """
     # workout the expected number of results
     # assuming 3 repeats of each solvent and complex transformation
-    missing_results = []
-    all_results = {}
-    for edge in alchemical_network.edges:
-        all_results[edge.name] = []
-    expected_results = len(all_results) * 3
+    all_results = defaultdict(list)
+    expected_results = len(alchemical_network.edges) * 3
+    expected_edges = [edge.name for edge in alchemical_network.edges]
 
     # map the transformation to the results files
     for results_folder in results_folders:
-        for results_file in tqdm.tqdm(results_folder.glob("*.json"), desc=f"Processing results in {results_folder}", ncols=80):
+        for results_file in tqdm.tqdm(results_folder.glob("**/*.json"), desc=f"Processing results in {results_folder}", ncols=80):
             # run checks on the end results
             result = load_results_file(file_name=results_file)
             if result is not None:
@@ -672,19 +687,24 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
                 ddg, uncertainty = get_estimate(result)
                 # find the cleaned up results file
                 simulation_data_file = find_data_folder(result=result)
-                # work out the name of the transform and add it to the dict
+                # work out the name of the transform
+                # we use the tuple to avoid splitting on _ as ligands might have _ in the name
                 transformation_name = get_transform_name(result=result, alchemical_network=alchemical_network)
                 # collect the paths to the results files and the structural data
-                if transformation_name in all_results and simulation_data_file is not None:
+                if simulation_data_file is not None:
                     all_results[transformation_name].append((ddg, uncertainty, simulation_data_file))
-                elif transformation_name not in all_results:
-                    error_message = (f"Found a result for {transformation_name} which was not expected "
-                                     f"from the alchemical network.")
-                    raise ValueError(error_message)
+
+    # check we don't have any unexpected transforms
+    for (phase, ligand_a, ligand_b) in all_results.keys():
+        if transformation_name := f"{phase}_{ligand_a}_{ligand_b}" not in expected_edges:
+            error_message = (f"Found a result for {transformation_name} which was not expected "
+                             f"from the alchemical network.")
+            raise ValueError(error_message)
 
     # Write stats on the number of transformations found
     found_results = sum([len(v) for v in all_results.values()])
     print(f"Total results found {found_results}/{expected_results} indicating {expected_results - found_results} failed transformations.")
+
     # check we have a connected network
     if not check_network_is_connected(results_data=all_results, alchemical_network=alchemical_network):
         raise ValueError("The network built from the complete results is disconnected, some simulations may still be"
@@ -693,13 +713,15 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
 
     estimates = {}
     # move the results to the output folder and collect the estimates
-    for transformation_name, results in tqdm.tqdm(all_results.items(), desc="Collecting files", total=len(all_results), ncols=80):
-        for i, ddg, uncertainty, results_dir in enumerate(results):
+    for transformation_name, results in tqdm.tqdm(all_results.items(), desc="Collecting edges", total=len(all_results), ncols=80):
+        for i, (ddg, uncertainty, results_dir) in enumerate(results):
             # store the per repeat estimates
             repeat = f"repeat_{i}"
-            # the ligand names will be swapped later
-            estimates[f"{transformation_name}_{repeat}"] = (ddg, uncertainty)
-            output_path = output_dir.joinpath(transformation_name, repeat)
+            estimates[transformation_name + (repeat, )] = (ddg, uncertainty)
+
+            # copy the files for this estimate
+            phase, ligand_a, ligand_b = transformation_name
+            output_path = output_dir.joinpath(f"{phase}_{ligand_a}_{ligand_b}_{repeat}")
             output_path.mkdir(parents=True, exist_ok=False)
            # copy the analysis files
             for f_name in RESULT_FILES:
@@ -790,18 +812,25 @@ def gather_data(
     # process the results one by one
     collected_results = process_results(results_folder, output_dir, alchemical_network)
 
-    failed_transforms = []
-    # workout which edges must have failed
+    # create a copy of the results using a string as the hash to enable saving to json
+    formated_results = dict(
+        (f"{phase}_{ligand_a}_{ligand_b}_{repeat}", value)
+        for (phase, ligand_a, ligand_b, repeat), value in collected_results.items()
+    )
+
+    # workout which edges must have failed by checking for 6 unique transformation results
+    edge_counts = defaultdict(list)
     for name, results in collected_results.items():
-        if len(results) != 3:
-            #TODO how do we handle ligands with _ in the name?
-            _, lig_a, lig_b = name.split("_")
-            # use the name format which matches the gather_transformation_scores function
-            failed_transforms.append(f"edge_{lig_a}_{lig_b}")
+        _, lig_a, lig_b, _ = name
+        # use the name format which matches the gather_transformation_scores function
+        edge_name = f"edge_{lig_a}_{lig_b}"
+        if results:
+            edge_counts[edge_name].append(results)
 
     # annotate the failed edges only
-    for failed_edge in failed_transforms:
-        transformation_scores[failed_edge]["failed"] = True
+    for edge, results in edge_counts.items():
+        if len(results) != 6:
+            transformation_scores[edge]["failed"] = True
 
     blinded_network = get_transformation_network_map(ligand_network)
     # Create a single dict of all scores
@@ -809,15 +838,15 @@ def gather_data(
         "Network_map": blinded_network,
         "transformation_scores": transformation_scores,
         "ligand_scores": ligand_scores,
-        "DDG_estimates": collected_results
+        "DDG_estimates": formated_results
     }
     # Save this to json
     file = pathlib.Path(output_dir / 'all_network_properties.json')
     with open(file, mode='w') as f:
-        json.dump(network_properties, f)
+        json.dump(network_properties, f, cls=JSON_HANDLER.encoder, indent=2)
 
     # finally zip the folder
-    shutil.make_archive("all_results.zip", "zip", output_dir.as_posix())
+    shutil.make_archive(output_dir.as_posix(), "zip", output_dir.as_posix())
 
 
 
