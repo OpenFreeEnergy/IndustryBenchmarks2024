@@ -350,7 +350,7 @@ You can extract the ddG results in the following manner from the directory conta
 .. code-block:: bash
 
    wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/extras/extract_results.py
-   python extract_results.py
+   python extract_results.py --input_ligand_network_file network_setup/ligand_network.graphml
 
 
 This will create a file named `ddg.tsv` from the individual simulation repeats.
