@@ -246,8 +246,16 @@ def test_get_transformation_name(bace_network, bace_cleaned_result):
 
 
 @pytest.mark.parametrize("results_data, expected_output", [
-    pytest.param({("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3], ("solvent", "lig_CHEMBL3402754_40_14", "lig_CHEMBL3402761_1_21"): [1, 2, 3]}, False, id="Not connected"),
-    pytest.param({("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3], ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402754_40_14"): [1, 2, 3]}, True, id="Connected")
+    pytest.param({
+        ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3],
+        ("solvent", "lig_CHEMBL3402754_40_14", "lig_CHEMBL3402761_1_21"): [1, 2, 3]
+    }, False, id="Not connected"),
+    pytest.param({
+        ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3],
+        ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402754_40_14"): [1, 2, 3],
+        ("complex", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3],
+        ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402754_40_14"): [1, 2, 3]
+    }, True, id="Connected")
 ])
 def test_check_is_connected(cmet_network, results_data, expected_output):
     network = parse_alchemical_network(cmet_network)

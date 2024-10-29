@@ -627,22 +627,33 @@ def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork)
     ligmap = mapping_look_up[mapping_key]
     return phase, ligmap.componentA.name, ligmap.componentB.name
 
-def check_network_is_connected(results_data: dict[tuple[str, str, str], tuple[unit.Quantity, unit.Quantity]], alchemical_network: gufe.AlchemicalNetwork) -> bool:
-    """Build a network from the results and check the network is connected."""
+def check_network_is_connected(results_data: dict[tuple[str, str, str], list[tuple[unit.Quantity, unit.Quantity]]], alchemical_network: gufe.AlchemicalNetwork) -> bool:
+    """
+    Build a network from the results and check the network is connected.
+
+    This requires that both the complex and solvent phases have 3 repeats.
+
+    """
     from networkx.exception import NetworkXPointlessConcept
 
-    # remake the dict using the naming in the network edges
+    # map the edge name to the tuple
     results_by_name = dict(
-        (f"{phase}_{ligand_a}_{ligand_b}", value)
-        for (phase, ligand_a, ligand_b), value in results_data.items()
+        (f"{phase}_{ligand_a}_{ligand_b}", (phase, ligand_a, ligand_b))
+        for (phase, ligand_a, ligand_b) in results_data.keys()
     )
-    edges = []
+
+    edges = defaultdict(list)
+    # group the transforms by ligands
     for transform in alchemical_network.edges:
-        if transform.name in results_by_name and len(results_by_name[transform.name]) == 3:
-            edges.append(transform)
+        if transform.name in results_by_name and len(results_data[results_by_name[transform.name]]) == 3:
+            _, ligand_a, ligand_b = results_by_name[transform.name]
+            edges[(ligand_a, ligand_b)].append(transform)
+
+    # extract edges which have both phases completed
+    complete_edges = [t for values in edges.values() if len(values) == 2 for t in values]
 
     # extract the ligand network and check its connected
-    result_network = gufe.AlchemicalNetwork(edges=edges)
+    result_network = gufe.AlchemicalNetwork(edges=complete_edges)
     ligand_network = extract_ligand_network(result_network)
     try:
         is_connected = ligand_network.is_connected()
