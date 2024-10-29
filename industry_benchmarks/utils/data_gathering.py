@@ -719,7 +719,7 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
     # check we have a connected network
     if not check_network_is_connected(results_data=all_results, alchemical_network=alchemical_network):
         raise ValueError("The network built from the complete results is disconnected, some simulations may still be"
-                         "running or needed restarting. Reproducible edge failures may require extra edges which "
+                         "running, needed restarting or you may have missing repeats. Reproducible edge failures may require extra edges which "
                          "can be generated using the `fix_networks.py` script.")
 
     estimates = {}
