@@ -466,7 +466,7 @@ def gather_ligand_scores(
 @click.option(
     '--output_dir',
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
-    default=pathlib.Path("./"),
+    default=pathlib.Path("./output_data_gathering"),
     required=True,
     help="Path to the output directory that stores all data.",
 )
