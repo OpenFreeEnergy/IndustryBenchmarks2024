@@ -690,7 +690,7 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
 
     # map the transformation to the results files
     for results_folder in results_folders:
-        for results_file in tqdm.tqdm(results_folder.glob("**/*.json"), desc=f"Processing results in {results_folder}", ncols=80):
+        for results_file in results_folder.glob("**/*.json"):
             # run checks on the end results
             result = load_results_file(file_name=results_file)
             if result is not None:
