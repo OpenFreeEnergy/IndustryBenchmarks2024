@@ -477,16 +477,13 @@ Phase 3: Data Analysis
 **********************
 
 
-.. note::
-   Details for phase 3 of the public dataset benchmarks are still being finalised. These will be updated as soon as possible!
-
-
 In this phase, relevant simulation results will be gathered from industry partners.
 
-**Start date:** *Early September 2024*
+**Start date:** *Early November 2024*
 
-**End date:** *End of October 2024*
+**End date:** *Early December 2024*
 
+.. _gathering_of_results:
 
 Gathering of results
 ====================
@@ -496,16 +493,59 @@ Industry partners will be expected to post-process simulation outputs using a sp
 This script will:
 
 * Extract relevant free energy estimates, including time series of free energies
+   *
 * Gather simulation health metrics
    * Overlap matrix and replica exchange probability plots
    * Relevant structural analysis plots
-* Gather additional simulation information (optional)
-   * Additional simulation metrics, relevant for the OpenFE 2024 scoring data project, may be gathered.
+* Gather additional simulation information
+   * Additional simulation metrics, including transformation and ligand scores.
 
 Industry partners will be expected to submit this information back to OpenFE for
 analysis. Please note that all data will be collected in a human readable format
 in order to allow industry partners the ability to review the data ahead of submission
 back to the OpenFE team.
+
+For performing the data gathering, please note the following:
+
+* Make sure to run the `post-simulation cleanup`_ before running the data gathering script! If you have not run the cleanup script, this data gathering script will throw an error.
+* The data gathering script will throw an error if the network is broken and also not all three repeats have finished successfully.
+
+   * If you have a broken network, please run the `fix_networks`_ script and the new edges first to obtain a connected network.
+   * If some of your repeats had failed, please re-run those as described `here <failed_edges>`_
+
+
+.. code-block:: bash
+
+   wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/data_gathering.py
+   python data_gathering.py --input_alchemical_network network_setup/alchemical_network.json
+
+If the `fix network script <fix_networks>`_ was run, two alchemical networks need to be provided to the data gathering script, the original one and the one that was created after running the ``fix_networks.py``:
+
+.. code-block:: bash
+
+   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --fixed_alchemical_network new_network_setup/alchemicalNetwork/alchemical_network.json
+
+If confidential ligand names were used, those can be replaced with generic ligand names. To do that you will need to add the flag ``--hide-ligand-names``:
+
+.. code-block:: bash
+
+   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --hide-ligand-names
+
+.. warning::
+   Per default, the ligand names that were present in the original ligand sdf will be stored. Please check those and if they contain any confidential information, use the ``hide-ligand-names`` flag.
+
+.. _gathered_data:
+
+Content of the data that will be transferred to OpenFE
+------------------------------------------------------
+
+Here you can find the full list of files and data that will be extracted in the `data gathering script <gathering_of_results>`_.
+
+* Explain what the gathering script will extract
+* Create a folder output...
+  * In the folder separate folder for each transformation, in there separate folder for each repeat, list files and what they contain in that folder
+  * .json file with a lot of information: blinded transformation network, transformation and ligand scores
+
 
 Analysis of results
 ===================
