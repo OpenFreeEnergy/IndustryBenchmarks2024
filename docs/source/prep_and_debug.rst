@@ -6,7 +6,8 @@ FAQ: Preparing and Debugging OpenFE Simulations
 
 This FAQ contains a list of issues you may encounter when preparing and
 running simulations with OpenFE. This list will be updated as feedback
-is provided by benchmark partners.
+is provided by benchmark partners. If you find your issue is not currently addressed then please raise an issue on
+the `industry benchmarking repository <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024/issues>`_.
 
 
 1. Ligand Alignment
@@ -16,7 +17,7 @@ Ligands in a series should be pre-aligned when passed to OpenFE tools.
 This means that regions of the ligand that should be part of a common
 core, should have the same coordinates.
 
-In these benchmarks we will use the Kartograf atom mapper. Any ligand
+In these benchmarks we will use the `Kartograf atom mapper <https://kartograf.readthedocs.io/en/latest/index.html>`_. Any ligand
 regions which do not align in 3D space will be unmapped and treated
 as unique atoms in the alchemical topology.
 

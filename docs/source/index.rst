@@ -65,6 +65,7 @@ We thank the OpenFE industry partners for their participation, guidance, and fun
    ./public/overview
    ./private/overview
    get-in-touch
+   prep_and_debug
 
 
 .. toctree::
