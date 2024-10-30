@@ -627,7 +627,7 @@ def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork)
     ligmap = mapping_look_up[mapping_key]
     return phase, ligmap.componentA.name, ligmap.componentB.name
 
-def check_network_is_connected(results_data: dict[tuple[str, str, str], list[tuple[unit.Quantity, unit.Quantity]]], alchemical_network: gufe.AlchemicalNetwork) -> bool:
+def check_network_is_connected(results_data: dict[tuple[str, str, str], list[tuple[unit.Quantity, unit.Quantity, pathlib.Path]]], alchemical_network: gufe.AlchemicalNetwork) -> bool:
     """
     Build a network from the results and check the network is connected.
 
