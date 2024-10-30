@@ -70,8 +70,8 @@ def bace_cleaned_result():
 
 @pytest.fixture
 def bace_full_results():
-    with resources.files("utils.tests.data") as d:
-        yield d / "bace_full_results"
+    with resources.files("utils.tests.data.bace_full_results") as d:
+        yield d
 
 
 # test all metrics independently
@@ -254,8 +254,17 @@ def test_get_transformation_name(bace_network, bace_cleaned_result):
         ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3],
         ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402754_40_14"): [1, 2, 3],
         ("complex", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3],
+        ("complex", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402754_40_14"): [1, 2, 3]
+    }, True, id="Connected"),
+    pytest.param({
+        ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2],
+        ("complex", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3]
+    }, False, id="Missing repeats not connected"),
+    pytest.param({
+        ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3],
+        ("complex", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402749_500_9"): [1, 2, 3],
         ("solvent", "lig_CHEMBL3402745_200_5", "lig_CHEMBL3402754_40_14"): [1, 2, 3]
-    }, True, id="Connected")
+    }, True, id="Connected partial results.")
 ])
 def test_check_is_connected(cmet_network, results_data, expected_output):
     network = parse_alchemical_network(cmet_network)
@@ -318,6 +327,33 @@ class TestScript:
                 catch_exceptions=False
             )
 
+    def test_missing_fixed_network(self, bace_full_results, tmpdir):
+        """Make sure an error is raised if we have extra results which are not expected"""
+        runner = CliRunner()
+        with pytest.raises(ValueError, match="contains a transformation which was not expected for the alchemical network"):
+            _ = runner.invoke(
+                gather_data,
+                [
+                    "--input_alchemical_network",
+                    str(bace_full_results / "alchemicalNetwork" / "alchemical_network.json"),
+                    "--output_dir",
+                    str(tmpdir / "full_test"),
+                    "--results-folder",
+                    str(bace_full_results / "results_0"),
+                    "--results-folder",
+                    str(bace_full_results / "results_1"),
+                    "--results-folder",
+                    str(bace_full_results / "results_2"),
+                    "--results-folder",
+                    str(bace_full_results / "fixed_network" / "results_0"),
+                    "--results-folder",
+                    str(bace_full_results / "fixed_network" / "results_1"),
+                    "--results-folder",
+                    str(bace_full_results / "fixed_network" / "results_2")
+                ], catch_exceptions=False
+            )
+
+
     def test_full_run(self, bace_full_results, tmpdir):
         """
         Check a full successful run of the CLI and inspect the returned results.
@@ -341,6 +377,8 @@ class TestScript:
         assert result.exit_code == 0
         # make sure the missing png file warnings are printed
         assert "Can't find cleaned results file: forward_reverse_convergence.png" in result.stdout
+        assert "Total results found 6/6 indicating 0 failed transformations." in result.stdout
+
         # make sure we have a zip folder
         archive: pathlib.Path = tmpdir / "full_test.zip"
         assert archive.exists()
@@ -387,3 +425,85 @@ class TestScript:
                     "info.yaml"
                 ]:
                     assert (edge_folder / f_name).exists()
+
+    def test_full_run_fixed_network(self, bace_full_results, tmpdir):
+        """
+        Check a full successful run of the CLI with a fixed network and inspect the returned results.
+        """
+        runner = CliRunner()
+        result = runner.invoke(
+            gather_data,
+            [
+                "--input_alchemical_network",
+                str(bace_full_results / "alchemicalNetwork" / "alchemical_network.json"),
+                "--fixed_alchemical_network",
+                str(bace_full_results / "fixed_network" / "alchemicalNetwork"/ "alchemical_network.json"),
+                "--output_dir",
+                str(tmpdir / "full_test"),
+                "--results-folder",
+                str(bace_full_results / "results_0"),
+                "--results-folder",
+                str(bace_full_results / "results_1"),
+                "--results-folder",
+                str(bace_full_results / "results_2"),
+                "--results-folder",
+                str(bace_full_results / "fixed_network" / "results_0"),
+                "--results-folder",
+                str(bace_full_results / "fixed_network" / "results_1"),
+                "--results-folder",
+                str(bace_full_results / "fixed_network" / "results_2")
+            ]
+        )
+        assert result.exit_code == 0
+        # make sure the missing png file warnings are printed
+        assert "Can't find cleaned results file: forward_reverse_convergence.png" in result.stdout
+        assert "Total results found 12/12 indicating 0 failed transformations." in result.stdout
+        # make sure we have a zip folder
+        archive: pathlib.Path = tmpdir / "full_test.zip"
+        assert archive.exists()
+        # make sure we have the folder made into the archive
+        result_folder = tmpdir / "full_test"
+        assert result_folder.exists()
+        # load the results JSON
+        result_json = json.load(
+            (result_folder / "all_network_properties.json").open(mode="r"),
+            cls=JSON_HANDLER.decoder
+        )
+        # check for the expected keys
+        assert "Network_map" in result_json
+        assert "transformation_scores" in result_json
+        assert "ligand_scores" in result_json
+        assert "DDG_estimates" in result_json
+
+        # do some basic checks
+        # check for 3 ligands and two edges in the combined network
+        assert len(result_json["Network_map"]["nodes"]) == 3
+        assert len(result_json["Network_map"]["edge"]) == 2
+        # check the two edges have scores
+        assert len(result_json["transformation_scores"]) == 2
+        assert "edge_spiro2_spiro1" in result_json["transformation_scores"]
+        assert "edge_spiro2_spiro3" in result_json["transformation_scores"]
+        # check the ligand scores
+        assert len(result_json["ligand_scores"]) == 3
+        assert "ligand_spiro2" in result_json["ligand_scores"]
+        assert "ligand_spiro1" in result_json["ligand_scores"]
+        assert "ligand_spiro3" in result_json["ligand_scores"]
+
+        # check the edge estimates
+        assert len(result_json["DDG_estimates"]) == 12
+        for edge in ["spiro2_spiro1", "spiro2_spiro3"]:
+            for repeat in range(3):
+                for phase in ["solvent", "complex"]:
+                    edge_name = f"{phase}_{edge}_repeat_{repeat}"
+                    assert edge_name in result_json["DDG_estimates"]
+                    # make sure the edge folder was created
+                    edge_folder = result_folder / edge_name
+                    assert edge_folder.exists()
+                    # check the files were moved to the directory
+                    for f_name in [
+                        "structural_analysis_data.npz",
+                        "energy_replica_state.npz",
+                        "simulation_real_time_analysis.yaml",
+                        "info.yaml"
+                    ]:
+                        assert (edge_folder / f_name).exists()

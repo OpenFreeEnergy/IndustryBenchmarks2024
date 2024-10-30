@@ -700,17 +700,16 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
                 simulation_data_file = find_data_folder(result=result)
                 # work out the name of the transform
                 # we use the tuple to avoid splitting on _ as ligands might have _ in the name
-                transformation_name = get_transform_name(result=result, alchemical_network=alchemical_network)
-                # collect the paths to the results files and the structural data
-                if simulation_data_file is not None:
-                    all_results[transformation_name].append((ddg, uncertainty, simulation_data_file))
-
-    # check we don't have any unexpected transforms
-    for (phase, ligand_a, ligand_b) in all_results.keys():
-        if transformation_name := f"{phase}_{ligand_a}_{ligand_b}" not in expected_edges:
-            error_message = (f"Found a result for {transformation_name} which was not expected "
-                             f"from the alchemical network.")
-            raise ValueError(error_message)
+                try:
+                    transformation_name = get_transform_name(result=result, alchemical_network=alchemical_network)
+                    # collect the paths to the results files and the structural data
+                    if simulation_data_file is not None:
+                        all_results[transformation_name].append((ddg, uncertainty, simulation_data_file))
+                except KeyError:
+                    # if we can not find the edge name this means the result was not expected
+                    raise ValueError(f"Result {results_file} contains a transformation which was not expected for the "
+                               f"alchemical network, if you have had to fix this network pass in the extra "
+                               f"`alchemical_network.json` using the `--fixed_alchemical_network` flag.")
 
     # Write stats on the number of transformations found
     found_results = sum([len(v) for v in all_results.values()])
