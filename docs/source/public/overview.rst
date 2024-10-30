@@ -493,7 +493,6 @@ Industry partners will be expected to post-process simulation outputs using a sp
 This script will:
 
 * Extract relevant free energy estimates, including time series of free energies
-   *
 * Gather simulation health metrics
    * Overlap matrix and replica exchange probability plots
    * Relevant structural analysis plots
@@ -507,7 +506,7 @@ back to the OpenFE team.
 
 For performing the data gathering, please note the following:
 
-* Make sure to run the `post-simulation cleanup`_ before running the data gathering script! If you have not run the cleanup script, this data gathering script will throw an error.
+* Make sure to run the `post-simulation cleanup`_ script before running the data gathering script! If you have not run the cleanup script, this data gathering script will throw an error.
 * The data gathering script will throw an error if the network is broken and also not all three repeats have finished successfully.
 
    * If you have a broken network, please run the `fix_networks`_ script and the new edges first to obtain a connected network.
