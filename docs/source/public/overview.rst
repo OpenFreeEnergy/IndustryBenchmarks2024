@@ -517,19 +517,19 @@ For performing the data gathering, please note the following:
 .. code-block:: bash
 
    wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/data_gathering.py
-   python data_gathering.py --input_alchemical_network network_setup/alchemical_network.json
+   python data_gathering.py --input_alchemical_network network_setup/alchemical_network.json --results-folder results_0 results_1 results_2
 
 If the `fix network script <fix_networks>`_ was run, two alchemical networks need to be provided to the data gathering script, the original one and the one that was created after running the ``fix_networks.py``:
 
 .. code-block:: bash
 
-   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --fixed_alchemical_network new_network_setup/alchemicalNetwork/alchemical_network.json
+   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --fixed_alchemical_network new_network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 results_1 results_2
 
 If confidential ligand names were used, those can be replaced with generic ligand names. To do that you will need to add the flag ``--hide-ligand-names``:
 
 .. code-block:: bash
 
-   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --hide-ligand-names
+   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 results_1 results_2 --hide-ligand-names
 
 .. warning::
    Per default, the ligand names that were present in the original ligand sdf will be stored. Please check those and if they contain any confidential information, use the ``hide-ligand-names`` flag.
@@ -541,10 +541,46 @@ Content of the data that will be transferred to OpenFE
 
 Here you can find the full list of files and data that will be extracted in the `data gathering script <gathering_of_results>`_.
 
-* Explain what the gathering script will extract
-* Create a folder output...
-  * In the folder separate folder for each transformation, in there separate folder for each repeat, list files and what they contain in that folder
-  * .json file with a lot of information: blinded transformation network, transformation and ligand scores
+1. A file containing a variety of network properties (``all_network_properties.json``). More specifically, the file contains the following information:
+
+  * ``Network_map``: A network containing the ligand names as nodes, and the transformations that were run between those ligands.
+  * ``transformation_scores``: Following information is saved for each transformation:
+
+    * Lomap score
+    * Alchemical charge difference
+    * Charge score: A score that describes the difficulty of a transformation related to the absolute change difference between ligands
+    * Shape score
+    * Volume score
+    * Mapping RMSD score
+    * Number of heavy atoms in the common core
+    * Number of heavy atoms in the dummy region of ligand A
+    * Number of heavy atoms in the dummy region of ligand B
+    * Changing number of rings
+    * Changing number of rotatable bonds
+    * Morgan fingerprint Tanimoto similarity
+    * Difference in solvent accessible surface area
+    * Whether or not the simulation failed
+
+  * ``ligand_scores``: Following information is saved for each ligand:
+
+    * Number of rotatable bonds
+    * Number of ring systems
+    * Number of heavy atoms
+    * Number of elements
+    * Solvent accessible surface area
+    * Formal charge
+
+  * ``DDG_estimates``: For each leg and each repeat, the DDG estimate and its uncertainty are stores
+
+2. For each transformation and each repeat, a folder is created that contains following files:
+
+  * ``structural_analysis_data.npz``: Data to be able to calculate the ligand center of mass drift, the ligand RMSD, and the protein RMSD.
+  * ``energy_replica_state.npz``: time series of potential energies to be able to re-calculate the free energy differences as well as the MBAR overlap and replica exchange matrix.
+  * ``simulation_real_time_analysis.yaml``: Contains cumulative free energy estimates and simulation run time information
+  * ``info.yaml``: Number of atoms, run time information (nanoseconds per day)
+  * If present, following image analysis files are collected:
+
+    * ``forward_reverse_convergence.png``, ``ligand_COM_drift.png``, ``ligand_RMSD.png``, ``mbar_overlap_matrix.png``, ``protein_2D_RMSD.png``, ``replica_exchange_matrix.png``, ``replica_state_timeseries.png``
 
 
 Analysis of results
