@@ -131,13 +131,6 @@ To help you, we have created a :ref:`preparing and debugging simulations FAQ <pr
 some common issues you may encounter.
 
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-
-   prep_and_debug
-
-
 Cleaning Results
 ================
 
