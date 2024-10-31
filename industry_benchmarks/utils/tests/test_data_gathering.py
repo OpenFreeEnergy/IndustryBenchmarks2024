@@ -272,6 +272,57 @@ def test_check_is_connected(cmet_network, results_data, expected_output):
     assert check_network_is_connected(results_data=results_data, alchemical_network=network) is expected_output
 
 
+@pytest.mark.parametrize("results_data, expected_output", [
+    pytest.param({
+        ("solvent", "ligand0", "ligand1"): [1, 2, 3],
+        ("solvent", "ligand2", "ligand3"): [1, 2, 3]
+    }, False, id="Not connected"),
+    pytest.param({
+        ("solvent", "ligand0", "ligand1"): [1, 2, 3],
+        ("solvent", "ligand0", "ligand2"): [1, 2, 3],
+        ("complex", "ligand0", "ligand1"): [1, 2, 3],
+        ("complex", "ligand0", "ligand2"): [1, 2, 3]
+    }, True, id="Connected"),
+    pytest.param({
+        ("solvent", "ligand0", "ligand1"): [1, 2],
+        ("complex", "ligand0", "ligand1"): [1, 2, 3]
+    }, False, id="Missing repeats not connected"),
+    pytest.param({
+        ("solvent", "ligand0", "ligand1"): [1, 2, 3],
+        ("complex", "ligand0", "ligand1"): [1, 2, 3],
+        ("solvent", "ligand0", "ligand2"): [1, 2, 3]
+    }, True, id="Connected partial results.")
+])
+def test_check_is_connected_name_mapped(cmet_network, results_data, expected_output):
+    name_mapping = {
+        "lig_CHEMBL3402745_200_5": "ligand0",
+        "lig_CHEMBL3402749_500_9": "ligand1",
+        "lig_CHEMBL3402754_40_14": "ligand2",
+        "lig_CHEMBL3402761_1_21": "ligand3",
+    }
+    network = parse_alchemical_network(cmet_network)
+    assert check_network_is_connected(results_data=results_data, alchemical_network=network, name_mapping=name_mapping) is expected_output
+
+
+def test_replace_ligand_names(cmet_ligand_network):
+    new_network, name_mapping = replace_ligand_names(ligand_network=cmet_ligand_network)
+    assert len(name_mapping) == 5
+    new_names = sorted(name_mapping.values())
+    assert new_names == [
+        "ligand0",
+        "ligand1",
+        "ligand2",
+        "ligand3",
+        "ligand4"
+    ]
+    # make sure all names have been replaced
+    for node in new_network.nodes:
+        assert node.name not in name_mapping
+    for edge in new_network.edges:
+        assert edge.componentA.name not in name_mapping
+        assert edge.componentB.name not in name_mapping
+
+
 # Full CLI tests
 class TestScript:
     def test_cli_clean_up_not_ran(self, bace_complete_results, bace_network):
@@ -381,10 +432,10 @@ class TestScript:
         assert "Total results found 6/6 indicating 0 failed transformations." in result.stdout
 
         # make sure we have a zip folder
-        archive: pathlib.Path = tmpdir / "full_test.zip"
+        archive: pathlib.Path = tmpdir / "full_test" / "results_data.zip"
         assert archive.exists()
         # make sure we have the folder made into the archive
-        result_folder = tmpdir / "full_test"
+        result_folder = tmpdir / "full_test" / "results_data"
         assert result_folder.exists()
         # load the results JSON
         result_json = json.load(
@@ -427,6 +478,91 @@ class TestScript:
                 ]:
                     assert (edge_folder / f_name).exists()
 
+    def test_full_run_hide_names(self, bace_full_results, tmpdir):
+        """
+        Check a full successful run of the CLI when hiding the ligand names and inspect the returned results.
+        """
+        runner = CliRunner()
+        result = runner.invoke(
+            gather_data,
+            [
+                "--input_alchemical_network",
+                str(bace_full_results / "alchemicalNetwork" / "alchemical_network.json"),
+                "--output_dir",
+                str(tmpdir / "full_test"),
+                "--results-folder",
+                str(bace_full_results / "results_0"),
+                "--results-folder",
+                str(bace_full_results / "results_1"),
+                "--results-folder",
+                str(bace_full_results / "results_2"),
+                "--hide-ligand-names"
+            ]
+        )
+        assert result.exit_code == 0
+        # make sure the missing png file warnings are printed
+        assert "Can't find cleaned results file: forward_reverse_convergence.png" in result.stdout
+        assert "Total results found 6/6 indicating 0 failed transformations." in result.stdout
+
+        # make sure we have a zip folder
+        archive: pathlib.Path = tmpdir / "full_test" / "results_data.zip"
+        assert archive.exists()
+        # make sure we have a ligand name mapping
+        name_mapping_file = tmpdir / "full_test" / "ligand_name_mapping_PRIVATE.json"
+        assert name_mapping_file.exists()
+        # check the name mappings
+        name_mappings = json.load(
+            name_mapping_file.open("r")
+        )
+        assert len(name_mappings) == 2
+        assert name_mappings["spiro2"] == "ligand0"
+        assert name_mappings["spiro1"] == "ligand1"
+
+        # make sure we have the folder made into the archive
+        result_folder = tmpdir / "full_test" / "results_data"
+        assert result_folder.exists()
+        # load the results JSON
+        result_json = json.load(
+            (result_folder / "all_network_properties.json").open(mode="r"),
+            cls=JSON_HANDLER.decoder
+        )
+        # check for the expected keys
+        assert "Network_map" in result_json
+        assert "transformation_scores" in result_json
+        assert "ligand_scores" in result_json
+        assert "DDG_estimates" in result_json
+
+        # do some basic checks
+        # check for 2 ligands and a single edge
+        assert len(result_json["Network_map"]["nodes"]) == 2
+        assert len(result_json["Network_map"]["edge"]) == 1
+        # check the single edge has a score
+        assert len(result_json["transformation_scores"]) == 1
+        assert "edge_ligand0_ligand1" in result_json["transformation_scores"]
+        # check the ligand scores
+        assert len(result_json["ligand_scores"]) == 2
+        assert "ligand_ligand0" in result_json["ligand_scores"]
+        assert "ligand_ligand1" in result_json["ligand_scores"]
+
+        # check the edge estimates
+        assert len(result_json["DDG_estimates"]) == 6
+        for repeat in range(3):
+            for phase in ["solvent", "complex"]:
+                edge_name = f"{phase}_ligand0_ligand1_repeat_{repeat}"
+                assert edge_name in result_json["DDG_estimates"]
+                # make sure the edge folder was created
+                edge_folder = result_folder / edge_name
+                assert edge_folder.exists()
+                # check the files were moved to the directory
+                for f_name in [
+                    "structural_analysis_data.npz",
+                    "energy_replica_state.npz",
+                    "simulation_real_time_analysis.yaml",
+                    "info.yaml"
+                ]:
+                    assert (edge_folder / f_name).exists()
+
+
     def test_full_run_fixed_network(self, bace_full_results, tmpdir):
         """
         Check a full successful run of the CLI with a fixed network and inspect the returned results.
@@ -460,10 +596,10 @@ class TestScript:
         assert "Can't find cleaned results file: forward_reverse_convergence.png" in result.stdout
         assert "Total results found 12/12 indicating 0 failed transformations." in result.stdout
         # make sure we have a zip folder
-        archive: pathlib.Path = tmpdir / "full_test.zip"
+        archive: pathlib.Path = tmpdir / "full_test" / "results_data.zip"
         assert archive.exists()
         # make sure we have the folder made into the archive
-        result_folder = tmpdir / "full_test"
+        result_folder = tmpdir / "full_test" / "results_data"
         assert result_folder.exists()
         # load the results JSON
         result_json = json.load(
@@ -508,22 +644,3 @@ class TestScript:
                         "info.yaml"
                     ]:
                         assert (edge_folder / f_name).exists()
-
-
-def test_replace_ligand_names(cmet_ligand_network):
-    new_network, name_mapping = replace_ligand_names(ligand_network=cmet_ligand_network)
-    assert len(name_mapping) == 5
-    new_names = sorted(name_mapping.values())
-    assert new_names == [
-        "ligand0",
-        "ligand1",
-        "ligand2",
-        "ligand3",
-        "ligand4"
-    ]
-    # make sure all names have been replaced
-    for node in new_network.nodes:
-        assert node.name not in name_mapping
-    for edge in new_network.edges:
-        assert edge.componentA.name not in name_mapping
-        assert edge.componentB.name not in name_mapping
