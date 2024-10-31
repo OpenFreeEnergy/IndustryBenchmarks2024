@@ -411,21 +411,22 @@ class TestScript:
         Check a full successful run of the CLI and inspect the returned results.
         """
         runner = CliRunner()
-        result = runner.invoke(
-            gather_data,
-            [
-                "--input_alchemical_network",
-                str(bace_full_results / "alchemicalNetwork" / "alchemical_network.json"),
-                "--output_dir",
-                str(tmpdir / "full_test"),
-                "--results-folder",
-                str(bace_full_results / "results_0"),
-                "--results-folder",
-                str(bace_full_results / "results_1"),
-                "--results-folder",
-                str(bace_full_results / "results_2")
-            ]
-        )
+        with pytest.warns(UserWarning, match="The names of the ligands will be used as-is in the results"):
+            result = runner.invoke(
+                gather_data,
+                [
+                    "--input_alchemical_network",
+                    str(bace_full_results / "alchemicalNetwork" / "alchemical_network.json"),
+                    "--output_dir",
+                    str(tmpdir / "full_test"),
+                    "--results-folder",
+                    str(bace_full_results / "results_0"),
+                    "--results-folder",
+                    str(bace_full_results / "results_1"),
+                    "--results-folder",
+                    str(bace_full_results / "results_2")
+                ]
+            )
         assert result.exit_code == 0
         # make sure the missing png file warnings are printed
         assert "Can't find cleaned results file: forward_reverse_convergence.png" in result.stdout
