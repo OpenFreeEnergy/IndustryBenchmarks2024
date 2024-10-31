@@ -569,7 +569,7 @@ Here you can find the full list of files and data that will be extracted in the 
     * Solvent accessible surface area
     * Formal charge
 
-  * ``DDG_estimates``: For each leg and each repeat, the DDG estimate and its uncertainty are stores
+  * ``DDG_estimates``: For each leg and each repeat, the DDG estimate and its uncertainty are stored
 
 2. For each transformation and each repeat, a folder is created that contains following files:
 
