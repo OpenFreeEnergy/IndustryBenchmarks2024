@@ -542,7 +542,7 @@ Here you can find the full list of files and data that will be extracted in the 
 
 1. A file containing a variety of network properties (``all_network_properties.json``). More specifically, the file contains the following information:
 
-  * ``Network_map``: A network containing the ligand names as nodes, and the transformations that were run between those ligands.
+  * ``Network_map``: A network containing the ligand names as nodes, and ligand name pairs as edges to specify which transformations were run.
   * ``transformation_scores``: Following information is saved for each transformation:
 
     * Lomap score
