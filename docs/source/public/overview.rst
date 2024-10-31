@@ -528,7 +528,7 @@ If confidential ligand names were used, those can be replaced with generic ligan
 
 .. code-block:: bash
 
-   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 results_1 results_2 --hide-ligand-names
+   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2 --hide-ligand-names
 
 .. warning::
    Per default, the ligand names that were present in the original ligand sdf will be stored. Please check those and if they contain any confidential information, use the ``hide-ligand-names`` flag.
