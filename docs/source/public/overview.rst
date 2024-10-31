@@ -507,7 +507,7 @@ back to the OpenFE team.
 For performing the data gathering, please note the following:
 
 * Make sure to run the `post-simulation cleanup`_ script before running the data gathering script! If you have not run the cleanup script, this data gathering script will throw an error.
-* The data gathering script will throw an error if the network is broken and also not all three repeats have finished successfully.
+* The data gathering script will throw an error if the network is broken or if any of the three repeats have not finished successfully.
 
    * If you have a broken network, please run the `fix_networks`_ script and the new edges first to obtain a connected network.
    * If some of your repeats had failed, please re-run those as described `here <failed_edges>`_
