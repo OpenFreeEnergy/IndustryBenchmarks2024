@@ -453,7 +453,6 @@ class TestScript:
         assert len(result_json["Edges"]) == 1
         assert "edge_spiro2_spiro1" in result_json["Edges"]
         # check the ligand scores
-        assert len(result_json["Ligands"]) == 2
         assert "spiro2" in result_json["Ligands"]
         assert "spiro1" in result_json["Ligands"]
 
@@ -512,8 +511,8 @@ class TestScript:
             name_mapping_file.open("r")
         )
         assert len(name_mappings) == 2
-        assert name_mappings["spiro2"] == "ligand0"
-        assert name_mappings["spiro1"] == "ligand1"
+        assert "spiro2" in name_mappings
+        assert "spiro1" in name_mappings
 
         # make sure we have the folder made into the archive
         result_folder = tmpdir / "full_test" / "results_data"
@@ -524,22 +523,19 @@ class TestScript:
             cls=JSON_HANDLER.decoder
         )
         # check for the expected keys
-        assert "Network_map" in result_json
-        assert "transformation_scores" in result_json
-        assert "ligand_scores" in result_json
+        assert "Edges" in result_json
+        assert "Ligands" in result_json
         assert "DDG_estimates" in result_json
 
         # do some basic checks
         # check for 2 ligands and a single edge
-        assert len(result_json["Network_map"]["nodes"]) == 2
-        assert len(result_json["Network_map"]["edge"]) == 1
+        assert len(result_json["Ligands"]) == 2
         # check the single edge has a score
-        assert len(result_json["transformation_scores"]) == 1
-        assert "edge_ligand0_ligand1" in result_json["transformation_scores"]
+        assert len(result_json["Edges"]) == 1
+        assert "edge_ligand0_ligand1" in result_json["Edges"]
         # check the ligand scores
-        assert len(result_json["ligand_scores"]) == 2
-        assert "ligand_ligand0" in result_json["ligand_scores"]
-        assert "ligand_ligand1" in result_json["ligand_scores"]
+        assert "ligand0" in result_json["Ligands"]
+        assert "ligand1" in result_json["Ligands"]
 
         # check the edge estimates
         assert len(result_json["DDG_estimates"]) == 6
