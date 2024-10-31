@@ -683,9 +683,16 @@ def check_network_is_connected(results_data: dict[tuple[str, str, str], list[tup
     return is_connected
 
 def get_estimate(result: dict) -> tuple[unit.Quantity, unit.Quantity]:
-    """Extract the DDG and error estimate from this run"""
+    """Extract the DDG and MBAR error estimate from this run"""
     ddg = result["estimate"]["magnitude"] * getattr(unit, result["estimate"]["unit"])
-    uncertainty = result["uncertainty"]["magnitude"] * getattr(unit, result["uncertainty"]["unit"])
+    # get the unit key
+    proto_key = next(
+        k
+        for k in result["unit_results"].keys()
+        if k.startswith("ProtocolUnitResult")
+    )
+    # extract the MBAR uncertainty
+    uncertainty = result["unit_results"][proto_key]["outputs"]["unit_estimate_error"]["magnitude"] * getattr(unit, result["unit_results"][proto_key]["outputs"]["unit_estimate_error"]["unit"])
     return ddg, uncertainty
 
 

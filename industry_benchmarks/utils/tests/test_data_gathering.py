@@ -236,7 +236,7 @@ def test_get_estimate(cmet_results):
     result = load_results_file(str(cmet_results / "results_0" / "lig_CHEMBL3402745_200_5_solvent_lig_CHEMBL3402744_300_4_solvent_solvent.json"))
     ddg, error = get_estimate(result)
     assert pytest.approx(ddg.m) == -13.506009
-    assert pytest.approx(error.m) == 0.0
+    assert pytest.approx(error.m) == 0.049676475618199725
 
 
 def test_get_transformation_name(bace_network, bace_cleaned_result):
