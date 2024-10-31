@@ -629,7 +629,7 @@ def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork)
     ligmap = mapping_look_up[mapping_key]
     return phase, ligmap.componentA.name, ligmap.componentB.name
 
-def check_network_is_connected(results_data: dict[tuple[str, str, str], list[tuple[unit.Quantity, unit.Quantity, pathlib.Path]]], alchemical_network: gufe.AlchemicalNetwork) -> bool:
+def check_network_is_connected(results_data: dict[tuple[str, str, str], list[tuple[unit.Quantity, unit.Quantity, pathlib.Path]]], alchemical_network: gufe.AlchemicalNetwork, name_mapping: None | dict[str, str] = None) -> bool:
     """
     Build a network from the results and check the network is connected.
 
@@ -638,17 +638,35 @@ def check_network_is_connected(results_data: dict[tuple[str, str, str], list[tup
     """
     from networkx.exception import NetworkXPointlessConcept
 
-    # map the edge name to the tuple
-    results_by_name = dict(
-        (f"{phase}_{ligand_a}_{ligand_b}", (phase, ligand_a, ligand_b))
-        for (phase, ligand_a, ligand_b) in results_data.keys()
-    )
+    # reverse the name mapping
+    if name_mapping is not None:
+        reverse_name_mapping = dict(
+            (v, k) for k, v in name_mapping.items()
+        )
+    else:
+        reverse_name_mapping = None
+
+    # create a new version of the results data with the correct edge names
+    results_by_edge = {}
+    edge_to_ligands = {}
+    for (phase, ligand_a, ligand_b), results in results_data.items():
+        # create the edge string
+        if reverse_name_mapping is not None:
+            edge_name = f"{phase}_{reverse_name_mapping[ligand_a]}_{reverse_name_mapping[ligand_b]}"
+
+        else:
+            edge_name = f"{phase}_{ligand_a}_{ligand_b}"
+
+        results_by_edge[edge_name] = results
+        edge_to_ligands[edge_name] = (ligand_a, ligand_b)
+
 
     edges = defaultdict(list)
     # group the transforms by ligands
     for transform in alchemical_network.edges:
-        if transform.name in results_by_name and len(results_data[results_by_name[transform.name]]) == 3:
-            _, ligand_a, ligand_b = results_by_name[transform.name]
+        if transform.name in results_by_edge and len(results_by_edge[transform.name]) == 3:
+            # get the names of the ligands in this edge
+            ligand_a, ligand_b = edge_to_ligands[transform.name]
             edges[(ligand_a, ligand_b)].append(transform)
 
     # extract edges which have both phases completed
@@ -671,11 +689,10 @@ def get_estimate(result: dict) -> tuple[unit.Quantity, unit.Quantity]:
     return ddg, uncertainty
 
 
-def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork) -> dict[tuple[str, str, str, str], tuple[unit.Quantity, unit.Quantity]]:
+def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Path, alchemical_network: gufe.AlchemicalNetwork, name_mapping: None | dict[str, str] = None) -> dict[tuple[str, str, str, str], tuple[unit.Quantity, unit.Quantity]]:
     """
     Loop over the results folders extracting the required information and moving it to the output folder.
 
-    TODO take in the name mapping to ensure we swap the ligand name in the filenames
 
     Returns
     -------
@@ -688,7 +705,6 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
     # assuming 3 repeats of each solvent and complex transformation
     all_results = defaultdict(list)
     expected_results = len(alchemical_network.edges) * 3
-    expected_edges = [edge.name for edge in alchemical_network.edges]
 
     # map the transformation to the results files
     for results_folder in results_folders:
@@ -704,6 +720,9 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
                 # we use the tuple to avoid splitting on _ as ligands might have _ in the name
                 try:
                     transformation_name = get_transform_name(result=result, alchemical_network=alchemical_network)
+                    if name_mapping is not None:
+                        phase, ligand_a, ligand_b = transformation_name
+                        transformation_name = (phase, name_mapping[ligand_a], name_mapping[ligand_b])
                     # collect the paths to the results files and the structural data
                     if simulation_data_file is not None:
                         all_results[transformation_name].append((ddg, uncertainty, simulation_data_file))
@@ -718,7 +737,7 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
     print(f"Total results found {found_results}/{expected_results} indicating {expected_results - found_results} failed transformations.")
 
     # check we have a connected network
-    if not check_network_is_connected(results_data=all_results, alchemical_network=alchemical_network):
+    if not check_network_is_connected(results_data=all_results, alchemical_network=alchemical_network, name_mapping=name_mapping):
         raise ValueError("The network built from the complete results is disconnected, some simulations may still be"
                          "running, needed restarting or you may have missing repeats. Reproducible edge failures may require extra edges which "
                          "can be generated using the `fix_networks.py` script.")
@@ -761,6 +780,42 @@ def extract_ligand_network(alchemical_network: gufe.AlchemicalNetwork) -> Ligand
     network = LigandNetwork(edges=set(edges))
     return network
 
+def replace_ligand_names(ligand_network: LigandNetwork) -> tuple[LigandNetwork, dict[str, str]]:
+    """
+    Replace the names of the ligands in the network with generic names and return a mapping of the current name to
+        the generic one of the form ligand1
+
+    Parameters
+    ----------
+    ligand_network:
+        The ligand network with ligands that should have their name replaced.
+
+    Returns
+    -------
+    A tuple of the new ligand network and a dict mapping the old name to the new ligand name.
+    """
+
+    # store a mapping of names
+    name_mapping = {}
+    # create new small molecules for the network
+    node_mapping = {}
+    # create new names for each ligand
+    for i, node in enumerate(ligand_network.nodes):
+        new_name = f"ligand{i}"
+        name_mapping[node.name] = new_name
+        node_mapping[node.name] = node.copy_with_replacements(name=new_name)
+    edges = []
+    for edge in ligand_network.edges:
+        new_edge = LigandAtomMapping(
+            componentA=node_mapping[edge.componentA.name],
+            componentB=node_mapping[edge.componentB.name],
+            componentA_to_componentB=edge.componentA_to_componentB,
+            annotations=edge.annotations
+        )
+        edges.append(new_edge)
+
+    return LigandNetwork(edges=edges), name_mapping
+
 
 @click.command
 @click.option(
@@ -788,6 +843,13 @@ def extract_ligand_network(alchemical_network: gufe.AlchemicalNetwork) -> Ligand
          "simulations of fixing the network."),
 )
 @click.option(
+    '--hide-ligand-names',
+    is_flag=True,
+    show_default=True,
+    default=False,
+    help="If the ligand names should be replaced by generic labels to hide confidential data."
+)
+@click.option(
     "--results-folder",
     type=click.Path(dir_okay=True, file_okay=False, path_type=pathlib.Path),
     multiple=True,
@@ -798,12 +860,16 @@ def gather_data(
     output_dir: pathlib.Path,
     fixed_alchemical_network: None | pathlib.Path,
     results_folder: list[pathlib.Path],
+    hide_ligand_names: bool,
 ):
     """
     Function that gathers all the data.
     """
     # Make folder for outputs
     output_dir.mkdir(exist_ok=False, parents=True)
+    # make the subfolder which will become the zip archive
+    results_dir = output_dir.joinpath("results_data")
+    results_dir.mkdir(exist_ok=False, parents=True)
 
     # GATHER Input based information
     alchemical_network = parse_alchemical_network(input_alchemical_network)
@@ -817,12 +883,30 @@ def gather_data(
         # combine the alchemical networks
         alchemical_network = gufe.AlchemicalNetwork(edges=[*alchemical_network.edges, *fixed_alchemical_network.edges])
 
+    # work out if we should hide the names of the ligands
+    if hide_ligand_names:
+        ligand_network, name_mapping = replace_ligand_names(ligand_network)
+        with open(output_dir / "ligand_name_mapping_PRIVATE.json", "w") as out:
+            json.dump(name_mapping, out)
+    else:
+        # make some noise that we are not hiding the names
+        name_mapping = None
+        import warnings
+        warnings.warn(message="The names of the ligands will be used as-is in the results, if you want to make them anonymous"
+                              "run the script again with the '--hide-ligand-names' flag.")
+
+
     # get the ligand and edge scores
     transformation_scores = gather_transformation_scores(ligand_network)
     ligand_scores = gather_ligand_scores(ligand_network)
 
     # process the results one by one
-    collected_results = process_results(results_folder, output_dir, alchemical_network)
+    collected_results = process_results(
+        results_folders=results_folder,
+        output_dir=results_dir,
+        alchemical_network=alchemical_network,
+        name_mapping=name_mapping
+    )
 
     # create a copy of the results using a string as the hash to enable saving to json
     formatted_results = dict(
@@ -852,13 +936,14 @@ def gather_data(
         "Edges": transformation_scores,
         "DDG_estimates": formatted_results,
     }
+
     # Save this to json
-    file = pathlib.Path(output_dir / 'all_network_properties.json')
+    file = pathlib.Path(results_dir / 'all_network_properties.json')
     with open(file, mode='w') as f:
         json.dump(network_properties, f, cls=JSON_HANDLER.encoder, indent=2)
 
     # finally zip the folder
-    shutil.make_archive(output_dir.as_posix(), "zip", output_dir.as_posix())
+    shutil.make_archive(results_dir.as_posix(), "zip", results_dir.as_posix())
 
 
 
