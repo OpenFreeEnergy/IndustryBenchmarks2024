@@ -381,7 +381,7 @@ def get_difference_solvent_accessible_surface_area(mapping: LigandAtomMapping) -
 
 def gather_transformation_scores(
     input_ligand_network: LigandNetwork,
-) -> dict[str, dict[str, int]]:
+) -> dict[str, dict[str, any]]:
     """
     Gather all scores for the transformations in a dict.
     Transformations information
@@ -405,6 +405,8 @@ def gather_transformation_scores(
         name = f'edge_{edge.componentA.name}_{edge.componentB.name}'
         transformations_scores[name] = {}
         edge_scores = {}
+        edge_scores["ligand_A"] = edge.componentA.name
+        edge_scores["ligand_B"] = edge.componentB.name
         lomap_score = get_lomap_score(edge)
         edge_scores["lomap_score"] = lomap_score
         alchemical_charge_difference = get_alchemical_charge_difference(edge)
@@ -454,7 +456,7 @@ def gather_ligand_scores(
     """
     all_ligand_scores = {}
     for node in input_ligand_network.nodes:
-        name = f'ligand_{node.name}'
+        name = f'{node.name}'
         all_ligand_scores[name] = {}
         ligand_scores = {}
         num_rotatable_bonds = get_number_rotatable_bonds(node)
@@ -823,7 +825,7 @@ def gather_data(
     collected_results = process_results(results_folder, output_dir, alchemical_network)
 
     # create a copy of the results using a string as the hash to enable saving to json
-    formated_results = dict(
+    formatted_results = dict(
         (f"{phase}_{ligand_a}_{ligand_b}_{repeat}", value)
         for (phase, ligand_a, ligand_b, repeat), value in collected_results.items()
     )
@@ -843,12 +845,12 @@ def gather_data(
             transformation_scores[edge]["failed"] = True
 
     blinded_network = get_transformation_network_map(ligand_network)
+
     # Create a single dict of all scores
     network_properties = {
-        "Network_map": blinded_network,
-        "transformation_scores": transformation_scores,
-        "ligand_scores": ligand_scores,
-        "DDG_estimates": formated_results
+        "Ligands": ligand_scores,
+        "Edges": transformation_scores,
+        "DDG_estimates": formatted_results,
     }
     # Save this to json
     file = pathlib.Path(output_dir / 'all_network_properties.json')

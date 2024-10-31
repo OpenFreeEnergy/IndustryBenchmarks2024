@@ -391,22 +391,19 @@ class TestScript:
             cls=JSON_HANDLER.decoder
         )
         # check for the expected keys
-        assert "Network_map" in result_json
-        assert "transformation_scores" in result_json
-        assert "ligand_scores" in result_json
+        assert "Edges" in result_json
+        assert "Ligands" in result_json
         assert "DDG_estimates" in result_json
 
         # do some basic checks
-        # check for 2 ligands and a single edge
-        assert len(result_json["Network_map"]["nodes"]) == 2
-        assert len(result_json["Network_map"]["edge"]) == 1
+        assert len(result_json["Ligands"]) == 2
         # check the single edge has a score
-        assert len(result_json["transformation_scores"]) == 1
-        assert "edge_spiro2_spiro1" in result_json["transformation_scores"]
+        assert len(result_json["Edges"]) == 1
+        assert "edge_spiro2_spiro1" in result_json["Edges"]
         # check the ligand scores
-        assert len(result_json["ligand_scores"]) == 2
-        assert "ligand_spiro2" in result_json["ligand_scores"]
-        assert "ligand_spiro1" in result_json["ligand_scores"]
+        assert len(result_json["Ligands"]) == 2
+        assert "spiro2" in result_json["Ligands"]
+        assert "spiro1" in result_json["Ligands"]
 
         # check the edge estimates
         assert len(result_json["DDG_estimates"]) == 6
@@ -470,24 +467,24 @@ class TestScript:
             cls=JSON_HANDLER.decoder
         )
         # check for the expected keys
-        assert "Network_map" in result_json
-        assert "transformation_scores" in result_json
-        assert "ligand_scores" in result_json
+        assert "Edges" in result_json
+        assert "Ligands" in result_json
         assert "DDG_estimates" in result_json
 
         # do some basic checks
         # check for 3 ligands and two edges in the combined network
-        assert len(result_json["Network_map"]["nodes"]) == 3
-        assert len(result_json["Network_map"]["edge"]) == 2
+        assert len(result_json["Ligands"]) == 3
+        assert len(result_json["Edges"]) == 2
         # check the two edges have scores
-        assert len(result_json["transformation_scores"]) == 2
-        assert "edge_spiro2_spiro1" in result_json["transformation_scores"]
-        assert "edge_spiro2_spiro3" in result_json["transformation_scores"]
+        assert len(result_json["Edges"]) == 2
+        assert "edge_spiro2_spiro1" in result_json["Edges"]
+        assert "edge_spiro2_spiro3" in result_json["Edges"]
+        assert "spiro2" == result_json["Edges"]["edge_spiro2_spiro3"]["ligand_A"]
         # check the ligand scores
-        assert len(result_json["ligand_scores"]) == 3
-        assert "ligand_spiro2" in result_json["ligand_scores"]
-        assert "ligand_spiro1" in result_json["ligand_scores"]
-        assert "ligand_spiro3" in result_json["ligand_scores"]
+        assert len(result_json["Ligands"]) == 3
+        assert "spiro2" in result_json["Ligands"]
+        assert "spiro1" in result_json["Ligands"]
+        assert "spiro3" in result_json["Ligands"]
 
         # check the edge estimates
         assert len(result_json["DDG_estimates"]) == 12
