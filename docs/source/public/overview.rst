@@ -522,7 +522,7 @@ If the `fix network script <fix_networks>`_ was run, two alchemical networks nee
 
 .. code-block:: bash
 
-   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --fixed_alchemical_network new_network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 results_1 results_2
+   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --fixed_alchemical_network new_network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2
 
 If confidential ligand names were used, those can be replaced with generic ligand names. To do that you will need to add the flag ``--hide-ligand-names``:
 
