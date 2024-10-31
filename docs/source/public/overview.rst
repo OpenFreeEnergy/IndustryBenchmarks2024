@@ -516,7 +516,7 @@ For performing the data gathering, please note the following:
 .. code-block:: bash
 
    wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/data_gathering.py
-   python data_gathering.py --input_alchemical_network network_setup/alchemical_network.json --results-folder results_0 results_1 results_2
+   python data_gathering.py --input_alchemical_network network_setup/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2
 
 If the `fix network script <fix_networks>`_ was run, two alchemical networks need to be provided to the data gathering script, the original one and the one that was created after running the ``fix_networks.py``:
 
