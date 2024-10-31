@@ -77,6 +77,9 @@ def get_calc_data(filename: Path) -> dict[str, dict[str, float]]:
             calculated_data[tag]['ligand_j'] = row[1]
             calculated_data[tag]['ddG'] = float(row[2])
             calculated_data[tag]['ddG_err'] = float(row[3])
+            # Special case for when you have a near zero error
+            if calculated_data[tag]['ddG_err'] < 0.01:
+                calculated_data[tag]['ddG_err'] += 0.01
 
     return calculated_data
 
