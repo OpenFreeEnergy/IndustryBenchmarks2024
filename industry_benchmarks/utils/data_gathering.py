@@ -4,9 +4,9 @@ import pathlib
 import json
 import rdkit
 import tqdm
-from rdkit import Chem
+from rdkit import Chem, DataStructs
 from rdkit.Chem import AllChem
-from rdkit.Chem import rdFreeSASA
+from rdkit.Chem import rdFreeSASA, rdMolDescriptors
 import gufe
 from gufe import SmallMoleculeComponent, LigandAtomMapping, AtomMapping
 from gufe.tokenization import JSON_HANDLER
@@ -344,9 +344,30 @@ def get_fingerprint_similarity_score(mapping: LigandAtomMapping) -> float:
     fpA = fpgen_morgan.GetFingerprint(molA)
     fpB = fpgen_morgan.GetFingerprint(molB)
     # Get Tanimoto similarity
-    morgan_fp_score = rdkit.DataStructs.TanimotoSimilarity(fpA, fpB)
+    morgan_fp_score = DataStructs.TanimotoSimilarity(fpA, fpB)
 
     return morgan_fp_score
+
+def get_atom_pair_similarity(mapping: LigandAtomMapping) -> float:
+    molA = mapping.componentA.to_rdkit()
+    molB = mapping.componentB.to_rdkit()
+    Chem.SanitizeMol(molA)
+    Chem.SanitizeMol(molB)
+
+    fp_a = rdMolDescriptors.GetHashedAtomPairFingerprintAsBitVect(molA)
+    fp_b = rdMolDescriptors.GetHashedAtomPairFingerprintAsBitVect(molB)
+    return DataStructs.TanimotoSimilarity(fp_a, fp_b)
+
+def get_topological_torsion_similarity(mapping: LigandAtomMapping) -> float:
+    molA = mapping.componentA.to_rdkit()
+    molB = mapping.componentB.to_rdkit()
+    Chem.SanitizeMol(molA)
+    Chem.SanitizeMol(molB)
+
+    fp_a = rdMolDescriptors.GetHashedTopologicalTorsionFingerprintAsBitVect(molA)
+    fp_b = rdMolDescriptors.GetHashedTopologicalTorsionFingerprintAsBitVect(molB)
+    return DataStructs.TanimotoSimilarity(fp_a, fp_b)
+
 
 
 def get_changing_number_rotatable_bonds(mapping: LigandAtomMapping) -> int:
@@ -431,6 +452,10 @@ def gather_transformation_scores(
         edge_scores["morgan_tanimoto_similarity"] = morgan_fp_score
         diff_sasa_AB = get_difference_solvent_accessible_surface_area(edge)
         edge_scores["difference_solvent_accessible_surface_area"] = diff_sasa_AB
+        diff_atom_pair = get_atom_pair_similarity(edge)
+        edge_scores["atom_pair_tanimoto_similarity"] = diff_atom_pair
+        diff_topological_torsions = get_topological_torsion_similarity(edge)
+        edge_scores["topological_torsion_tanimoto_similarity"] = diff_topological_torsions
 
         transformations_scores[name] = edge_scores
 

@@ -29,7 +29,9 @@ from ..data_gathering import (
     get_estimate,
     get_transform_name,
     check_network_is_connected,
-    replace_ligand_names
+    replace_ligand_names,
+    get_atom_pair_similarity,
+    get_topological_torsion_similarity
 )
 import pytest
 from importlib import resources
@@ -136,6 +138,8 @@ def test_gather_transfer_info(cmet_ligand_network):
         assert "morgan_tanimoto_similarity" in edge_info
         assert "difference_solvent_accessible_surface_area" in edge_info
         assert "charge_score" in edge_info
+        assert "atom_pair_tanimoto_similarity" in edge_info
+        assert "topological_torsion_tanimoto_similarity" in edge_info
 
 
 def test_number_of_rotor_bonds(cmet_ligand_network):
@@ -189,6 +193,16 @@ def test_changing_number_of_rotatable_bonds(cmet_ligand_network):
 def test_fingerprint_similarity(cmet_ligand_network):
     expected_similarity = [0.45217391, 0.48543689, 0.50505051, 0.81927711]
     similarity = sorted([get_fingerprint_similarity_score(edge) for edge in cmet_ligand_network.edges])
+    assert np.allclose(similarity, expected_similarity)
+
+def test_atom_pair_similarity(cmet_ligand_network):
+    expected_similarity = [0.49171270718232046, 0.6500956022944551, 0.6653846153846154, 0.8898488120950324]
+    similarity = sorted([get_atom_pair_similarity(edge) for edge in cmet_ligand_network.edges])
+    np.allclose(similarity, expected_similarity)
+
+def test_topological_torsion_similarity(cmet_ligand_network):
+    expected_similarity = [0.5777777777777777, 0.58, 0.5813953488372093, 0.9705882352941176]
+    similarity = sorted([get_topological_torsion_similarity(edge) for edge in cmet_ligand_network.edges])
     assert np.allclose(similarity, expected_similarity)
 
 
