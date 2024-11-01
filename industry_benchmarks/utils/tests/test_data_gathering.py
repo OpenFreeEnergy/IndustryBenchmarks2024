@@ -138,8 +138,8 @@ def test_gather_transfer_info(cmet_ligand_network):
         assert "morgan_tanimoto_similarity" in edge_info
         assert "difference_solvent_accessible_surface_area" in edge_info
         assert "charge_score" in edge_info
-        assert "atom_pair_tanimoto_similarity" in edge_info
-        assert "topological_torsion_tanimoto_similarity" in edge_info
+        assert "atom_pair_dice_similarity" in edge_info
+        assert "topological_torsion_dice_similarity" in edge_info
 
 
 def test_number_of_rotor_bonds(cmet_ligand_network):

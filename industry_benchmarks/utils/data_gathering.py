@@ -452,9 +452,9 @@ def gather_transformation_scores(
         diff_sasa_AB = get_difference_solvent_accessible_surface_area(edge)
         edge_scores["difference_solvent_accessible_surface_area"] = diff_sasa_AB
         diff_atom_pair = get_atom_pair_similarity(edge)
-        edge_scores["atom_pair_tanimoto_similarity"] = diff_atom_pair
+        edge_scores["atom_pair_dice_similarity"] = diff_atom_pair
         diff_topological_torsions = get_topological_torsion_similarity(edge)
-        edge_scores["topological_torsion_tanimoto_similarity"] = diff_topological_torsions
+        edge_scores["topological_torsion_dice_similarity"] = diff_topological_torsions
 
         transformations_scores[name] = edge_scores
 
