@@ -354,9 +354,9 @@ def get_atom_pair_similarity(mapping: LigandAtomMapping) -> float:
     Chem.SanitizeMol(molA)
     Chem.SanitizeMol(molB)
 
-    fp_a = rdMolDescriptors.GetHashedAtomPairFingerprintAsBitVect(molA)
-    fp_b = rdMolDescriptors.GetHashedAtomPairFingerprintAsBitVect(molB)
-    return DataStructs.TanimotoSimilarity(fp_a, fp_b)
+    fp_a = rdMolDescriptors.GetAtomPairFingerprint(molA)
+    fp_b = rdMolDescriptors.GetAtomPairFingerprint(molB)
+    return DataStructs.DiceSimilarity(fp_a, fp_b)
 
 def get_topological_torsion_similarity(mapping: LigandAtomMapping) -> float:
     molA = mapping.componentA.to_rdkit()
@@ -364,9 +364,9 @@ def get_topological_torsion_similarity(mapping: LigandAtomMapping) -> float:
     Chem.SanitizeMol(molA)
     Chem.SanitizeMol(molB)
 
-    fp_a = rdMolDescriptors.GetHashedTopologicalTorsionFingerprintAsBitVect(molA)
-    fp_b = rdMolDescriptors.GetHashedTopologicalTorsionFingerprintAsBitVect(molB)
-    return DataStructs.TanimotoSimilarity(fp_a, fp_b)
+    fp_a = rdMolDescriptors.GetTopologicalTorsionFingerprint(molA)
+    fp_b = rdMolDescriptors.GetTopologicalTorsionFingerprint(molB)
+    return DataStructs.DiceSimilarity(fp_a, fp_b)
 
 
 

@@ -201,7 +201,7 @@ def test_atom_pair_similarity(cmet_ligand_network):
     np.allclose(similarity, expected_similarity)
 
 def test_topological_torsion_similarity(cmet_ligand_network):
-    expected_similarity = [0.5777777777777777, 0.58, 0.5813953488372093, 0.9705882352941176]
+    expected_similarity = [0.7663551401869159, 0.7735849056603774, 0.796875, 0.98989898989899]
     similarity = sorted([get_topological_torsion_similarity(edge) for edge in cmet_ligand_network.edges])
     assert np.allclose(similarity, expected_similarity)
 
