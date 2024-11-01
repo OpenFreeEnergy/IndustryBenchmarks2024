@@ -542,8 +542,7 @@ Here you can find the full list of files and data that will be extracted in the 
 
 1. A file containing a variety of network properties (``all_network_properties.json``). More specifically, the file contains the following information:
 
-  * ``Network_map``: A network containing the ligand names as nodes, and ligand name pairs as edges to specify which transformations were run.
-  * ``transformation_scores``: Following information is saved for each transformation:
+  * ``Edges``: Following information is saved for each transformation:
 
     * Lomap score
     * Alchemical charge difference
@@ -557,10 +556,12 @@ Here you can find the full list of files and data that will be extracted in the 
     * Changing number of rings
     * Changing number of rotatable bonds
     * Morgan fingerprint Tanimoto similarity
+    * AtomPair fingerprint dice similarity
+    * Topological torsion fingerprint dice similarity
     * Difference in solvent accessible surface area
     * Whether or not the simulation failed
 
-  * ``ligand_scores``: Following information is saved for each ligand:
+  * ``Ligands``: Following information is saved for each ligand:
 
     * Number of rotatable bonds
     * Number of ring systems
@@ -569,7 +570,69 @@ Here you can find the full list of files and data that will be extracted in the 
     * Solvent accessible surface area
     * Formal charge
 
-  * ``DDG_estimates``: For each leg and each repeat, the DDG estimate and its uncertainty are stored
+  * ``DDG_estimates``: For each leg and each repeat, the MBAR DDG estimate and its uncertainty are stored
+
+An example extract from the ``all_network_properties.json`` file is shown for the bace test system:
+
+.. code-block:: bash
+
+    {
+      "Ligands": {
+        "spiro1": {
+          "num_rotatable_bonds": 1,
+          "num_rings": 4,
+          "num_heavy_atoms": 26,
+          "num_elements": 5,
+          "solvent_accessible_surface_area": 387.43906527976293,
+          "formal_charge": 1
+        },
+        "spiro2": {
+          "num_rotatable_bonds": 1,
+          "num_rings": 4,
+          "num_heavy_atoms": 24,
+          "num_elements": 5,
+          "solvent_accessible_surface_area": 365.53534383347056,
+          "formal_charge": 1
+        }
+      },
+      "Edges": {
+        "edge_spiro2_spiro1": {
+          "ligand_A": "spiro2",
+          "ligand_B": "spiro1",
+          "lomap_score": 0.7788007830714049,
+          "alchemical_charge_difference": 0,
+          "charge_score": 1.0,
+          "shape_score": 0.2709510437018804,
+          "volume_score": 0.940014662311061,
+          "mapping_rmsd_score": 0.28410096856069245,
+          "num_heavy_core": 24,
+          "num_heavy_dummy_A": 0,
+          "num_heavy_dummy_B": 2,
+          "difference_num_rings_AB": 0,
+          "difference_num_rot_bonds_AB": 0,
+          "morgan_tanimoto_similarity": 0.6966292134831461,
+          "difference_solvent_accessible_surface_area": 21.903721446292366,
+          "atom_pair_dice_similarity": 0.899527983816588,
+          "topological_torsion_dice_similarity": 0.9166666666666666
+        }
+      },
+      "DDG_estimates": {
+        "solvent_spiro2_spiro1_repeat_0": [
+          {
+            "magnitude": 76.98924715451133,
+            "unit": "kilocalorie_per_mole",
+            ":is_custom:": true,
+            "pint_unit_registry": "openff_units"
+          },
+          {
+            "magnitude": 0.45136662410654116,
+            "unit": "kilocalorie_per_mole",
+            ":is_custom:": true,
+            "pint_unit_registry": "openff_units"
+          }
+        ],
+        "solvent_spiro2_spiro1_repeat_1": [...
+
 
 2. For each transformation and each repeat, a folder is created that contains following files:
 
@@ -580,6 +643,27 @@ Here you can find the full list of files and data that will be extracted in the 
   * If present, following image analysis files are collected:
 
     * ``forward_reverse_convergence.png``, ``ligand_COM_drift.png``, ``ligand_RMSD.png``, ``mbar_overlap_matrix.png``, ``protein_2D_RMSD.png``, ``replica_exchange_matrix.png``, ``replica_state_timeseries.png``
+
+The results directory should be organised as follows:
+
+.. code-block:: bash
+
+    results_data
+    ├── all_network_properties.json
+    ├── complex_spiro2_spiro1_repeat_0
+    │   ├── energy_replica_state.npz
+    │   ├── info.yaml
+    │   ├── simulation_real_time_analysis.yaml
+    │   └── structural_analysis_data.npz
+    ├── solvent_spiro2_spiro1_repeat_0
+    │   ├── energy_replica_state.npz
+    │   ├── info.yaml
+    │   ├── simulation_real_time_analysis.yaml
+    │   └── structural_analysis_data.npz
+    ...
+
+A zip archive of this data will also be created in the output folder called ``results_data.zip`` which should be shared
+with the OpenFE team, instructions on how to do this will be shared later.
 
 
 Analysis of results
