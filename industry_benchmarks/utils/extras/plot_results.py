@@ -5,6 +5,7 @@ from cinnabar import Measurement, ReferenceState, FEMap
 from cinnabar import plotting as cinnabar_plotting
 from openff.units import unit
 import numpy as np
+import warnings
 
 
 def get_exp_data(filename: Path) -> dict[str, dict[str, float]]:
@@ -77,6 +78,10 @@ def get_calc_data(filename: Path) -> dict[str, dict[str, float]]:
             calculated_data[tag]['ligand_j'] = row[1]
             calculated_data[tag]['ddG'] = float(row[2])
             calculated_data[tag]['ddG_err'] = float(row[3])
+            # Special case for when you have a near zero error
+            if calculated_data[tag]['ddG_err'] < 0.01:
+                warnings.warn(f"Calculated standard deviation for {tag} is less than 0.01 - adding 0.01 padding")
+                calculated_data[tag]['ddG_err'] += 0.01
 
     return calculated_data
 
