@@ -2,11 +2,10 @@ import click
 from collections import defaultdict
 import pathlib
 import json
-import rdkit
 import tqdm
 from rdkit import Chem, DataStructs
-from rdkit.Chem import AllChem
-from rdkit.Chem import rdFreeSASA, rdMolDescriptors
+from rdkit.Chem import AllChem, rdFreeSASA, rdMolDescriptors
+from rdkit.Chem.AtomPairs import Pairs, Torsions
 import gufe
 from gufe import SmallMoleculeComponent, LigandAtomMapping, AtomMapping
 from gufe.tokenization import JSON_HANDLER
@@ -354,8 +353,8 @@ def get_atom_pair_similarity(mapping: LigandAtomMapping) -> float:
     Chem.SanitizeMol(molA)
     Chem.SanitizeMol(molB)
 
-    fp_a = rdMolDescriptors.GetAtomPairFingerprint(molA)
-    fp_b = rdMolDescriptors.GetAtomPairFingerprint(molB)
+    fp_a = Pairs.GetAtomPairFingerprint(molA)
+    fp_b = Pairs.GetAtomPairFingerprint(molB)
     return DataStructs.DiceSimilarity(fp_a, fp_b)
 
 def get_topological_torsion_similarity(mapping: LigandAtomMapping) -> float:
@@ -364,8 +363,8 @@ def get_topological_torsion_similarity(mapping: LigandAtomMapping) -> float:
     Chem.SanitizeMol(molA)
     Chem.SanitizeMol(molB)
 
-    fp_a = rdMolDescriptors.GetTopologicalTorsionFingerprint(molA)
-    fp_b = rdMolDescriptors.GetTopologicalTorsionFingerprint(molB)
+    fp_a = Torsions.GetTopologicalTorsionFingerprintAsIntVect(molA)
+    fp_b = Torsions.GetTopologicalTorsionFingerprintAsIntVect(molB)
     return DataStructs.DiceSimilarity(fp_a, fp_b)
 
 

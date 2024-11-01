@@ -547,7 +547,9 @@ class TestScript:
         assert len(result_json["Ligands"]) == 2
         # check the single edge has a score
         assert len(result_json["Edges"]) == 1
-        assert "edge_ligand0_ligand1" in result_json["Edges"]
+        # use the mapping to get the new edge name
+        edge_name = f"edge_{name_mappings['spiro2']}_{name_mappings['spiro1']}"
+        assert edge_name in result_json["Edges"]
         # check the ligand scores
         assert "ligand0" in result_json["Ligands"]
         assert "ligand1" in result_json["Ligands"]
@@ -556,7 +558,8 @@ class TestScript:
         assert len(result_json["DDG_estimates"]) == 6
         for repeat in range(3):
             for phase in ["solvent", "complex"]:
-                edge_name = f"{phase}_ligand0_ligand1_repeat_{repeat}"
+                # use the mappings to get the new name
+                edge_name = f"{phase}_{name_mappings['spiro2']}_{name_mappings['spiro1']}_repeat_{repeat}"
                 assert edge_name in result_json["DDG_estimates"]
                 # make sure the edge folder was created
                 edge_folder = result_folder / edge_name
