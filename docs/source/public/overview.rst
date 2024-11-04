@@ -668,7 +668,7 @@ An example extract from the ``all_network_properties.json`` file is shown for th
 
 For each transformation and each repeat, a folder is created that contains following files:
 
-* ``structural_analysis_data.npz``: a NPZ data file with timeseries values for the ligand center of mass drift, the ligand RMSD, and the protein RMSD.
+* ``structural_analysis_data.npz``: time series values for the ligand center of mass drift, the ligand RMSD, and the protein RMSD.
 * ``energy_replica_state.npz``: time series of potential energies to be able to re-calculate the free energy differences as well as the MBAR overlap and replica exchange matrix.
 * ``simulation_real_time_analysis.yaml``: contains cumulative free energy estimates and simulation run time information
 * ``info.yaml``: number of atoms, run time information (nanoseconds per day)
