@@ -521,7 +521,11 @@ def load_results_file(file_name: pathlib.Path) -> None | dict:
         return None
 
     # Check to see if we have already cleaned  up this result
-    result_key = next(k for k in results["protocol_result"]["data"].keys())
+    try:
+        result_key = next(k for k in results["protocol_result"]["data"].keys())
+    except KeyError:
+        print(f"{file_name} is not recognised, skipping")
+        return None
     if (
             "structural_analysis"
             in results["protocol_result"]["data"][result_key][0]["outputs"]
@@ -583,9 +587,10 @@ def remove_first_reversed_sequential_duplicate_from_path(path: pathlib.Path) -> 
     return pathlib.Path(*reversed(reversed_path_parts))
 
 
-def find_data_folder(result: dict) -> None | pathlib.Path:
+def find_data_folder(result: dict, result_file_path: pathlib.Path) -> None | pathlib.Path:
     """
-    Find the path to the cleaned up results file for this transformation result.
+    Find the path to the cleaned up results file for this transformation result using the result json path to create an
+    absolute path.
     """
     # get the name of the key which is a gufe token
     # for the only ProtocolUnitResult-* in unit_results
@@ -596,9 +601,8 @@ def find_data_folder(result: dict) -> None | pathlib.Path:
         for k in result["unit_results"].keys()
         if k.startswith("ProtocolUnitResult")
     )
-    results_dir = (
+    results_dir = result_file_path.joinpath(
         pathlib.Path(result["unit_results"][proto_key]["outputs"]["nc"]["path"])
-        .resolve()
         .parent
     )
     # if the dir doesn't exist, we should try and fix it
@@ -622,10 +626,6 @@ def find_data_folder(result: dict) -> None | pathlib.Path:
             if ".png" not in f_name:
                 error_message = f"Can't find cleaned results file: {f_name} in {results_dir}"
                 raise FileNotFoundError(error_message)
-            else:
-                error_message = f"Can't find cleaned results file: {f_name} in {results_dir} skipping"
-                print(error_message)
-
 
     return results_dir
 
@@ -746,7 +746,7 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
                 # get the estimate which will be saved
                 ddg, uncertainty = get_estimate(result)
                 # find the cleaned up results file
-                simulation_data_file = find_data_folder(result=result)
+                simulation_data_file = find_data_folder(result=result, result_file_path=results_folder.resolve().parent)
                 # work out the name of the transform
                 # we use the tuple to avoid splitting on _ as ligands might have _ in the name
                 try:

@@ -442,8 +442,6 @@ class TestScript:
                 ]
             )
         assert result.exit_code == 0
-        # make sure the missing png file warnings are printed
-        assert "Can't find cleaned results file: forward_reverse_convergence.png" in result.stdout
         assert "Total results found 6/6 indicating 0 failed transformations." in result.stdout
 
         # make sure we have a zip folder
@@ -511,8 +509,6 @@ class TestScript:
             ]
         )
         assert result.exit_code == 0
-        # make sure the missing png file warnings are printed
-        assert "Can't find cleaned results file: forward_reverse_convergence.png" in result.stdout
         assert "Total results found 6/6 indicating 0 failed transformations." in result.stdout
 
         # make sure we have a zip folder
@@ -603,8 +599,6 @@ class TestScript:
             ]
         )
         assert result.exit_code == 0
-        # make sure the missing png file warnings are printed
-        assert "Can't find cleaned results file: forward_reverse_convergence.png" in result.stdout
         assert "Total results found 12/12 indicating 0 failed transformations." in result.stdout
         # make sure we have a zip folder
         archive: pathlib.Path = tmpdir / "full_test" / "results_data.zip"
