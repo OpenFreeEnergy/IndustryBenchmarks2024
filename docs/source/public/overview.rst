@@ -668,10 +668,16 @@ An example extract from the ``all_network_properties.json`` file is shown for th
 
 For each transformation and each repeat, a folder is created that contains following files:
 
-* ``structural_analysis_data.npz``: time series values for the ligand center of mass drift, the ligand RMSD, and the protein RMSD.
-* ``energy_replica_state.npz``: time series of potential energies to be able to re-calculate the free energy differences as well as the MBAR overlap and replica exchange matrix.
 * ``simulation_real_time_analysis.yaml``: contains cumulative free energy estimates and simulation run time information
 * ``info.yaml``: number of atoms, run time information (nanoseconds per day)
+* ``ligand_RMSD.txt``: time series values for the ligand RMSD from the initial frame for each replicate
+* ``ligand_wander.txt``: time series values for the ligand center of mass drift from its initial frame position for each replicate
+* ``protein_RMSD.txt``: time series values for the protein RMSD from the initial frame for each replicate
+* ``protein_2D_RMSD.txt``: time series values for the protein RMSD measured between every frame for each replicate
+* ``u_ln.txt``: time series values for the reduced potential for each replicate
+* ``N_l.txt``: the number of samples drawn from each replicate state
+* ``replicas_state_indices.txt``: time series values of the replica state
+* ``time_ps.txt``: the total simulation time in picoseconds at each sample
 * If present, following image analysis files are collected:
 
   * ``forward_reverse_convergence.png``: a time censured plot of the free energy estimates
@@ -689,15 +695,27 @@ The results directory should be organised as follows:
     results_data
     ├── all_network_properties.json
     ├── complex_spiro2_spiro1_repeat_0
-    │   ├── energy_replica_state.npz
+    │   ├── ligand_RMSD.txt
+    │   ├── ligand_wander.txt
+    │   ├── protein_RMSD.txt
+    │   ├── protein_2D_RMSD.txt
+    │   ├── u_ln.txt
+    │   ├── N_l.txt
+    │   ├── replicas_state_indices.txt
     │   ├── info.yaml
     │   ├── simulation_real_time_analysis.yaml
-    │   └── structural_analysis_data.npz
+    │   └── time_ps.txt
     ├── solvent_spiro2_spiro1_repeat_0
-    │   ├── energy_replica_state.npz
+    │   ├── ligand_RMSD.txt
+    │   ├── ligand_wander.txt
+    │   ├── protein_RMSD.txt
+    │   ├── protein_2D_RMSD.txt
+    │   ├── u_ln.txt
+    │   ├── N_l.txt
+    │   ├── replicas_state_indices.txt
     │   ├── info.yaml
     │   ├── simulation_real_time_analysis.yaml
-    │   └── structural_analysis_data.npz
+    │   └── time_ps.txt
     ...
 
 A zip archive of this data will also be created in the output folder called ``results_data.zip`` which should be shared
