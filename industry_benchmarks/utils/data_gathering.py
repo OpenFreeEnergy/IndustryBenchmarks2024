@@ -15,6 +15,7 @@ from kartograf.atom_mapping_scorer import (
     MappingRMSDScorer, MappingShapeOverlapScorer, MappingVolumeRatioScorer,
 )
 import shutil
+import numpy as np
 from openff.units import unit
 
 # define all the result files we want to collect
@@ -790,7 +791,15 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
                 target_file = results_dir.joinpath(f_name)
                 # we have already done error handling so just try and move files which are present
                 if target_file.exists():
-                    shutil.copy(target_file, output_path.joinpath(f_name))
+                    # we need to convert the npz files to readable txt files for approval
+                    if ".npz" in f_name:
+                        # load the data
+                        data = np.load(target_file)
+                        for key, value in data.items():
+                            # transpose the matrix to have 11 columns for better readability
+                            np.savetxt(output_path.joinpath(f"{key}.txt"), value.T)
+                    else:
+                        shutil.copy(target_file, output_path.joinpath(f_name))
 
 
     return estimates
