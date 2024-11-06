@@ -480,8 +480,12 @@ class TestScript:
                 assert edge_folder.exists()
                 # check the files were moved to the directory
                 for f_name in [
-                    "structural_analysis_data.npz",
-                    "energy_replica_state.npz",
+                    "energy.txt",
+                    "ligand_RMSD.txt",
+                    "ligand_wander.txt",
+                    "protein_2D_RMSD.txt",
+                    "protein_RMSD.txt",
+                    "time_ps.txt",
                     "simulation_real_time_analysis.yaml",
                     "info.yaml"
                 ]:
@@ -562,8 +566,12 @@ class TestScript:
                 assert edge_folder.exists()
                 # check the files were moved to the directory
                 for f_name in [
-                    "structural_analysis_data.npz",
-                    "energy_replica_state.npz",
+                    "energy.txt",
+                    "ligand_RMSD.txt",
+                    "ligand_wander.txt",
+                    "protein_2D_RMSD.txt",
+                    "protein_RMSD.txt",
+                    "time_ps.txt",
                     "simulation_real_time_analysis.yaml",
                     "info.yaml"
                 ]:
@@ -643,8 +651,12 @@ class TestScript:
                     assert edge_folder.exists()
                     # check the files were moved to the directory
                     for f_name in [
-                        "structural_analysis_data.npz",
-                        "energy_replica_state.npz",
+                        "energy.txt",
+                        "ligand_RMSD.txt",
+                        "ligand_wander.txt",
+                        "protein_2D_RMSD.txt",
+                        "protein_RMSD.txt",
+                        "time_ps.txt",
                         "simulation_real_time_analysis.yaml",
                         "info.yaml"
                     ]:
