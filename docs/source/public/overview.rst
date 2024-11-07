@@ -335,7 +335,7 @@ Inspecting Results
 
 
 .. note::
-   A separate script will be provided for gathering relevant FE output data in Phase 3.
+   A separate script is provided for :ref:`gathering relevant FE output data <gathering_of_results>` in Phase 3.
 
 
 Due to the slightly modified simulation execution layout, using `openfe gather` will not work in openfe v1.0.1.
@@ -417,9 +417,8 @@ The cleanup script will delete:
 * Simulation ``.nc`` & checkpoint ``.chk`` files 
 
 .. note:: 
-      
-         The simulation ``.nc`` file is subsampled and for each lambda window, an ``.xtc`` trajectory file is created
-   
+   The simulation ``.nc`` file is subsampled and for each lambda window, an ``.xtc`` trajectory file is created
+
 
 Compute Requirements
 ====================
@@ -472,52 +471,261 @@ It will include:
 
 The data will be kept around by each partner for further processing should it be necessary as part of the manuscript writing process.
 
+.. _public_phase3:
 
 Phase 3: Data Analysis
 **********************
 
 
-.. note::
-   Details for phase 3 of the public dataset benchmarks are still being finalised. These will be updated as soon as possible!
-
-
 In this phase, relevant simulation results will be gathered from industry partners.
 
-**Start date:** *Early September 2024*
+**Start date:** *Early November 2024*
 
-**End date:** *End of October 2024*
+**End date:** *Early December 2024*
 
+
+Industry partners are expected to post-process simulation outputs using a specialized script provided by the OpenFE team.
+
+This script extracts:
+
+* Relevant free energy estimates, including time series of free energies
+* Simulation health metrics
+
+  * Overlap matrix and replica exchange probability plots
+  * Relevant structural analysis plots
+
+* Additional transformation information
+
+  * Additional metrics, including blinded transformation and ligand scores.
+
+Industry partners are expected to submit this information back to OpenFE for
+analysis. A list of :ref:`gathered data <gathered_data>` is provided
+to help with data review ahead of submission.
+
+
+.. _gathering_of_results:
 
 Gathering of results
 ====================
 
-Industry partners will be expected to post-process simulation outputs using a specialized script provided by the OpenFE team.
 
-This script will:
+.. note::
+  Make sure to run the `post-simulation cleanup`_ script before running the data gathering script!
+  If you have not run the cleanup script, this data gathering script will throw an error.
 
-* Extract relevant free energy estimates, including time series of free energies
-* Gather simulation health metrics
-   * Overlap matrix and replica exchange probability plots
-   * Relevant structural analysis plots
-* Gather additional simulation information (optional)
-   * Additional simulation metrics, relevant for the OpenFE 2024 scoring data project, may be gathered.
 
-Industry partners will be expected to submit this information back to OpenFE for
-analysis. Please note that all data will be collected in a human readable format
-in order to allow industry partners the ability to review the data ahead of submission
-back to the OpenFE team.
+.. note::
+  The data gathering script will throw an error if the network is broken or if any of the three repeats have not finished successfully.
+
+    * If you have a broken network, please run the `fix_networks`_ script and any newly generated edges to obtain a connected network. You will then need to use the `--fixed_alchemical_network` option (see below) when calling the script.
+    * If some of your repeats have failed, please re-run those as described `here <failed_edges>`_
+
+
+.. warning::
+  By default the gathering script does not replace ligand names! If you used proprietary names, please use the `--hide-ligand-names` flag.
+
+
+To perform the data gathering, do the following:
+
+.. code-block:: bash
+
+   wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/data_gathering.py
+   python data_gathering.py --input_alchemical_network network_setup/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2
+
+If the `fix network script <fix_networks>`_ was run, two alchemical networks need to be provided to the data gathering script, the original one and the one that was created after running the ``fix_networks.py``:
+
+.. code-block:: bash
+
+   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --fixed_alchemical_network new_network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2
+
+If confidential ligand names were used, those can be replaced with generic ligand names. To do that you will need to add the flag ``--hide-ligand-names``:
+
+.. code-block:: bash
+
+   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2 --hide-ligand-names
+
+.. warning::
+   Per default, the ligand names that were present in the original ligand sdf will be stored. Please check those and if they contain any confidential information, use the ``hide-ligand-names`` flag.
+
+
+.. _gathered_data:
+
+Content of the data that will be transferred to OpenFE
+======================================================
+
+Here you can find the full list of files and data that will be extracted in the `data gathering script <gathering_of_results>`_.
+
+
+1. Network properties JSON file
+-------------------------------
+
+
+.. note::
+   All ligand properties gathered are, to best of our knowledge, blinded and cannot be used to recover the underlying structures.
+
+
+A file containing a variety of network properties (``all_network_properties.json``).
+More specifically, the file contains the following information:
+
+* ``Edges``: Following information is saved for each transformation:
+
+  * Lomap score
+  * Alchemical charge difference
+  * Charge score: A score that describes the difficulty of a transformation related to the absolute change difference between ligands
+  * Shape score
+  * Volume score
+  * Mapping RMSD score
+  * Number of heavy atoms in the common core
+  * Number of heavy atoms in the dummy region of ligand A
+  * Number of heavy atoms in the dummy region of ligand B
+  * Changing number of rings
+  * Changing number of rotatable bonds
+  * Morgan fingerprint Tanimoto similarity
+  * AtomPair fingerprint dice similarity
+  * Topological torsion fingerprint dice similarity
+  * Difference in solvent accessible surface area
+  * Whether or not the simulation failed
+
+* ``Ligands``: Following information is saved for each ligand:
+
+  * Number of rotatable bonds
+  * Number of ring systems
+  * Number of heavy atoms
+  * Number of elements
+  * Solvent accessible surface area
+  * Formal charge
+
+* ``DDG_estimates``: For each leg and each repeat, the MBAR DDG estimate and its uncertainty are stored
+
+An example extract from the ``all_network_properties.json`` file is shown for the bace test system:
+
+.. code-block:: bash
+
+    {
+      "Ligands": {
+        "spiro1": {
+          "num_rotatable_bonds": 1,
+          "num_rings": 4,
+          "num_heavy_atoms": 26,
+          "num_elements": 5,
+          "solvent_accessible_surface_area": 387.43906527976293,
+          "formal_charge": 1
+        },
+        "spiro2": {
+          "num_rotatable_bonds": 1,
+          "num_rings": 4,
+          "num_heavy_atoms": 24,
+          "num_elements": 5,
+          "solvent_accessible_surface_area": 365.53534383347056,
+          "formal_charge": 1
+        }
+      },
+      "Edges": {
+        "edge_spiro2_spiro1": {
+          "ligand_A": "spiro2",
+          "ligand_B": "spiro1",
+          "lomap_score": 0.7788007830714049,
+          "alchemical_charge_difference": 0,
+          "charge_score": 1.0,
+          "shape_score": 0.2709510437018804,
+          "volume_score": 0.940014662311061,
+          "mapping_rmsd_score": 0.28410096856069245,
+          "num_heavy_core": 24,
+          "num_heavy_dummy_A": 0,
+          "num_heavy_dummy_B": 2,
+          "difference_num_rings_AB": 0,
+          "difference_num_rot_bonds_AB": 0,
+          "morgan_tanimoto_similarity": 0.6966292134831461,
+          "difference_solvent_accessible_surface_area": 21.903721446292366,
+          "atom_pair_dice_similarity": 0.899527983816588,
+          "topological_torsion_dice_similarity": 0.9166666666666666
+        }
+      },
+      "DDG_estimates": {
+        "solvent_spiro2_spiro1_repeat_0": [
+          {
+            "magnitude": 76.98924715451133,
+            "unit": "kilocalorie_per_mole",
+            ":is_custom:": true,
+            "pint_unit_registry": "openff_units"
+          },
+          {
+            "magnitude": 0.45136662410654116,
+            "unit": "kilocalorie_per_mole",
+            ":is_custom:": true,
+            "pint_unit_registry": "openff_units"
+          }
+        ],
+        "solvent_spiro2_spiro1_repeat_1": [...
+
+
+2. Simulation files (reduced potentials, system information, and automated analyses)
+------------------------------------------------------------------------------------
+
+.. note::
+   None of the files gathered contain any information which could be used to extract the underlying system's chemistries.
+
+
+For each transformation and each repeat, a folder is created that contains following files:
+
+* ``simulation_real_time_analysis.yaml``: contains cumulative free energy estimates and simulation run time information
+* ``info.yaml``: number of atoms, run time information (nanoseconds per day)
+* ``ligand_RMSD.txt``: time series values for the ligand RMSD from the initial frame for each replicate
+* ``ligand_wander.txt``: time series values for the ligand center of mass drift from its initial frame position for each replicate
+* ``protein_RMSD.txt``: time series values for the protein RMSD from the initial frame for each replicate
+* ``protein_2D_RMSD.txt``: time series values for the protein RMSD measured between every frame for each replicate
+* ``u_ln.txt``: time series values for the reduced potential for each replicate
+* ``N_l.txt``: the number of samples drawn from each replicate state
+* ``replicas_state_indices.txt``: time series values of the replica state
+* ``time_ps.txt``: the total simulation time in picoseconds at each sample
+* If present, following image analysis files are collected:
+
+  * ``forward_reverse_convergence.png``: a time censured plot of the free energy estimates
+  * ``ligand_COM_drift.png``: the ligands center of mass (COM) distance from its initial frame position
+  * ``ligand_RMSD.png``: the RMSD of the ligand from the initial frame
+  * ``mbar_overlap_matrix.png``: the MBAR overlap matrix
+  * ``protein_2D_RMSD.png``: the 2D RMSD of the protein alpha carbons
+  * ``replica_exchange_matrix.png``: the replica exchange matrix
+  * ``replica_state_timeseries.png``: a plot of the replica state timeseries
+
+The results directory should be organised as follows:
+
+.. code-block:: bash
+
+    results_data
+    ├── all_network_properties.json
+    ├── complex_spiro2_spiro1_repeat_0
+    │   ├── ligand_RMSD.txt
+    │   ├── ligand_wander.txt
+    │   ├── protein_RMSD.txt
+    │   ├── protein_2D_RMSD.txt
+    │   ├── u_ln.txt
+    │   ├── N_l.txt
+    │   ├── replicas_state_indices.txt
+    │   ├── info.yaml
+    │   ├── simulation_real_time_analysis.yaml
+    │   └── time_ps.txt
+    ├── solvent_spiro2_spiro1_repeat_0
+    │   ├── ligand_RMSD.txt
+    │   ├── ligand_wander.txt
+    │   ├── protein_RMSD.txt
+    │   ├── protein_2D_RMSD.txt
+    │   ├── u_ln.txt
+    │   ├── N_l.txt
+    │   ├── replicas_state_indices.txt
+    │   ├── info.yaml
+    │   ├── simulation_real_time_analysis.yaml
+    │   └── time_ps.txt
+    ...
+
+A zip archive of this data will also be created in the output folder called ``results_data.zip`` which should be shared
+with the OpenFE team, instructions on how to do this will be shared later.
+
 
 Analysis of results
 ===================
 
-**Analysis of individual systems**
-
-Initial analysis of results for each system will be carried out by each industry benchmark partner
-with the help of the OpenFE development team.
-
-**Analysis of all results**
-
-A final analysis of all simulation results will be conducted by the OpenFE development team with
+Once submitted, the datasets will be analyzed by the OpenFE development team with
 help from volunteering industry board and technical advisory committee members.
 
 
