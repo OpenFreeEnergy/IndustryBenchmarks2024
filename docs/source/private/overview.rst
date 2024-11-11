@@ -194,7 +194,7 @@ Phase 2: Data Gathering
 What data will we gather?
 =========================
 
-Like the public benchmark we need to gather some general data about the alchemical network you have run, more information
+Like during the public phase of this benchmarking project we need to gather some general data about the alchemical network you have run. More information
 about the script which extracts the data and the contents of the final data package to be shared with the OpenFE team can
 be found :ref:`here <gathering_of_results>`.
 
