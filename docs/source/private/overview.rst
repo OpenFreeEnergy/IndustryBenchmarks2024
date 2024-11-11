@@ -194,31 +194,34 @@ Phase 2: Data Gathering
 What data will we gather?
 =========================
 
-We will need the following data from you:
+Like the public benchmark we need to gather some general data about the alchemical network you have run, more information
+about the script which extracts the data and the contents of the final data package to be shared with the OpenFE team can
+be found :ref:`here <gathering_of_results>`.
 
-* Calculated ddG values.
-* Experimental assay values (micromolar).
-* Broad assay description (e.g. "Kd from ITC").
-* Estimated benchmark difficulty (i.e. "easy", "medium", "hard").
-* Convergence data (MBAR overlap, forward/backwards plots, etc...).
-* Number of completed & failed edges.
+As this phase involves private datasets we also require you to disclose the experimental data used to validate the accuracy
+of the simulations in a specific CSV format which is shown here for some example data:
 
-  * Including information about any attempts at remediating broken networks due to failed edges.
+.. csv-table:: Example Data
+   :file: experimental_data.csv
+   :header-rows: 1
 
-* Simulation time and the number of atoms.
-* Blinded transformation networks (i.e. name of nodes and how they are connected).
-* Transformation information.
+.. warning::
+    The names of the ligands must match those used when planning your alchemical network and
+    therefore those in the gathered results. If the names are private and you hid them using the
+    :ref:`data gathering script <gathering_of_results>`, an additional script will be provided which can translate
+    those in the experimental CSV to match the anonymised names.
 
-  * Mapping scores (Lomap, formal charge, shape overlay, RMSD, number of heavy dummy & core atoms) for each edge.
+Notes on generating the CSV data:
 
-  * 2D and 3D fingerprint similarity scores (e.g. Tanimoto).
-
-  * Number of rotatable bonds & rings.
+* Experimental assay values should be supplied as ``nanomolar affinities``.
+* If experimental error is not available a value of ``-1`` should be used.
+* The annotation column should be used to note anything different about this ligand, such as the assay changing or the measurement being near the limit.
 
 
 Optionally (if you can't that's completely ok!) we also wish to gather the following:
 
-* Free form additional details on the experimental assay.
+* Broad assay description (e.g. "Kd from ITC") and free form additional details on the experimental assay.
+* Estimated benchmark difficulty (i.e. "easy", "medium", "hard").
 * Additional details which may impact simulation difficulty, e.g. "likely water sampling issues" or "ions in the binding site".
 * Structure model type, e.g. xray, cryo-em, homology model.
 * Compute hardware description, e.g. what type of GPU was used.
