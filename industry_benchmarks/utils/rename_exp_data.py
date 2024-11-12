@@ -5,14 +5,14 @@ import pathlib
 @click.option(
     "--experimental-data",
     help="The path to the experimental data CSV file.",
-    type=click.Path(file_okay=True, dir_okay=False, path_type=pathlib.Path),
+    type=click.Path(file_okay=True, dir_okay=False, path_type=pathlib.Path, exists=True),
     required=True
 )
 @click.option(
     "--name-mapping-file",
     default=pathlib.Path("./ligand_name_mapping_PRIVATE.json"),
     help="The path to the JSON file with the name mappings created by the `data_gathering.py` script.",
-    type=click.Path(file_okay=True, dir_okay=True, path_type=pathlib.Path),
+    type=click.Path(file_okay=True, dir_okay=False, path_type=pathlib.Path, exists=True),
     show_default=True,
 )
 @click.option(
