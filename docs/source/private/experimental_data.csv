@@ -1,0 +1,5 @@
+Ligand Name,Affinity (nM),Affinity Error (nM),Annotation
+ligand_a,96.3, 1.2,
+ligand_b,84.7,-1,Single repeat
+ligand_c,102.4,1.6,Racemate
+ligand_d,1000,-1,>1000 outside assay range
