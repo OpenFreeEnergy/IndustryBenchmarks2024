@@ -208,7 +208,7 @@ of the simulations in a specific CSV format which is shown here for some example
 .. warning::
     The names of the ligands must match those used when planning your alchemical network and
     therefore those in the gathered results. If the names are private and you hid them using the
-    :ref:`data gathering script <gathering_of_results>`, an additional script will be provided which can translate
+    :ref:`data gathering script <gathering_of_results>`, an additional :ref:`script <rename-csv-ligands>` is provided which can translate
     those in the experimental CSV to match the anonymised names.
 
 Notes on generating the CSV data:
@@ -216,6 +216,20 @@ Notes on generating the CSV data:
 * Experimental assay values should be supplied as ``nanomolar affinities``.
 * If experimental error is not available a value of ``-1`` should be used.
 * The annotation column should be used to note anything different about this ligand, such as the assay changing or the measurement being near the limit.
+
+
+.. _rename-csv-ligands:
+
+Renaming ligands
+~~~~~~~~~~~~~~~~
+The ``rename_exp_data.py`` script can be used to hide any private ligand names in your created experimental data file
+using the name mapping which was created by the ``data_gathering.py`` script.
+
+.. code-block:: bash
+
+   wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/rename_exp_data.py
+   python rename_exp_data.py --experimental-data my_exp_data.csv -name-mapping-file ligand_name_mapping_PRIVATE.json --output blinded_exp_data.csv
+
 
 
 Optionally (if you can't that's completely ok!) we also wish to gather the following:
