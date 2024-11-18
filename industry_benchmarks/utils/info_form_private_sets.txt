@@ -1,0 +1,65 @@
+#################################
+### Private dataset info form ###
+#################################
+
+System preparation
+------------------
+
+- Protein preparation
+  - Structure model type, e.g. X-ray, cryo-em, homology model
+  - Structure preparation, e.g. modelling of missing loops, assignment of protonation states
+
+- Ligand preparation
+  - Assignment of protonation states
+  - Tautomer generation
+  - Obtaining the binding mode:
+        - Known binding mode: Yes/No
+        - Used e.g. (constrained) docking, alignment on co-crystalized ligand, ...
+
+- Known binding site: [ ] Yes
+
+
+Benchmark difficulty
+--------------------
+
+- Estimated benchmark difficulty
+[ ] Easy
+[ ] Medium
+[ ] Hard
+
+- Potential challenges
+[ ] Protonation states ligands
+[ ] Protonation states protein
+[ ] Water sampling
+[ ] Ions in the binding site
+[ ] Metals in the binding site
+[ ] Known sampling issues
+    [ ] Ligands
+    [ ] Protein
+[ ] Diverse chemistry / known force field parameterization issues
+[ ] Large perturbations
+[ ] ...
+
+- Additional details for the system specific challenges
+
+
+Experimental assay
+------------------
+
+- Broad assay description (e.g. “Kd from ITC”)
+
+- Assay error provenance, e.g. multiple repeats
+
+- All ligands have been measured with the same assay: [ ] Yes
+
+- Additional details on the experimental assay
+
+
+Additional information (optional)
+---------------------------------
+
+- Compute hardware description, e.g. what type of GPU was used
+
+- Failure information
+
+
