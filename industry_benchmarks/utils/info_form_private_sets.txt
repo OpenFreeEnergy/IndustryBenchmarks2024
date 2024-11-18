@@ -10,16 +10,16 @@ System preparation
 a) Structure model type, e.g. X-ray, cryo-em, homology model:
 -
 
-b) Structure preparation, e.g. modelling of missing loops, assignment of protonation states:
+b) Structure preparation details, e.g. modelling of missing loops, assignment of protonation states:
 -
 
 
 2. Ligand preparation
 
-a) Assignment of protonation states:
+a) Method for assigning the protonation state:
 -
 
-b) Tautomer generation:
+b) Method for choosing the tautomer (if applicable):
 -
 
 c) Known binding mode: [ ] Yes  [ ] No
@@ -69,7 +69,7 @@ Experimental assay
 -
 
 3. All ligands have been measured with the same assay: [ ] Yes  [ ] No
--
+
 
 4. Additional details on the experimental assay:
 -
@@ -80,7 +80,7 @@ Additional information (optional)
 ---------------------------------
 
 1. Compute hardware description, e.g. what type of GPU was used:
-
+-
 
 2. Failure information: If there were any systematic edge failures in this dataset, do you have any information about why the edge(s) failed?
-
+-
