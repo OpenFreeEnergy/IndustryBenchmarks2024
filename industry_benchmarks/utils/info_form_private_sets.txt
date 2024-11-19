@@ -52,6 +52,7 @@ Benchmark difficulty
     [ ] Ligands
     [ ] Protein
 [ ] Diverse chemistry / known force field parameterization issues
+[ ] Poor ligand alignment
 [ ] Large perturbations
 [ ] ...
 
