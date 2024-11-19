@@ -230,16 +230,26 @@ using the name mapping which was created by the ``data_gathering.py`` script.
    wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/rename_exp_data.py
    python rename_exp_data.py --experimental-data my_exp_data.csv -name-mapping-file ligand_name_mapping_PRIVATE.json --output blinded_exp_data.csv
 
+Private datasets info form
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+We also wish to gather additional information about the private datasets:
 
-
-Optionally (if you can't that's completely ok!) we also wish to gather the following:
-
-* Broad assay description (e.g. "Kd from ITC") and free form additional details on the experimental assay.
-* Estimated benchmark difficulty (i.e. "easy", "medium", "hard").
+* Details on system preparation
+* Estimated benchmark difficulty (i.e. "easy", "medium", "hard")
 * Additional details which may impact simulation difficulty, e.g. "likely water sampling issues" or "ions in the binding site".
-* Structure model type, e.g. xray, cryo-em, homology model.
+* Broad assay description (e.g. "Kd from ITC") and additional details on the experimental assay.
 * Compute hardware description, e.g. what type of GPU was used.
-* Any additional information.
+* Any information you have on systematic edge failures
+
+We provide a template text file for you to fill in all the information. You can download this file using:
+
+.. code-block:: bash
+
+   wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/info_form_private_sets.txt
+
+You can open and edit the file using e.g. VIM or Microsoft Word. Please fill out this form for each private dataset and upload
+the file (as a pdf or text file) together with the other results in your zenodo upload.
+
 
 How will this be gathered?
 ==========================
@@ -249,7 +259,7 @@ How will this be gathered?
 We anticipating gathering the data through:
 
 1. A script provided by the OpenFE team that will extract relevant information from your simulations.
-2. A text form for you to fill in with information.
+2. A text file for you to fill in with information.
 3. A CSV file with experimental data that you will need to prepare.
 
 
