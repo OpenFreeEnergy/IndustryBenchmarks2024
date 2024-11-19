@@ -85,5 +85,5 @@ Additional information
 11. Compute hardware description, e.g. what type of GPU was used (optional):
 -
 
-2. Failure information: If there were any systematic edge failures in this dataset, do you have any information about why the edge(s) failed?
+12. Failure information: If there were any systematic edge failures in this dataset, do you have any information about why the edge(s) failed (optional)?
 -
