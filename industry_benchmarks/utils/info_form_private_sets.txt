@@ -41,7 +41,7 @@ Benchmark difficulty
 [ ] Medium
 [ ] Hard
 
-2. Potential challenges
+5. Potential challenges (optional)
 
 [ ] Protonation states ligands
 [ ] Protonation states protein
