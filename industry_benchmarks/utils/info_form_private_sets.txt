@@ -12,7 +12,7 @@ System preparation
 a) Structure model type, e.g. X-ray, cryo-em, homology model (optional):
 -
 
-b) Structure preparation details, e.g. modelling of missing loops, assignment of protonation states:
+b) Structure preparation details, e.g. modelling of missing loops, assignment of protonation states (optional):
 -
 
 
