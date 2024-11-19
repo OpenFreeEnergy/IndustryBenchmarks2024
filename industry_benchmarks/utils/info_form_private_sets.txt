@@ -74,7 +74,7 @@ Experimental assay
 9. All ligands have been measured with the same assay: [ ] Yes  [ ] No
 
 
-4. Additional details on the experimental assay:
+10. Additional details on the experimental assay (optional):
 -
 
 
