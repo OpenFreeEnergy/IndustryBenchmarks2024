@@ -68,7 +68,7 @@ Experimental assay
 7. Broad assay description (e.g. “Kd from ITC”):
 -
 
-2. Assay error provenance, e.g. multiple repeats:
+8. Assay error provenance, e.g. multiple repeats (if applicable):
 -
 
 9. All ligands have been measured with the same assay: [ ] Yes  [ ] No
