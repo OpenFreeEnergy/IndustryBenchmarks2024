@@ -71,7 +71,7 @@ Experimental assay
 2. Assay error provenance, e.g. multiple repeats:
 -
 
-3. All ligands have been measured with the same assay: [ ] Yes  [ ] No
+9. All ligands have been measured with the same assay: [ ] Yes  [ ] No
 
 
 4. Additional details on the experimental assay:
