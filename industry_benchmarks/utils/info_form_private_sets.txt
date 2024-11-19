@@ -16,7 +16,7 @@ b) Structure preparation details, e.g. modelling of missing loops, assignment of
 
 2. Ligand preparation
 
-a) Method for assigning the protonation state:
+a) Method for assigning the protonation state (optional):
 -
 
 b) Method for choosing the tautomer (if applicable):
