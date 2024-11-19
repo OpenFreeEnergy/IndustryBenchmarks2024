@@ -54,7 +54,7 @@ Benchmark difficulty
 [ ] Diverse chemistry / known force field parameterization issues
 [ ] Poor ligand alignment
 [ ] Large perturbations
-[ ] ...
+[ ] <add other challenge type here>
 
 3. Additional details for the system specific challenges:
 -
