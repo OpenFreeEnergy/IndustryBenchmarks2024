@@ -2,6 +2,8 @@
 ### Private dataset info form ###
 #################################
 
+Please fill in and submit this form as part of your dataset result submission. Please make sure that non-optional sections 1c, 3, 4, 7, 8, and 9 have been completed.
+
 System preparation
 ------------------
 
