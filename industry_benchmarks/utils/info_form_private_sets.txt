@@ -82,7 +82,7 @@ Experimental assay
 Additional information (optional)
 ---------------------------------
 
-1. Compute hardware description, e.g. what type of GPU was used:
+11. Compute hardware description, e.g. what type of GPU was used (optional):
 -
 
 2. Failure information: If there were any systematic edge failures in this dataset, do you have any information about why the edge(s) failed?
