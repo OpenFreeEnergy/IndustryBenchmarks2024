@@ -37,7 +37,7 @@ d) Method used for generating the binding mode (e.g. (constrained) docking, alig
 Benchmark difficulty
 --------------------
 
-1. Estimated benchmark difficulty
+4. Estimated benchmark difficulty
 
 [ ] Easy
 [ ] Medium
