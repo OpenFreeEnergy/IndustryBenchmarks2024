@@ -79,8 +79,8 @@ Experimental assay
 
 
 
-Additional information (optional)
----------------------------------
+Additional information
+----------------------
 
 11. Compute hardware description, e.g. what type of GPU was used (optional):
 -
