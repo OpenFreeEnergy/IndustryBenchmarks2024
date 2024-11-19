@@ -58,7 +58,7 @@ Benchmark difficulty
 [ ] Large perturbations
 [ ] <add other challenge type here>
 
-3. Additional details for the system specific challenges:
+6. Additional details for the system specific challenges (optional):
 -
 
 
