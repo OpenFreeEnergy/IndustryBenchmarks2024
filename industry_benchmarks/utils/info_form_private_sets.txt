@@ -25,7 +25,7 @@ b) Method for choosing the tautomer (if applicable):
 c) Known binding mode: [ ] Yes  [ ] No
 
 
-d) Method used for generating the binding mode (e.g. (constrained) docking, alignment on co-crystalized ligand):
+d) Method used for generating the binding mode (e.g. (constrained) docking, alignment on co-crystalized ligand) (optional):
 -
 
 
