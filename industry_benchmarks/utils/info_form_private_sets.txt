@@ -65,7 +65,7 @@ Benchmark difficulty
 Experimental assay
 ------------------
 
-1. Broad assay description (e.g. “Kd from ITC”):
+7. Broad assay description (e.g. “Kd from ITC”):
 -
 
 2. Assay error provenance, e.g. multiple repeats:
