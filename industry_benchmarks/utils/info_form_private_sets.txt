@@ -1,0 +1,89 @@
+#################################
+### Private dataset info form ###
+#################################
+
+Please fill in and submit this form as part of your dataset result submission. Please make sure that non-optional sections 1c, 3, 4, 7, 8, and 9 have been completed.
+
+System preparation
+------------------
+
+1. Protein preparation
+
+a) Structure model type, e.g. X-ray, cryo-em, homology model (optional):
+-
+
+b) Structure preparation details, e.g. modelling of missing loops, assignment of protonation states (optional):
+-
+
+
+2. Ligand preparation
+
+a) Method for assigning the protonation state (optional):
+-
+
+b) Method for choosing the tautomer (if applicable):
+-
+
+c) Known binding mode: [ ] Yes  [ ] No
+
+
+d) Method used for generating the binding mode (e.g. (constrained) docking, alignment on co-crystalized ligand) (optional):
+-
+
+
+3. Known binding site: [ ] Yes  [ ] No
+
+
+Benchmark difficulty
+--------------------
+
+4. Estimated benchmark difficulty
+
+[ ] Easy
+[ ] Medium
+[ ] Hard
+
+5. Potential challenges (optional)
+
+[ ] Protonation states ligands
+[ ] Protonation states protein
+[ ] Water sampling
+[ ] Ions in the binding site
+[ ] Metals in the binding site
+[ ] Known sampling issues
+    [ ] Ligands
+    [ ] Protein
+[ ] Diverse chemistry / known force field parameterization issues
+[ ] Poor ligand alignment
+[ ] Large perturbations
+[ ] <add other challenge type here>
+
+6. Additional details for the system specific challenges (optional):
+-
+
+
+Experimental assay
+------------------
+
+7. Broad assay description (e.g. “Kd from ITC”):
+-
+
+8. Assay error provenance, e.g. multiple repeats (if applicable):
+-
+
+9. All ligands have been measured with the same assay: [ ] Yes  [ ] No
+
+
+10. Additional details on the experimental assay (optional):
+-
+
+
+
+Additional information
+----------------------
+
+11. Compute hardware description, e.g. what type of GPU was used (optional):
+-
+
+12. Failure information: If there were any systematic edge failures in this dataset, do you have any information about why the edge(s) failed (optional)?
+-
