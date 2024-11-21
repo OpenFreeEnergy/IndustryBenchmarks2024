@@ -721,6 +721,33 @@ The results directory should be organised as follows:
 A zip archive of this data will also be created in the output folder called ``results_data.zip`` which should be shared
 with the OpenFE team, instructions on how to do this will be shared later.
 
+.. _upload_of_results:
+
+Uploading the results to zenodo
+===============================
+
+The results from this benchmarking study will be submitted to the OpenFE team via a zenodo upload.
+
+To upload the data, please follow these steps:
+
+1. Run the `post-simulation cleanup`_.
+2. Run the `data gathering script <gathering_of_results>`_.
+3. Upload the compressed results folder to zenodo.
+
+  a) Go to `https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest`_ to upload the data to the Open Free Energy organization.
+  b) Click the `New upload` button on the top right.
+  c) Fill out all the relevant information. In the `Description` section please reference the Industry Benchmark repo as
+     it contains all necessary information about the simulation details (`https://github.com/OpenFreeEnergy/IndustryBenchmarks2024`_).
+  d) Add the compressed results folder (``results_data.zip``) to the zenodo upload.
+  e) Click the `Submit for review` button on the top right. We will then review the upload and publish it.
+
+If you plan to submit the results from multiple datasets in a single zenodo upload, please make sure to create subfolders for the different datasets
+and to name them according to the set name and target name. Additionally, please list all the sets contained in the upload in the `Description` section.
+
+.. note::
+  For the private datasets you will need to upload two additional files to zenodo, a CSV file with experimental data and
+  the `private dataset info form <private info form>`_. You can find the instructions for uploading the private datasets `here <private-data-gather>`_.
+
 
 Analysis of results
 ===================

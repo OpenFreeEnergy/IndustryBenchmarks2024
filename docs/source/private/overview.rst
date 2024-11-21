@@ -230,6 +230,8 @@ using the name mapping which was created by the ``data_gathering.py`` script.
    wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/rename_exp_data.py
    python rename_exp_data.py --experimental-data my_exp_data.csv -name-mapping-file ligand_name_mapping_PRIVATE.json --output blinded_exp_data.csv
 
+.. _private info form:
+
 Private datasets info form
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 We also wish to gather additional information about the private datasets:
@@ -263,4 +265,4 @@ We anticipating gathering the data through:
 3. A CSV file with experimental data that you will need to prepare.
 
 
-The text form and data gathering scripts are currently being prepared by the OpenFE team. Please come back soon for more details!
+
