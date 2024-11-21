@@ -257,7 +257,7 @@ the file (as a pdf or text file) together with the other results in your zenodo 
 .. _private-data-gather:
 
 Uploading the results to zenodo
-=================
+===============================
 
 To prepare the results for the submission, please follow these steps:
 
