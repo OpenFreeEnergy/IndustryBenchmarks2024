@@ -256,23 +256,23 @@ the file (as a pdf or text file) together with the other results in your zenodo 
 
 .. _private-data-gather:
 
-How will this be gathered?
-==========================
-
-We anticipating gathering the data through:
-
-1. A script provided by the OpenFE team that will extract relevant information from your simulations.
-2. A text file for you to fill in with information.
-3. A CSV file with experimental data that you will need to prepare.
+Upload of results
+=================
 
 To prepare the results for the submission, please follow these steps:
 
 1. Run the :ref:`post-simulation cleanup` script.
 2. Run the :ref:`data gathering script <gathering_of_results>`. The output of this step should be a compressed folder named ``results_data.zip``.
+   The contents in this folder are all human readable and should be reviewed before submitting.
 3. Prepare a CSV file containing the experimental data for the set (see :ref:`here <exp-csv-file>`).
 4. Fill out the :ref:`private dataset info form <private info form>`.
 5. Create a folder named ``dataset_name`` where `dataset_name` can be any arbitrary name that you want to give the different private datasets
-6. Copy the three items, the compressed folder ``results_data.zip``, the experimental CSV file ``experimental_data.csv`` and the private info form ``info_form_private_sets.txt`` into the ``dataset_name`` folder.
+6. Copy the follwing three items into the ``dataset_name`` folder:
+
+  * the compressed folder ``results_data.zip``,
+  * the experimental CSV file ``experimental_data.csv``,
+  * the private info form ``info_form_private_sets.txt``.
+
 7. Upload the ``dataset_name`` folder to zenodo following the steps outlined :ref:`here <upload_of_results>`.
 
 .. warning::
