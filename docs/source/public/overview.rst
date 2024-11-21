@@ -730,14 +730,14 @@ The results from this benchmarking study will be submitted to the OpenFE team vi
 
 To upload the data, please follow these steps:
 
-1. Run the `post-simulation cleanup`_.
-2. Run the `data gathering script <gathering_of_results>`_.
+1. Run the :ref:`post-simulation cleanup`_.
+2. Run the :ref:`data gathering script <gathering_of_results>`_.
 3. Upload the compressed results folder to zenodo.
 
-  a) Go to `https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest`_ to upload the data to the Open Free Energy organization.
+  a) Go to `zenodo <https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest>`_ to upload the data to the Open Free Energy organization.
   b) Click the `New upload` button on the top right.
-  c) Fill out all the relevant information. In the `Description` section please reference the Industry Benchmark repo as
-     it contains all necessary information about the simulation details (`https://github.com/OpenFreeEnergy/IndustryBenchmarks2024`_).
+  c) Fill out all the relevant information. In the `Description` section please reference the `Industry Benchmark repo <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_ as
+     it contains all necessary information about the simulation details.
   d) Add the compressed results folder (``results_data.zip``) to the zenodo upload.
   e) Click the `Submit for review` button on the top right. We will then review the upload and publish it.
 
@@ -746,7 +746,7 @@ and to name them according to the set name and target name. Additionally, please
 
 .. note::
   For the private datasets you will need to upload two additional files to zenodo, a CSV file with experimental data and
-  the `private dataset info form <private info form>`_. You can find the instructions for uploading the private datasets `here <private-data-gather>`_.
+  the :ref:`private dataset info form <private info form>`_. You can find the instructions for uploading the private datasets :ref:`here <private-data-gather>`_.
 
 
 Analysis of results
