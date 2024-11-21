@@ -371,11 +371,10 @@ For example, for the JACS TYK2 set:
 
 This will automatically generate plots of OpenFE vs experiment and FEP+ vs experiment using cinnabar.
 
+.. _post-simulation cleanup:
 
 Simulation Cleanup
 ==================
-
-.. _post-simulation cleanup:
 
 The post-simulation cleanup script will reduce the amount of data you need to store after your simulations.
 It does not delete any data required for analysis.
@@ -510,7 +509,7 @@ Gathering of results
 
 
 .. note::
-  Make sure to run the `post-simulation cleanup`_ script before running the data gathering script!
+  Make sure to run the :ref:`post-simulation cleanup` script before running the data gathering script!
   If you have not run the cleanup script, this data gathering script will throw an error.
 
 

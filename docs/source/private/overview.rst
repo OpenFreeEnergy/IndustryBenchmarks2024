@@ -252,11 +252,10 @@ We provide a template text file for you to fill in all the information. You can 
 You can open and edit the file using e.g. VIM or Microsoft Word. Please fill out this form for each private dataset and upload
 the file (as a pdf or text file) together with the other results in your zenodo upload.
 
+.. _private-data-gather:
 
 How will this be gathered?
 ==========================
-
-.. _private-data-gather:
 
 We anticipating gathering the data through:
 
