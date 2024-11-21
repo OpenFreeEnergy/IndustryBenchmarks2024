@@ -191,6 +191,8 @@ Reproducible failures which result in broken networks can be fixed using the sam
 Phase 2: Data Gathering
 ***********************
 
+.. _exp-csv-file:
+
 What data will we gather?
 =========================
 
@@ -263,5 +265,15 @@ We anticipating gathering the data through:
 2. A text file for you to fill in with information.
 3. A CSV file with experimental data that you will need to prepare.
 
+To prepare the results for the submission, please follow these steps:
 
+1. Run the :ref:`post-simulation cleanup` script.
+2. Run the :ref:`data gathering script <gathering_of_results>`. The output of this step should be a compressed folder named ``results_data.zip``.
+3. Prepare a CSV file containing the experimental data for the set (see :ref:`here <exp-csv-file>`).
+4. Fill out the :ref:`private dataset info form <private info form>`.
+5. Create a folder named ``dataset_name`` where `dataset_name` can be any arbitrary name that you want to give the different private datasets
+6. Copy the three items, the compressed folder ``results_data.zip``, the experimental CSV file ``experimental_data.csv`` and the private info form ``info_form_private_sets.txt`` into the ``dataset_name`` folder.
+7. Upload the ``dataset_name`` folder to zenodo following the steps outlined :ref:`here <upload_of_results>`.
 
+.. warning::
+   Please double check that your experimental CSV file does not contain any confidential ligand names, but that those have been renamed, e.g. using :ref:`this script <rename-csv-ligands>`.
