@@ -730,8 +730,8 @@ The results from this benchmarking study will be submitted to the OpenFE team vi
 
 To upload the data, please follow these steps:
 
-1. Run the :ref:`post-simulation cleanup`_.
-2. Run the :ref:`data gathering script <gathering_of_results>`_.
+1. Run the :ref:`post-simulation cleanup`.
+2. Run the :ref:`data gathering script <gathering_of_results>`.
 3. Upload the compressed results folder to zenodo.
 
   a) Go to `zenodo <https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest>`_ to upload the data to the Open Free Energy organization.
@@ -746,7 +746,7 @@ and to name them according to the set name and target name. Additionally, please
 
 .. note::
   For the private datasets you will need to upload two additional files to zenodo, a CSV file with experimental data and
-  the :ref:`private dataset info form <private info form>`_. You can find the instructions for uploading the private datasets :ref:`here <private-data-gather>`_.
+  the :ref:`private dataset info form <private info form>`. You can find the instructions for uploading the private datasets :ref:`here <private-data-gather>`.
 
 
 Analysis of results
