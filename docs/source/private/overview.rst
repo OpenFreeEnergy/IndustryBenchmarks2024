@@ -266,7 +266,7 @@ To prepare the results for the submission, please follow these steps:
    The contents in this folder are all human readable and should be reviewed before submitting.
 3. Prepare a CSV file containing the experimental data for the set (see :ref:`here <exp-csv-file>`).
 4. Fill out the :ref:`private dataset info form <private info form>`.
-5. Create a folder named ``dataset_name`` where `dataset_name` can be any arbitrary name that you want to give the different private datasets
+5. Create a folder named ``dataset_name`` where ``dataset_name`` can be any arbitrary name that you want to give the different private datasets
 6. Copy the following three items into the ``dataset_name`` folder:
 
   * the compressed folder ``results_data.zip``,

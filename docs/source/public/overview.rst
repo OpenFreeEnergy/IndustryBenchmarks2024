@@ -733,7 +733,7 @@ To upload the data, please follow these steps:
 2. Run the :ref:`data gathering script <gathering_of_results>`. The output of this step should be a compressed folder named ``results_data.zip``.
 3. Upload the compressed results folder to zenodo.
 
-  a) Go to `zenodo <https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest>`_ to upload the data to the Open Free Energy organization.
+  a) Go to `zenodo <https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest>`_ to upload the data to the **Open Free Energy Zenodo Community**.
   b) Click the `New upload` button on the top right.
   c) Fill out all the relevant information. In the `Description` section please report the OpenFE version used to run the setup, simulations, and analysis of the data. In addition to that, please reference the `Industry Benchmark repo <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_ as
      it contains all necessary information about the simulation details.

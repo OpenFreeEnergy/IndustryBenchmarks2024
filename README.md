@@ -31,12 +31,7 @@ for more information.
 
 ## Public Dataset Benchmarks
 
-
-**Deadline:** TBA
-
-
-*3rd May 2024: [Phase 1](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#phase-1-preparing-inputs) of the [Public Dataset Benchmarks](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#) is now live!*
-
+**The public benchmark is now live!**
 
 To get started with this project please have a look at the [public dataset benchmarks overview](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#)
 and our [getting started](https://industrybenchmarks2024.readthedocs.io/en/latest/public/overview.html#phase-1-preparing-inputs) instructions.
@@ -44,8 +39,14 @@ and our [getting started](https://industrybenchmarks2024.readthedocs.io/en/lates
 
 ## Private Dataset Benchmarks
 
-The private dataset benchmarking initiative has not be launched yet. Further
-information will be made available as soon as possible!
+**The private benchmark is now live!**
+
+To get started with this project please have a look at the [private dataset benchmarks overview](https://industrybenchmarks2024.readthedocs.io/en/latest/private/overview.html#private-dataset-benchmarks) 
+and our [getting started](https://industrybenchmarks2024.readthedocs.io/en/latest/private/overview.html#before-you-start) instructions.
+
+## FAQ
+
+If you have any issues with preparing and running any of the benchmarks please see our [FAQ guide](https://industrybenchmarks2024.readthedocs.io/en/latest/prep_and_debug.html#faq-preparing-and-debugging-openfe-simulations).
 
 
 ## Acknowledgements
