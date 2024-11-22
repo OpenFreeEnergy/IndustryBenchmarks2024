@@ -735,7 +735,7 @@ To upload the data, please follow these steps:
 
   a) Go to `zenodo <https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest>`_ to upload the data to the Open Free Energy organization.
   b) Click the `New upload` button on the top right.
-  c) Fill out all the relevant information. In the `Description` section please reference the `Industry Benchmark repo <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_ as
+  c) Fill out all the relevant information. In the `Description` section please report the OpenFE version used to run the setup, simulations, and analysis of the data. In addition to that, please reference the `Industry Benchmark repo <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_ as
      it contains all necessary information about the simulation details.
   d) Add the compressed results folder (``results_data.zip``) to the zenodo upload.
   e) Click the `Submit for review` button on the top right. We will then review the upload and publish it.
