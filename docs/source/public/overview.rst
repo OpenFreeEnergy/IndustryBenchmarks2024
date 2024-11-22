@@ -371,11 +371,10 @@ For example, for the JACS TYK2 set:
 
 This will automatically generate plots of OpenFE vs experiment and FEP+ vs experiment using cinnabar.
 
+.. _post-simulation cleanup:
 
 Simulation Cleanup
 ==================
-
-.. _post-simulation cleanup:
 
 The post-simulation cleanup script will reduce the amount of data you need to store after your simulations.
 It does not delete any data required for analysis.
@@ -510,7 +509,7 @@ Gathering of results
 
 
 .. note::
-  Make sure to run the `post-simulation cleanup`_ script before running the data gathering script!
+  Make sure to run the :ref:`post-simulation cleanup` script before running the data gathering script!
   If you have not run the cleanup script, this data gathering script will throw an error.
 
 
@@ -720,6 +719,33 @@ The results directory should be organised as follows:
 
 A zip archive of this data will also be created in the output folder called ``results_data.zip`` which should be shared
 with the OpenFE team, instructions on how to do this will be shared later.
+
+.. _upload_of_results:
+
+Uploading the results to zenodo
+===============================
+
+The results from this benchmarking study will be submitted to the OpenFE team via a zenodo upload.
+
+To upload the data, please follow these steps:
+
+1. Run the :ref:`post-simulation cleanup` script.
+2. Run the :ref:`data gathering script <gathering_of_results>`. The output of this step should be a compressed folder named ``results_data.zip``.
+3. Upload the compressed results folder to zenodo.
+
+  a) Go to `zenodo <https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest>`_ to upload the data to the **Open Free Energy Zenodo Community**.
+  b) Click the `New upload` button on the top right.
+  c) Fill out all the relevant information. In the `Description` section, please report the OpenFE version that was used. You can get this information by running ``openfe --version`` in the commandline within the environment that you used to run the setup, simulations, and analysis of the data. In addition to that, please reference the `Industry Benchmark repo <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_ as
+     it contains all necessary information about the simulation details.
+  d) Add the compressed results folder (``results_data.zip``) to the zenodo upload.
+  e) Click the `Submit for review` button on the top right. We will then review the upload and publish it.
+
+If you plan to submit the results from multiple datasets in a single zenodo upload, please make sure to create subfolders for the different datasets
+and to name them according to the set name and target name. Additionally, please list all the sets contained in the upload in the `Description` section.
+
+.. note::
+  For the private datasets you will need to upload two additional files to zenodo, a CSV file with experimental data and
+  the :ref:`private dataset info form <private info form>`. You can find the instructions for uploading the private datasets :ref:`here <private-data-gather>`.
 
 
 Analysis of results

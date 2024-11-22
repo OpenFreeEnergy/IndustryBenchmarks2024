@@ -191,6 +191,8 @@ Reproducible failures which result in broken networks can be fixed using the sam
 Phase 2: Data Gathering
 ***********************
 
+.. _exp-csv-file:
+
 What data will we gather?
 =========================
 
@@ -230,6 +232,8 @@ using the name mapping which was created by the ``data_gathering.py`` script.
    wget https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/main/industry_benchmarks/utils/rename_exp_data.py
    python rename_exp_data.py --experimental-data my_exp_data.csv -name-mapping-file ligand_name_mapping_PRIVATE.json --output blinded_exp_data.csv
 
+.. _private info form:
+
 Private datasets info form
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 We also wish to gather additional information about the private datasets:
@@ -250,17 +254,26 @@ We provide a template text file for you to fill in all the information. You can 
 You can open and edit the file using e.g. VIM or Microsoft Word. Please fill out this form for each private dataset and upload
 the file (as a pdf or text file) together with the other results in your zenodo upload.
 
-
-How will this be gathered?
-==========================
-
 .. _private-data-gather:
 
-We anticipating gathering the data through:
+Uploading the results to zenodo
+===============================
 
-1. A script provided by the OpenFE team that will extract relevant information from your simulations.
-2. A text file for you to fill in with information.
-3. A CSV file with experimental data that you will need to prepare.
+To prepare the results for the submission, please follow these steps:
 
+1. Run the :ref:`post-simulation cleanup` script.
+2. Run the :ref:`data gathering script <gathering_of_results>`. The output of this step should be a compressed folder named ``results_data.zip``.
+   The contents in this folder are all human readable and should be reviewed before submitting.
+3. Prepare a CSV file containing the experimental data for the set (see :ref:`here <exp-csv-file>`).
+4. Fill out the :ref:`private dataset info form <private info form>`.
+5. Create a folder named ``dataset_name`` where ``dataset_name`` can be any arbitrary name that you want to give the different private datasets
+6. Copy the following three items into the ``dataset_name`` folder:
 
-The text form and data gathering scripts are currently being prepared by the OpenFE team. Please come back soon for more details!
+  * the compressed folder ``results_data.zip``,
+  * the experimental CSV file ``experimental_data.csv``,
+  * the private info form ``info_form_private_sets.txt``.
+
+7. Upload the ``dataset_name`` folder to zenodo following the steps outlined :ref:`here <upload_of_results>`.
+
+.. warning::
+   Please double check that your experimental CSV file does not contain any confidential ligand names, but that those have been renamed, e.g. using :ref:`this script <rename-csv-ligands>`.
