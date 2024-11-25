@@ -745,8 +745,9 @@ To upload the data, please follow these steps:
      * Title: For example something like: OpenFE 2024 Industry Benchmarking Project, Results from X (where X could be company name, or dataset name, or author.
      * Creators: Please add as authors everyone involved in running the calculations.
      * Description: Please report the OpenFE version that was used. You can get this information by running ``openfe --version`` in the commandline within the environment that you used to run the setup, simulations, and analysis of the data. In addition to that, please reference the `Industry Benchmark repo <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_ as
-     it contains all necessary information about the simulation details.
-      E.g.: OpenFE 2024 Industry Benchmarking Project, Results from systems `jacs set; bace` and `merck set; shp2`. OpenFE version v1.0.1.  Simulation details can be found in the GitHub repository `https://github.com/OpenFreeEnergy/IndustryBenchmarks2024`
+       it contains all necessary information about the simulation details.
+       E.g.: OpenFE 2024 Industry Benchmarking Project, Results from systems `jacs set; bace` and `merck set; shp2`. OpenFE version v1.0.1.  Simulation details can be found in the GitHub repository `https://github.com/OpenFreeEnergy/IndustryBenchmarks2024`
+
   e) Add the compressed results folder (``results_data.zip``) to the zenodo upload. If multiple datasets are submitted in the same zenodo upload, please rename this file to reflect the benchmark system, e.g. `results_data_jacs_bace.zip`
   f) Click the `Submit for review` button on the top right. We will then review the upload and publish it.
 
