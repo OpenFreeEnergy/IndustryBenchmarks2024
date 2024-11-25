@@ -736,7 +736,7 @@ To upload the data, please follow these steps:
 3. Upload the compressed results folder to zenodo.
 
   a) Login to zenodo or sign up if you do not have an account.
-  b) Upload the data to the **Open Free Energy Zenodo Community**. You can find the OpenFE community here: `https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest`_.
+  b) Upload the data to the **Open Free Energy Zenodo Community**. You can find the OpenFE community here: `https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest <https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest>`_.
   c) Click the `New upload` button on the top right.
   d) Fill out all the relevant information.
 
