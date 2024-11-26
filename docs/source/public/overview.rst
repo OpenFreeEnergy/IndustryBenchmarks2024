@@ -748,7 +748,7 @@ To upload the data, please follow these steps:
   d) Fill out all the relevant information.
 
      * Digital Object Identifier: Click ``No`` and ``Generate a DOI now!``
-     * Resource type: Dataset
+     * Resource type: ``Dataset``
      * Title: For example something like: OpenFE 2024 Industry Benchmarking Project, Results from X (where X could be company name, or dataset name, or author.
      * Creators: Please add as authors everyone involved in running the calculations.
      * Description: Please report the OpenFE version that was used. You can get this information by running ``openfe --version`` in the commandline within the environment that you used to run the setup, simulations, and analysis of the data. In addition to that, please reference the `Industry Benchmark repo <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_ as
