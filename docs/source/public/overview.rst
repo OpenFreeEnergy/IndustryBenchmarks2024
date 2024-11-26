@@ -546,7 +546,6 @@ If confidential ligand names were used (private datasets), those can be replaced
    python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2 --hide-ligand-names
 
 .. warning::
-
    Per default, the ligand names that were present in the original ligand sdf will be stored. Please check those and if they contain any confidential information, use the ``hide-ligand-names`` flag.
 
 
@@ -735,6 +734,7 @@ To upload the data, please follow these steps:
 1. Run the :ref:`post-simulation cleanup` script.
 2. Run the :ref:`data gathering script <gathering_of_results>`. The output of this step should be a compressed folder named ``results_data.zip``.
 3. Create a directory for each dataset, naming it after the dataset, e.g. ``jacs_bace``. Then, move the  ``results_data.zip`` file into the respective dataset folder. Please make sure to include both the set name (e.g. jacs or waterset) and the target name (e.g. bace) since some targets occur in multiple sets.
+   For private datasets, please also copy the CSV file with the experimental data and the private info form into this same folder (see :ref:`here <private-data-gather>` for further instructions).
 
 .. code-block:: bash
 
