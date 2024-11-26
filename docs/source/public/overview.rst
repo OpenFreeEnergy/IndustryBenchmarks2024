@@ -747,7 +747,7 @@ To upload the data, please follow these steps:
   c) Click the ``New upload`` button on the top right.
   d) Fill out all the relevant information.
 
-     * Digital Object Identifier: Click `No` and `Generate a DOI now!`
+     * Digital Object Identifier: Click ``No`` and ``Generate a DOI now!``
      * Resource type: Dataset
      * Title: For example something like: OpenFE 2024 Industry Benchmarking Project, Results from X (where X could be company name, or dataset name, or author.
      * Creators: Please add as authors everyone involved in running the calculations.
