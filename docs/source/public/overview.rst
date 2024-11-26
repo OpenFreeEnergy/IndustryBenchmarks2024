@@ -756,7 +756,7 @@ To upload the data, please follow these steps:
        E.g.: OpenFE 2024 Industry Benchmarking Project, Results from systems `jacs set; bace` and `merck set; shp2`. OpenFE version v1.0.1.  Simulation details can be found in the GitHub repository `https://github.com/OpenFreeEnergy/IndustryBenchmarks2024`
 
   e) Add the dataset folder (e.g. ``jacs_bace``) that contains the compressed results folder (``results_data.zip``) to the zenodo upload. Please upload a separate folder for each dataset.
-  f) Click the `Submit for review` button on the top right. We will then review the upload and publish it.
+  f) Click the ``Submit for review`` button on the top right. We will then review the upload and publish it.
 
 If you plan to submit the results from multiple datasets in a single zenodo upload, please make sure to create subfolders for the different datasets
 and to name them according to the set name and target name. Additionally, please list all the sets contained in the upload in the `Description` section.
