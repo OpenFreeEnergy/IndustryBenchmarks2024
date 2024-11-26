@@ -539,13 +539,13 @@ If the `fix network script <fix_networks>`_ was run, two alchemical networks nee
 
    python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --fixed_alchemical_network new_network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2
 
-If confidential ligand names were used, those can be replaced with generic ligand names. To do that you will need to add the flag ``--hide-ligand-names``:
+If confidential ligand names were used (private datasets), those can be replaced with generic ligand names. To do that you will need to add the flag ``--hide-ligand-names``:
 
-thering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2 --hide-ligand-names
+.. code-block:: bash
+   python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2 --hide-ligand-names
 
-.. warning::.. code-block:: bash
+.. warning::
 
-   python data_ga
    Per default, the ligand names that were present in the original ligand sdf will be stored. Please check those and if they contain any confidential information, use the ``hide-ligand-names`` flag.
 
 
