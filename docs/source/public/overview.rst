@@ -523,7 +523,7 @@ Gathering of results
 .. warning::
   By default the gathering script does not replace ligand names!
   For the public datasets, we want to use the same ligand names as in the input files.
-  For the private datasets, if you used proprietary names, please use the `--hide-ligand-names` flag.
+  For the private datasets, if you used proprietary names, please use the ``--hide-ligand-names`` flag.
 
 
 To perform the data gathering, do the following:
