@@ -733,7 +733,7 @@ To upload the data, please follow these steps:
 
 1. Run the :ref:`post-simulation cleanup` script.
 2. Run the :ref:`data gathering script <gathering_of_results>`. The output of this step should be a compressed folder named ``results_data.zip``.
-3. Create a directory for each dataset, naming it after the dataset, e.g. `jacs_bace`. Then, move the  ``results_data.zip`` file into the respective dataset folder. Please make sure to include both the set name (e.g. jacs, merck) and the target name since some targets occur in multiple sets.
+3. Create a directory for each dataset, naming it after the dataset, e.g. ``jacs_bace``. Then, move the  ``results_data.zip`` file into the respective dataset folder. Please make sure to include both the set name (e.g. jacs or waterset) and the target name (e.g. bace) since some targets occur in multiple sets.
 
 .. code-block:: bash
 
