@@ -521,7 +521,9 @@ Gathering of results
 
 
 .. warning::
-  By default the gathering script does not replace ligand names! If you used proprietary names, please use the `--hide-ligand-names` flag.
+  By default the gathering script does not replace ligand names!
+  For the public datasets, we want to use the same ligand names as in the input files.
+  For the private datasets, if you used proprietary names, please use the ``--hide-ligand-names`` flag.
 
 
 To perform the data gathering, do the following:
@@ -537,7 +539,7 @@ If the `fix network script <fix_networks>`_ was run, two alchemical networks nee
 
    python data_gathering.py --input_alchemical_network network_setup/alchemicalNetwork/alchemical_network.json --fixed_alchemical_network new_network_setup/alchemicalNetwork/alchemical_network.json --results-folder results_0 --results-folder results_1 --results-folder results_2
 
-If confidential ligand names were used, those can be replaced with generic ligand names. To do that you will need to add the flag ``--hide-ligand-names``:
+If confidential ligand names were used (private datasets), those can be replaced with generic ligand names. To do that you will need to add the flag ``--hide-ligand-names``:
 
 .. code-block:: bash
 
@@ -731,14 +733,31 @@ To upload the data, please follow these steps:
 
 1. Run the :ref:`post-simulation cleanup` script.
 2. Run the :ref:`data gathering script <gathering_of_results>`. The output of this step should be a compressed folder named ``results_data.zip``.
-3. Upload the compressed results folder to zenodo.
+3. Create a directory for each dataset, naming it after the dataset, e.g. ``jacs_bace``. Then, move the  ``results_data.zip`` file into the respective dataset folder. Please make sure to include both the set name (e.g. jacs or waterset) and the target name (e.g. bace) since some targets occur in multiple sets.
+   For private datasets, please also copy the CSV file with the experimental data and the private info form into this same folder (see :ref:`here <private-data-gather>` for further instructions).
 
-  a) Go to `zenodo <https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest>`_ to upload the data to the **Open Free Energy Zenodo Community**.
-  b) Click the `New upload` button on the top right.
-  c) Fill out all the relevant information. In the `Description` section, please report the OpenFE version that was used. You can get this information by running ``openfe --version`` in the commandline within the environment that you used to run the setup, simulations, and analysis of the data. In addition to that, please reference the `Industry Benchmark repo <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_ as
-     it contains all necessary information about the simulation details.
-  d) Add the compressed results folder (``results_data.zip``) to the zenodo upload.
-  e) Click the `Submit for review` button on the top right. We will then review the upload and publish it.
+.. code-block:: bash
+
+    mkdir jacs_bace
+    mv results_data.zip jacs_bace
+
+4. Upload the dataset folder (that contains the compressed results) to zenodo.
+
+  a) Login to zenodo or sign up if you do not have an account.
+  b) Upload the data to the **Open Free Energy Zenodo Community**. You can find the OpenFE community here: `https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest <https://zenodo.org/communities/openfreeenergy/records?q=&l=list&p=1&s=10&sort=newest>`_.
+  c) Click the ``New upload`` button on the top right.
+  d) Fill out all the relevant information.
+
+     * Digital Object Identifier: Click ``No`` and ``Generate a DOI now!``
+     * Resource type: ``Dataset``
+     * Title: For example something like: OpenFE 2024 Industry Benchmarking Project, Results from X (where X could be company name, or dataset name, or author.
+     * Creators: Please add as authors everyone involved in running the calculations.
+     * Description: Please report the OpenFE version that was used. You can get this information by running ``openfe --version`` in the commandline within the environment that you used to run the setup, simulations, and analysis of the data. In addition to that, please reference the `Industry Benchmark repo <https://github.com/OpenFreeEnergy/IndustryBenchmarks2024>`_ as
+       it contains all necessary information about the simulation details.
+       E.g.: OpenFE 2024 Industry Benchmarking Project, Results from systems `jacs set; bace` and `merck set; shp2`. OpenFE version v1.0.1.  Simulation details can be found in the GitHub repository `https://github.com/OpenFreeEnergy/IndustryBenchmarks2024`
+
+  e) Add the dataset folder (e.g. ``jacs_bace``) that contains the compressed results folder (``results_data.zip``) to the zenodo upload. Please upload a separate folder for each dataset.
+  f) Click the ``Submit for review`` button on the top right. We will then review the upload and publish it.
 
 If you plan to submit the results from multiple datasets in a single zenodo upload, please make sure to create subfolders for the different datasets
 and to name them according to the set name and target name. Additionally, please list all the sets contained in the upload in the `Description` section.
