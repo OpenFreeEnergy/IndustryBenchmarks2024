@@ -1,4 +1,6 @@
 import click
+from cinnabar.plotting import _master_plot, plot_DGs
+from cinnabar import FEMap
 import pandas as pd
 import pathlib
 from openff.units import unit
@@ -10,6 +12,7 @@ from typing import Literal
 import pymbar
 from pymbar import MBAR
 import shutil
+from itertools import combinations
 
 
 def load_exp_data(filename: pathlib.Path) -> pd.DataFrame:
@@ -451,7 +454,8 @@ def extract_cumulative_dg_estimates(
                     "ligand_A": edge_data["ligand_A"],
                     "ligand_B": edge_data["ligand_B"],
                     "phase": phase,
-                    "repeat": repeat
+                    "repeat": repeat,
+                    "partner_id": industry_partner
                 }
                 potential = get_edge_matrix(
                     edge_name=repeat_name,
@@ -468,6 +472,173 @@ def extract_cumulative_dg_estimates(
                 all_data.append(dg_data)
 
     return pd.DataFrame(all_data)
+
+def plot_ddg_vs_experiment(edge_dataframe: pd.DataFrame, output: pathlib.Path, dataset_name: str):
+    """
+    For the given dataframe of general edge data plot the DDG vs the experimental data using cinnabar.
+
+    Parameters
+    ----------
+    edge_dataframe: pd.DataFrame
+        The dataframe with general edge data generated using extract_general_edge_data
+    output: pathlib.Path
+        The path of the output directory, the file will be called DDG_vs_exp.svg
+    dataset_name: str
+        The name of the dataset which will be added as a plot title.
+    """
+
+    exp_ddg = edge_dataframe["exp DDG (kcal/mol)"]
+    exp_error = edge_dataframe["exp dDDG (kcal/mol)"]
+    # calculate the DDG using the std between repeats as the error
+    complex_data = edge_dataframe[[f"complex_repeat_{i}_DG (kcal/mol)" for i in range(3)]]
+    complex_dg = complex_data.mean(axis=1)
+    complex_error = complex_data.std(axis=1)
+    solvent_data = edge_dataframe[[f"solvent_repeat_{i}_DG (kcal/mol)" for i in range(3)]]
+    solvent_dg = solvent_data.mean(axis=1)
+    solvent_error = solvent_data.std(axis=1)
+    ddg = complex_dg - solvent_dg
+    # propagate errors
+    ddg_error = (complex_error ** 2 + solvent_error ** 2) ** 0.5
+    # create the plot
+    _master_plot(
+        x=exp_ddg,
+        xerr=exp_error,
+        y=ddg,
+        yerr=ddg_error,
+        statistic_type="mle",
+        title=dataset_name,
+        figsize=4,
+        filename=output.joinpath("DDG_vs_exp.svg").as_posix()
+    )
+
+def plot_ddg_repeats(edge_dataframe: pd.DataFrame, output: pathlib.Path):
+    """
+    For the edge dataframe plot estimated DDG from each repeat against each other using cinnabar.
+
+    Parameters
+    ----------
+    edge_dataframe: pd.DataFrame
+        The dataframe with general edge data generated using extract_general_edge_data
+    output: pathlib.Path
+        The path of the output directory, the files will be saved as DDG_0_vs_1.svg, DDG_1_vs_2.svg, DDG_0_vs_2.svg
+    """
+    for repeat1, repeat2 in combinations(range(3), 2):
+        repeat1_ddg = edge_dataframe[f"complex_repeat_{repeat1}_DG (kcal/mol)"] - edge_dataframe[f"solvent_repeat_{repeat1}_DG (kcal/mol)"]
+        repeat1_error = (
+            edge_dataframe[f"complex_repeat_{repeat1}_dDG (kcal/mol)"] ** 2 + edge_dataframe[f"solvent_repeat_{repeat1}_dDG (kcal/mol)"] ** 2
+        ) ** 0.5
+        repeat2_ddg = edge_dataframe[f"complex_repeat_{repeat2}_DG (kcal/mol)"] - edge_dataframe[f"solvent_repeat_{repeat2}_DG (kcal/mol)"]
+        repeat2_error = (
+            edge_dataframe[f"complex_repeat_{repeat2}_dDG (kcal/mol)"] ** 2 + edge_dataframe[f"solvent_repeat_{repeat2}_dDG (kcal/mol)"] ** 2
+        ) ** 0.5
+        _master_plot(
+            x=repeat1_ddg,
+            xerr=repeat1_error,
+            y=repeat2_ddg,
+            yerr=repeat2_error,
+            statistic_type="mle",
+            title="DDG between repeats",
+            figsize=4,
+            filename=output.joinpath(f"DDG_{repeat1}_vs_{repeat2}.svg").as_posix(),
+            xlabel=f"Repeat {repeat1}",
+            ylabel=f"Repeat {repeat2}"
+        )
+
+def calculate_and_plot_dg(
+        edge_dataframe: pd.DataFrame,
+        output: pathlib.Path,
+        experimental_data: pd.DataFrame,
+        is_public: bool,
+        dataset_name: str
+) -> pd.DataFrame:
+    """
+    Calculate the DG values based on the edge dataframe and plot them against the experimental data.
+
+    Parameters
+    ----------
+    edge_dataframe: pd.DataFrame
+        The edge data extracted by extract_general_edge_dat.
+    output: pathlib.Path
+        The path of the output directory the plot should be saved to (DG_vs_exp.svg)
+    experimental_data: pd.DataFrame
+        The experimental dataframe.
+    is_public: bool
+        If the dataset is from the public benchmark, this changes how the exp data is extracted.
+    dataset_name: str
+        The name of the dataset which should be used as the title.
+
+    Returns
+    -------
+        A dataframe of the calculated DG values compared with experimental values.
+    """
+    # calculate the DDG using the std between repeats as the error
+    complex_data = edge_dataframe[[f"complex_repeat_{i}_DG (kcal/mol)" for i in range(3)]]
+    complex_dg = complex_data.mean(axis=1)
+    complex_error = complex_data.std(axis=1)
+    solvent_data = edge_dataframe[[f"solvent_repeat_{i}_DG (kcal/mol)" for i in range(3)]]
+    solvent_dg = solvent_data.mean(axis=1)
+    solvent_error = solvent_data.std(axis=1)
+    ddg = complex_dg - solvent_dg
+    # propagate errors
+    ddg_error = (complex_error ** 2 + solvent_error ** 2) ** 0.5
+    fe_map = FEMap()
+    # add each prediction
+    for index, row in edge_dataframe.iterrows():
+        fe_map.add_relative_calculation(
+            labelA=row["ligand_A"],
+            labelB=row["ligand_B"],
+            value=ddg.loc[index],
+            uncertainty=ddg_error.loc[index],
+            source="calculated",
+        )
+    # add the exp data points
+    for _, row in experimental_data.iterrows():
+        if is_public:
+            fe_map.add_experimental_measurement(
+                label=row["Ligand name"],
+                value=row["Exp. dG (kcal/mol)"] * unit.kilocalorie_per_mole,
+                uncertainty=0.0 * unit.kilocalorie_per_mole
+            )
+        else:
+            fe_map.add_experimental_measurement(
+                label=row["Ligand Name"],
+                value=row["Affinity (nM)"] * unit.nanomolar,
+                uncertainty=row["Affinity Error (nM)"] * unit.nanomolar
+            )
+
+    fe_map.generate_absolute_values()
+    plot_DGs(
+        graph=fe_map.to_legacy_graph(),
+        title=dataset_name,
+        filename=output.joinpath("DG_vs_exp.svg").as_posix(),
+        figsize=4
+    )
+    # if we have a public result plot DG vs FEP+
+    absolute_df = fe_map.get_absolute_dataframe()
+    abs_calc = absolute_df[absolute_df["computational"] == True]
+    if is_public:
+        openfe, openfe_error, fep_plus, fep_plus_error = [], [], [], []
+        for _, row in abs_calc.iterrows():
+            openfe.append(row["DG (kcal/mol)"])
+            openfe_error.append(row["uncertainty (kcal/mol)"])
+            fep_plus_data = experimental_data[experimental_data["Ligand name"] == row["label"]].iloc[0]
+            fep_plus.append(fep_plus_data["Pred. dG (kcal/mol)"])
+            fep_plus_error.append(fep_plus_data["Pred. dG std. error (kcal/mol)"])
+        # plot the data
+        _master_plot(
+            # shift by the mean Exp value to match the FEP+ data
+            x=np.array(openfe) + experimental_data["Exp. dG (kcal/mol)"].mean(axis=0),
+            xerr=np.array(openfe_error),
+            y=np.array(fep_plus),
+            yerr=np.array(fep_plus_error),
+            title="OpenFE vs FEP+",
+            xlabel="OpenFE",
+            ylabel="FEP+",
+            quantity=rf"$\Delta$ G",
+            filename=output.joinpath("openfe_vs_fep+.svg").as_posix()
+        )
+
+    return abs_calc.drop(columns=["computational", "source"])
 
 
 
@@ -553,7 +724,7 @@ def main(
             )
             # find the experimental data csv file if not provided
             if experimental_data is not None:
-                # assume its a local FEP+ data file
+                # assume it is a local FEP+ data file
                 exp_df = pd.read_csv(experimental_data.as_posix())
                 public_set = True
             else:
@@ -572,8 +743,30 @@ def main(
                 is_public=public_set
             )
             edge_data.to_csv(dataset_name.joinpath("pymbar3_edge_data.csv"))
-
+            edge_data = pd.read_csv(dataset_name.joinpath("pymbar3_edge_data.csv"))
+            # plot ddg vs exp
+            click.echo("Plotting DDG vs Exp")
+            plot_ddg_vs_experiment(
+                edge_dataframe=edge_data,
+                output=dataset_name,
+                dataset_name=dataset_name.parent
+            )
+            click.echo("Plotting DDG between repeats")
+            plot_ddg_repeats(
+                edge_dataframe=edge_data,
+                output=dataset_name
+            )
+            click.echo("Plotting DG vs Exp")
+            dg_dataframe = calculate_and_plot_dg(
+                edge_dataframe=edge_data,
+                output=dataset_name,
+                experimental_data=exp_df,
+                dataset_name=dataset_name.parent,
+                is_public=public_set
+            )
+            dg_dataframe.to_csv(dataset_name.joinpath("pymbar3_calculated_dg_data.csv"), index=False)
             # extract the cumulative estimates
+            click.echo("Calculating cumulative data")
             cumulative_data = extract_cumulative_dg_estimates(
                 all_properties=all_properties,
                 dataset_name=dataset_name,
