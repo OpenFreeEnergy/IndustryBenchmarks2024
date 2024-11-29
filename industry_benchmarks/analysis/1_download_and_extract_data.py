@@ -13,6 +13,7 @@ import pymbar
 from pymbar import MBAR
 import shutil
 from itertools import combinations
+from concurrent.futures import ProcessPoolExecutor, as_completed
 
 
 def load_exp_data(filename: pathlib.Path) -> pd.DataFrame:
@@ -163,6 +164,50 @@ def ki_to_dg(
 
     return dg, ddg
 
+def _extract_edge_data(
+        edge_data: dict[str, float],
+        all_props_data: dict,
+        archive: pathlib.Path,
+) -> dict:
+    for phase in ["solvent", "complex"]:
+        for repeat in range(3):
+            repeat_name = f"{phase}_{edge_data['ligand_A']}_{edge_data['ligand_B']}_repeat_{repeat}"
+            phase_repeat_name = f"{phase}_repeat_{repeat}"
+            dg, error = all_props_data["DDG_estimates"][repeat_name]
+            edge_data[f"{phase_repeat_name}_DG (kcal/mol)"] = dg.to(
+                unit.kilocalorie_per_mole
+            ).m
+            edge_data[f"{phase_repeat_name}_dDG (kcal/mol)"] = error.to(
+                unit.kilocalorie_per_mole
+            ).m
+            # extract maximum com drift and ligand RMSD values
+            com_drift_max = get_edge_matrix(
+                edge_name=repeat_name, archive=archive, matrix_type="com"
+            ).max()
+            rmsd_max = get_edge_matrix(
+                edge_name=repeat_name, archive=archive, matrix_type="ligand_rmsd"
+            ).max()
+            edge_data[f"{phase_repeat_name}_com_drift_max"] = com_drift_max
+            edge_data[f"{phase_repeat_name}_ligand_rmsd_max"] = rmsd_max
+            # extract the minimum off diagonal in the overlap matrix
+            potential = get_edge_matrix(
+                edge_name=repeat_name,
+                archive=archive,
+                matrix_type="reduced_potential",
+            )
+            samples = get_edge_matrix(
+                edge_name=repeat_name, archive=archive, matrix_type="samples"
+            )
+            # transpose the matrix as it was formated for readability
+            overlap_matrix = compute_overlap_matrix(
+                reduced_potential=potential.T, samples=samples
+            )
+            smallest_off_diagonal = get_smallest_off_diagonal(overlap_matrix)
+            edge_data[f"{phase_repeat_name}_smallest_overlap"] = (
+                smallest_off_diagonal
+            )
+    return edge_data
+
 
 def extract_general_edge_data(
     all_properties: dict[str, dict],
@@ -170,7 +215,8 @@ def extract_general_edge_data(
     industry_partner: str,
     experimental_data: pd.DataFrame,
     archive: pathlib.Path,
-    is_public: bool
+    is_public: bool,
+    workers: int
 ) -> pd.DataFrame:
     """
     Extract the top level edge information from the all properties JSON file made by the data gathering script.
@@ -189,77 +235,45 @@ def extract_general_edge_data(
         The location of the archive to extract edge matrix data from.
     is_public: bool
         If the dataset is from the public benchmark, this changes how the exp data is extracted.
+    workers: int
+        The number of workers to use when extracting the edge data.
 
     Returns
     -------
         A DataFrame of the edge data, such as edge scores and DG values per phase and repeat.
+
+    Notes
+    -----
+    Running MBAR a lot of times is slow so use more workers where possible.
     """
     all_data = []
-    for edge_data in tqdm.tqdm(
-        all_properties["Edges"].values(),
-        desc=f"Extracting edge data for {dataset_name}",
-        total=len(all_properties["Edges"]),
-    ):
-        # edge data has all the edge scores already
-        # and some identifiers to group the edges later
-        edge_data["dataset_name"] = dataset_name
-        edge_data["partner_id"] = industry_partner
-        # add in the experimental estimate for the edge
-        if is_public:
-            ddg, error = get_exp_ddg_fep_plus(
-                experimental_data=experimental_data,
-                ligand_a=edge_data["ligand_A"],
-                ligand_b=edge_data["ligand_B"]
-            )
-        else:
-            ddg, error = get_exp_ddg(
-                experimental_data=experimental_data,
-                ligand_a=edge_data["ligand_A"],
-                ligand_b=edge_data["ligand_B"],
-            )
-        edge_data["exp DDG (kcal/mol)"] = ddg
-        edge_data["exp dDDG (kcal/mol)"] = error
-        # add in the per repeat value for each phase
-        for phase in ["solvent", "complex"]:
-            for repeat in range(3):
-                repeat_name = f"{phase}_{edge_data['ligand_A']}_{edge_data['ligand_B']}_repeat_{repeat}"
-                phase_repeat_name = f"{phase}_repeat_{repeat}"
-                dg, error = all_properties["DDG_estimates"][repeat_name]
-                edge_data[f"{phase_repeat_name}_DG (kcal/mol)"] = dg.to(
-                    unit.kilocalorie_per_mole
-                ).m
-                edge_data[f"{phase_repeat_name}_dDG (kcal/mol)"] = error.to(
-                    unit.kilocalorie_per_mole
-                ).m
-                # extract maximum com drift and ligand RMSD values
-                com_drift_max = get_edge_matrix(
-                    edge_name=repeat_name, archive=archive, matrix_type="com"
-                ).max()
-                rmsd_max = get_edge_matrix(
-                    edge_name=repeat_name, archive=archive, matrix_type="ligand_rmsd"
-                ).max()
-                edge_data[f"{phase_repeat_name}_com_drift_max"] = com_drift_max
-                edge_data[f"{phase_repeat_name}_ligand_rmsd_max"] = rmsd_max
-                # extract the minimum off diagonal in the overlap matrix
-                potential = get_edge_matrix(
-                    edge_name=repeat_name,
-                    archive=archive,
-                    matrix_type="reduced_potential",
+    job_list = []
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        for edge_data in all_properties["Edges"].values():
+            # edge data has all the edge scores already
+            # and some identifiers to group the edges later
+            edge_data["dataset_name"] = dataset_name
+            edge_data["partner_id"] = industry_partner
+            # add in the experimental estimate for the edge
+            if is_public:
+                ddg, error = get_exp_ddg_fep_plus(
+                    experimental_data=experimental_data,
+                    ligand_a=edge_data["ligand_A"],
+                    ligand_b=edge_data["ligand_B"]
                 )
-                samples = get_edge_matrix(
-                    edge_name=repeat_name, archive=archive, matrix_type="samples"
+            else:
+                ddg, error = get_exp_ddg(
+                    experimental_data=experimental_data,
+                    ligand_a=edge_data["ligand_A"],
+                    ligand_b=edge_data["ligand_B"],
                 )
-                # transpose the matrix as it was formated for readability
-                overlap_matrix = compute_overlap_matrix(
-                    reduced_potential=potential.T, samples=samples
-                )
-                smallest_off_diagonal = get_smallest_off_diagonal(overlap_matrix)
-                edge_data[f"{phase_repeat_name}_smallest_overlap"] = (
-                    smallest_off_diagonal
-                )
+            edge_data["exp DDG (kcal/mol)"] = ddg
+            edge_data["exp dDDG (kcal/mol)"] = error
+            job_list.append(pool.submit(_extract_edge_data, edge_data, all_properties, archive))
 
-        # once we have every repeat for each phase add the row
-        all_data.append(edge_data)
+        # unpack the work
+        for job in tqdm.tqdm(as_completed(job_list), desc="Extracting edge data", total=len(job_list)):
+            all_data.append(job.result())
 
     return pd.DataFrame(all_data)
 
@@ -417,9 +431,9 @@ def get_cumulative_dg(
 
 def extract_cumulative_dg_estimates(
     all_properties: dict[str, dict],
-    dataset_name: str,
     industry_partner: str,
-    archive: pathlib.Path
+    archive: pathlib.Path,
+    workers: int
 ) -> pd.DataFrame:
     """
     For each edge in the dataset estimate the DG cumulative values using 10%, 20%, ... 100% of the data.
@@ -428,50 +442,66 @@ def extract_cumulative_dg_estimates(
     ----------
      all_properties: dict
         A dictionary of all network properties created by the data_gathering.py script.
-    dataset_name: str
-        The unique name which should be used to identify this dataset.
     industry_partner: str
         The unique name which should be used to identify the partner this dataset came from.
     archive: pathlib.Path
         The location of the archive to extract edge matrix data from.
+    workers: int
+        The number of workers to use when extracting the edge data.
 
     Returns
     -------
         A dataframe of DG estimates using portions of the total data, where each row is a unique phase and repeat.
+
+    Notes
+    -----
+    Running MBAR a lot of times is very expensive use as many workers as possible.
     """
     all_data = []
-    for edge_data in tqdm.tqdm(
-            all_properties["Edges"].values(),
-            desc=f"Calculating cumulative edge data for {dataset_name}",
-            total=len(all_properties["Edges"]),
-    ):
-        # add in the per repeat value for each phase
-        for phase in ["solvent", "complex"]:
-            for repeat in range(3):
-                repeat_name = f"{phase}_{edge_data['ligand_A']}_{edge_data['ligand_B']}_repeat_{repeat}"
-                # collect some general data
-                dg_data = {
-                    "ligand_A": edge_data["ligand_A"],
-                    "ligand_B": edge_data["ligand_B"],
-                    "phase": phase,
-                    "repeat": repeat,
-                    "partner_id": industry_partner
-                }
-                potential = get_edge_matrix(
-                    edge_name=repeat_name,
-                    archive=archive,
-                    matrix_type="reduced_potential",
-                )
-                samples = get_edge_matrix(
-                    edge_name=repeat_name, archive=archive, matrix_type="samples"
-                )
-                cumulative_dg = get_cumulative_dg(reduced_potential=potential.T, samples=samples)
-                # merge the cumulative data
-                dg_data.update(cumulative_dg)
+    job_list = []
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        for edge_data in all_properties["Edges"].values():
+            # add in the per repeat value for each phase
+            job_list.append(pool.submit(_get_cumulative_edge_estimate, edge_data, archive, industry_partner))
 
-                all_data.append(dg_data)
+        for result in tqdm.tqdm(as_completed(job_list), desc="Calculating cumulative DGs", total=len(job_list)):
+            all_data.extend(result.result())
 
     return pd.DataFrame(all_data)
+
+def _get_cumulative_edge_estimate(
+        edge_data: dict,
+        archive: pathlib.Path,
+        partner_id: str
+) -> list[dict[str, float]]:
+
+    cumulative_data = []
+    for phase in ["solvent", "complex"]:
+        for repeat in range(3):
+            repeat_name = f"{phase}_{edge_data['ligand_A']}_{edge_data['ligand_B']}_repeat_{repeat}"
+            # collect some general data
+            dg_data = {
+                "ligand_A": edge_data["ligand_A"],
+                "ligand_B": edge_data["ligand_B"],
+                "phase": phase,
+                "repeat": repeat,
+                "partner_id": partner_id
+            }
+            potential = get_edge_matrix(
+                edge_name=repeat_name,
+                archive=archive,
+                matrix_type="reduced_potential",
+            )
+            samples = get_edge_matrix(
+                edge_name=repeat_name, archive=archive, matrix_type="samples"
+            )
+            cumulative_dg = get_cumulative_dg(reduced_potential=potential.T, samples=samples)
+            # merge the cumulative data
+            dg_data.update(cumulative_dg)
+            # save the data for this transformation
+            cumulative_data.append(dg_data)
+    return cumulative_data
+
 
 def plot_ddg_vs_experiment(edge_dataframe: pd.DataFrame, output: pathlib.Path, dataset_name: str):
     """
@@ -677,12 +707,20 @@ def calculate_and_plot_dg(
     type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=pathlib.Path),
     default=None
 )
+@click.option(
+    "-w",
+    "--workers",
+    default=2,
+    type=click.INT,
+    help="The number of workers to use to extract the edge data."
+)
 def main(
     zenodo: str | None,
     archive: pathlib.Path,
     partner_id: str,
     output: pathlib.Path,
-    experimental_data: pathlib.Path | None
+    experimental_data: pathlib.Path | None,
+    workers: int
 ):
     """
     Format the raw data extracted from the Zenodo archive into CSV files
@@ -740,7 +778,8 @@ def main(
                 industry_partner=partner_id,
                 experimental_data=exp_df,
                 archive=dataset_name,
-                is_public=public_set
+                is_public=public_set,
+                workers=workers
             )
             edge_data.to_csv(dataset_name.joinpath("pymbar3_edge_data.csv"))
             edge_data = pd.read_csv(dataset_name.joinpath("pymbar3_edge_data.csv"))
@@ -769,9 +808,9 @@ def main(
             click.echo("Calculating cumulative data")
             cumulative_data = extract_cumulative_dg_estimates(
                 all_properties=all_properties,
-                dataset_name=dataset_name,
                 industry_partner=partner_id,
-                archive=dataset_name
+                archive=dataset_name,
+                workers=workers
             )
             cumulative_data.to_csv(dataset_name.joinpath("pymbar3_cumulative_data.csv"))
 
