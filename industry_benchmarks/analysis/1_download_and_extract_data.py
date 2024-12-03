@@ -14,6 +14,9 @@ from pymbar import MBAR
 import shutil
 from itertools import combinations
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from openmmtools.multistate import MultiStateSamplerAnalyzer, MultiStateReporter, utils
+import logging
+import tempfile
 
 
 def load_exp_data(filename: pathlib.Path) -> pd.DataFrame:
@@ -328,7 +331,7 @@ def get_edge_matrix(
     edge_name: str,
     archive: pathlib.Path,
     matrix_type: Literal[
-        "com", "ligand_rmsd", "protein_rmsd", "reduced_potential", "samples"
+        "com", "ligand_rmsd", "protein_rmsd", "reduced_potential", "samples", "state_index"
     ],
 ) -> np.array:
     """
@@ -348,14 +351,15 @@ def get_edge_matrix(
     The loaded matrix of the format (n_samples, n_replicas)
     """
     types_to_files = {
-        "com": "ligand_wander.txt",
-        "ligand_rmsd": "ligand_RMSD.txt",
-        "protein_rmsd": "protein_RMSD.txt",
-        "reduced_potential": "u_ln.txt",
-        "samples": "N_l.txt",
+        "com": ("ligand_wander.txt", np.float64),
+        "ligand_rmsd": ("ligand_RMSD.txt", np.float64),
+        "protein_rmsd": ("protein_RMSD.txt", np.float64),
+        "reduced_potential": ("u_ln.txt", np.float64),
+        "samples": ("N_l.txt", np.int16),
+        "state_index": ("replicas_state_indices.txt", np.int16)
     }
-    file_name = archive.joinpath(edge_name, types_to_files[matrix_type])
-    return np.loadtxt(file_name)
+    file_name = archive.joinpath(edge_name, types_to_files[matrix_type][0])
+    return np.loadtxt(file_name).astype(types_to_files[matrix_type][1])
 
 
 def compute_overlap_matrix(reduced_potential: np.array, samples: np.array) -> np.array:
@@ -395,10 +399,13 @@ def get_smallest_off_diagonal(matrix: np.array) -> float:
 
 def get_cumulative_dg(
         reduced_potential: np.array,
-        samples: np.array
+        samples: np.array,
+        state_indices: np.array,
+        charge_change: bool,
+
 ) -> dict[str, float]:
     """
-    Compute the cumulative DG estimates using a % of the data from 10 to 100.
+    Compute the cumulative DG estimates for each nanosecond of simulation time with and without subsampling.
 
     Parameters
     ----------
@@ -406,27 +413,101 @@ def get_cumulative_dg(
         The reduced potential calculated for each sample in the form (n_states, n_samples).
     samples: np.array
         The number of samples per state.
+    state_indices: np.array
+        The index of the state each sample is calculated at.
+    charge_change: bool
+        If the edge involves a charge change which changes the amount of simulation time and lambda windows.
 
     Returns
     -------
-    A dict of the % of samples and the estimated DG and dDG in kcal/mol.
+    A dict of the nanoseconds of simulation time and the estimated DG and dDG in kcal/mol.
     """
+    # hide the openmmtools warnings
+    logger = logging.getLogger()
+    logger.setLevel(logging.ERROR)
+
+    # fake the reporter and analyzer
+    temp_file = tempfile.NamedTemporaryFile().name
+    reporter = MultiStateReporter(open_mode="w", storage=temp_file)
+    analyzer = MultiStateSamplerAnalyzer(reporter)
+
     cumulative_dgs = {}
+
     # assuming we ran at the default openfe temperature in the protocol
     kt = unit.molar_gas_constant * 298.15 * unit.kelvin
-    for i in range(1, 11):
-        sliced_samples = np.floor(samples * (i / 10))
-        mbar = MBAR(reduced_potential[:,:int(sliced_samples[0] * 11)], sliced_samples)
+
+    # workout how many nanoseconds were run
+    total_nano = 5 if not charge_change else 20
+    # get the number of replicas run
+    n_replicas = len(samples)
+    # get the number of samples from each state
+    n_states = int(samples[0])
+
+    # make sure we have the right number of replicas
+    if total_nano == 5:
+        assert n_replicas == 11
+    else:
+        assert n_replicas == 22
+
+    # format the reduced potential to work with openmmtools
+    energy_matrix = np.zeros((n_replicas, n_replicas, n_states))
+    for i in range(n_replicas):
+        energy_matrix[i] = reduced_potential[:, i * n_states: int(i + 1) * n_states]
+
+    # calculate the DG for each nanosecond
+    for i in range(1, total_nano + 1):
+        analyzer.clear()
+        # get the % of data to slice, this matches the simulation_real_time_analysis.yaml exactly
+        n_samples = int(np.ceil(n_states * (i / total_nano)))
+        # slice out the data we would have at this simulation time
+        sample_matrix = energy_matrix[:,:,:n_samples]
+        sample_state_matrix = state_indices[:, :n_samples]
+        # calculate dg without subsamples
+        sample_u_ln_matrix = analyzer.reformat_energies_for_mbar(sample_matrix)
+        samples_per_state = np.array([n_samples for _ in range(n_replicas)], dtype=int)
+
+        mbar = MBAR(sample_u_ln_matrix, samples_per_state)
         try:
             estimate = mbar.getFreeEnergyDifferences(return_dict=True)
             DG, dDG = estimate["Delta_f"][0, -1] * kt, estimate["dDelta_f"][0, -1] * kt
-            cumulative_dgs[f"Samples {int(i * 10)}% DG"] = DG.to(unit.kilocalorie_per_mole).m
-            cumulative_dgs[f"Samples {int(i * 10)}% dDG"] = dDG.to(unit.kilocalorie_per_mole).m
+            cumulative_dgs[f"Samples {i}ns DG"] = DG.to(unit.kilocalorie_per_mole).m
+            cumulative_dgs[f"Samples {i}ns dDG"] = dDG.to(unit.kilocalorie_per_mole).m
         except pymbar.utils.ParameterError:
             # this is raised if we have an error solving
             # in this case just return na?
             cumulative_dgs[f"Samples {int(i * 10)}% DG"] = pd.NA
             cumulative_dgs[f"Samples {int(i * 10)}% dDG"] = pd.NA
+
+        # again with subsample
+        analyzer.clear()
+        # use openmmtools to subsample the data
+        number_equilibrated, g_t, Neff_max = analyzer._get_equilibration_data(sample_matrix, replica_state_indices=sample_state_matrix)
+        # remove unequilibrated data
+        sample_matrix = utils.remove_unequilibrated_data(sample_matrix, number_equilibrated, -1)
+        sample_state_matrix = utils.remove_unequilibrated_data(sample_state_matrix, number_equilibrated, -1)
+        # subsample using g_t
+        sample_matrix = utils.subsample_data_along_axis(sample_matrix, g_t, -1)
+        sample_state_matrix = utils.subsample_data_along_axis(sample_state_matrix, g_t, -1)
+
+        # Determine how many samples and which states they were drawn from.
+        unique_sampled_states, counts = np.unique(sample_state_matrix, return_counts=True)
+        # Assign those counts to the correct range of states.
+        samples_per_state = np.zeros([n_replicas], dtype=int)
+        samples_per_state[:][unique_sampled_states] = counts
+        sample_u_ln_matrix = analyzer.reformat_energies_for_mbar(sample_matrix)
+        mbar = MBAR(sample_u_ln_matrix, samples_per_state)
+
+        # run mbar again
+        try:
+            estimate = mbar.getFreeEnergyDifferences(return_dict=True)
+            DG, dDG = estimate["Delta_f"][0, -1] * kt, estimate["dDelta_f"][0, -1] * kt
+            cumulative_dgs[f"Samples {i}ns (subsample) DG"] = DG.to(unit.kilocalorie_per_mole).m
+            cumulative_dgs[f"Samples {i}ns (subsample) dDG"] = dDG.to(unit.kilocalorie_per_mole).m
+        except pymbar.utils.ParameterError:
+            # this is raised if we can not solve
+            cumulative_dgs[f"Samples {i}ns (subsample) DG"] = pd.NA
+            cumulative_dgs[f"Samples {i}ns (subsample) dDG"] = pd.NA
+
     return cumulative_dgs
 
 def extract_cumulative_dg_estimates(
@@ -436,7 +517,7 @@ def extract_cumulative_dg_estimates(
     workers: int
 ) -> pd.DataFrame:
     """
-    For each edge in the dataset estimate the DG cumulative values using 10%, 20%, ... 100% of the data.
+    For each edge in the dataset estimate the DG cumulative values after each nanosecond of simulation time.
 
     Parameters
     ----------
@@ -456,6 +537,7 @@ def extract_cumulative_dg_estimates(
     Notes
     -----
     Running MBAR a lot of times is very expensive use as many workers as possible.
+    We assume 5 nanoseconds and 11 windows for no charge change and 22 windows and 20 nanoseconds for a charge change.
     """
     all_data = []
     job_list = []
@@ -487,6 +569,7 @@ def _get_cumulative_edge_estimate(
                 "repeat": repeat,
                 "partner_id": partner_id
             }
+            charge_change = False if edge_data["charge_score"] == 1.0 else True
             potential = get_edge_matrix(
                 edge_name=repeat_name,
                 archive=archive,
@@ -495,7 +578,15 @@ def _get_cumulative_edge_estimate(
             samples = get_edge_matrix(
                 edge_name=repeat_name, archive=archive, matrix_type="samples"
             )
-            cumulative_dg = get_cumulative_dg(reduced_potential=potential.T, samples=samples)
+            state_indices = get_edge_matrix(
+                edge_name=repeat_name, archive=archive, matrix_type="state_index"
+            )
+            cumulative_dg = get_cumulative_dg(
+                reduced_potential=potential.T,
+                samples=samples,
+                charge_change=charge_change,
+                state_indices=state_indices.T
+            )
             # merge the cumulative data
             dg_data.update(cumulative_dg)
             # save the data for this transformation
@@ -782,7 +873,6 @@ def main(
                 workers=workers
             )
             edge_data.to_csv(dataset_name.joinpath("pymbar3_edge_data.csv"))
-            edge_data = pd.read_csv(dataset_name.joinpath("pymbar3_edge_data.csv"))
             # plot ddg vs exp
             click.echo("Plotting DDG vs Exp")
             plot_ddg_vs_experiment(
