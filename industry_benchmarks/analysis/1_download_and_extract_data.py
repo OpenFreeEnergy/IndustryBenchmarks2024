@@ -407,6 +407,8 @@ def get_cumulative_dg(
     """
     Compute the cumulative DG estimates for each nanosecond of simulation time with and without subsampling.
 
+    Also calculate the DG for each nanosecond using the full simulation autocorrelation time.
+
     Parameters
     ----------
     reduced_potential: np.array
@@ -454,6 +456,11 @@ def get_cumulative_dg(
     for i in range(n_replicas):
         energy_matrix[i] = reduced_potential[:, i * n_states: int(i + 1) * n_states]
 
+    # calculate the statistical inefficiency for the full simulation
+    analyzer.clear()
+    full_sim_number_equilibrated, full_sim_g_t, _ = analyzer._get_equilibration_data(energy_matrix,
+                                                                          replica_state_indices=state_indices)
+
     # calculate the DG for each nanosecond
     for i in range(1, total_nano + 1):
         analyzer.clear()
@@ -478,7 +485,7 @@ def get_cumulative_dg(
             cumulative_dgs[f"Samples {int(i * 10)}% DG"] = pd.NA
             cumulative_dgs[f"Samples {int(i * 10)}% dDG"] = pd.NA
 
-        # again with subsample
+        # again with subsample for partial data
         analyzer.clear()
         # use openmmtools to subsample the data
         number_equilibrated, g_t, Neff_max = analyzer._get_equilibration_data(sample_matrix, replica_state_indices=sample_state_matrix)
@@ -507,6 +514,34 @@ def get_cumulative_dg(
             # this is raised if we can not solve
             cumulative_dgs[f"Samples {i}ns (subsample) DG"] = pd.NA
             cumulative_dgs[f"Samples {i}ns (subsample) dDG"] = pd.NA
+
+        # again with subsample with full g_t
+        analyzer.clear()
+        # remove unequilibrated data using the full simulation g_t
+        sample_matrix = utils.remove_unequilibrated_data(sample_matrix, full_sim_number_equilibrated, -1)
+        sample_state_matrix = utils.remove_unequilibrated_data(sample_state_matrix, full_sim_number_equilibrated, -1)
+        # subsample using g_t
+        sample_matrix = utils.subsample_data_along_axis(sample_matrix, full_sim_g_t, -1)
+        sample_state_matrix = utils.subsample_data_along_axis(sample_state_matrix, full_sim_g_t, -1)
+
+        # Determine how many samples and which states they were drawn from.
+        unique_sampled_states, counts = np.unique(sample_state_matrix, return_counts=True)
+        # Assign those counts to the correct range of states.
+        samples_per_state = np.zeros([n_replicas], dtype=int)
+        samples_per_state[:][unique_sampled_states] = counts
+        sample_u_ln_matrix = analyzer.reformat_energies_for_mbar(sample_matrix)
+        mbar = MBAR(sample_u_ln_matrix, samples_per_state)
+
+        # run mbar again
+        try:
+            estimate = mbar.getFreeEnergyDifferences(return_dict=True)
+            DG, dDG = estimate["Delta_f"][0, -1] * kt, estimate["dDelta_f"][0, -1] * kt
+            cumulative_dgs[f"Samples {i}ns (subsample_full) DG"] = DG.to(unit.kilocalorie_per_mole).m
+            cumulative_dgs[f"Samples {i}ns (subsample_full) dDG"] = dDG.to(unit.kilocalorie_per_mole).m
+        except pymbar.utils.ParameterError:
+            # this is raised if we can not solve
+            cumulative_dgs[f"Samples {i}ns (subsample_full) DG"] = pd.NA
+            cumulative_dgs[f"Samples {i}ns (subsample_full) dDG"] = pd.NA
 
     return cumulative_dgs
 
