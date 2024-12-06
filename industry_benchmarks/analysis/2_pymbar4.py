@@ -7,7 +7,6 @@ from pymbar import MBAR
 import json
 import numpy as np
 from gufe.tokenization import JSON_HANDLER
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import Literal
 from openff.units import unit
 
@@ -131,14 +130,7 @@ def get_edge_data(edge_data: dict, dataset_path: pathlib.Path) -> dict[str, floa
     type=click.Path(
         dir_okay=True, exists=True, path_type=pathlib.Path, file_okay=False)
 )
-@click.option(
-    "-w",
-    "--workers",
-    default=2,
-    type=click.INT,
-    help="The number of workers to use to extract the edge data."
-)
-def main(archive: pathlib.Path, workers: int):
+def main(archive: pathlib.Path):
     """
     Run Pymbar4 and calculate DG the bootstrapped error and the overlap matrix for the set of edges and write out the
     results to a CSV in the same folder.
@@ -158,14 +150,10 @@ def main(archive: pathlib.Path, workers: int):
                 property_file.open("r").read(), cls=JSON_HANDLER.decoder
             )
 
-            job_list = []
             all_edge_data = []
-            with ProcessPoolExecutor(max_workers=workers) as pool:
-                for edge_data in all_properties["Edges"].values():
-                    job_list.append(pool.submit(get_edge_data, edge_data, dataset_name))
-
-                for result in tqdm.tqdm(as_completed(job_list), desc="Calculating pymbar4", total=len(job_list)):
-                    all_edge_data.append(result.result())
+            for edge_data in tqdm.tqdm(all_properties["Edges"].values(), desc="Calculating pymbar4", total=len(all_properties["Edges"])):
+                result = get_edge_data(edge_data, dataset_name)
+                all_edge_data.append(result)
 
             df = pd.DataFrame(all_edge_data)
 
