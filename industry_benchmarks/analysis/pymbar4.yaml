@@ -9,3 +9,4 @@ dependencies:
 - click
 - tqdm
 - gufe
+- openmmtools
