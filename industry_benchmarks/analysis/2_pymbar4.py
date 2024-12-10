@@ -9,10 +9,20 @@ import numpy as np
 from gufe.tokenization import JSON_HANDLER
 from typing import Literal
 from openff.units import unit
+import logging
+import tempfile
+from openmmtools.multistate import MultiStateSamplerAnalyzer, MultiStateReporter, utils
+import yaml
 
 
 
-def compute_mabr_values(reduced_potential: np.array, samples: np.array) -> dict[str, np.array]:
+def compute_mabr_values(
+        reduced_potential: np.array,
+        samples: np.array,
+        n_equilibration_iterations: int,
+        statistical_inefficiency: float,
+        state_indices: np.array
+) -> dict[str, np.array]:
     """
     Compute the MBAR overlap matrix using pymbar4 as well as DG and the bootstrap error.
 
@@ -22,11 +32,48 @@ def compute_mabr_values(reduced_potential: np.array, samples: np.array) -> dict[
         The reduced potential calculated for each sample in the form (n_states, n_samples)
     samples
         The number of samples per state.
+    n_equilibration_iterations: int
+        The number of equilibrium iteration to discard
+    statistical_inefficiency: float
+        The statistical_inefficiency of the production run used to subsample the trajectory
+    state_indices: np.array
+        The index of the state each sample is calculated at
     Returns
     -------
         The MBAR overlap matrix calculated with pymbar.
     """
-    mbar = MBAR(reduced_potential, samples, solver_protocol="robust", n_bootstraps=1000, bootstrap_solver_protocol="robust")
+    # hide the openmmtools warnings
+    logger = logging.getLogger()
+    logger.setLevel(logging.ERROR)
+
+    # fake the reporter and analyzer
+    temp_file = tempfile.NamedTemporaryFile().name
+    reporter = MultiStateReporter(open_mode="w", storage=temp_file)
+    analyzer = MultiStateSamplerAnalyzer(reporter)
+    analyzer.clear()
+
+    # format the reduced potential to work with openmmtools
+    n_replicas = len(samples)
+    n_states = int(samples[0])
+    energy_matrix = np.zeros((n_replicas, n_replicas, n_states))
+    for i in range(n_replicas):
+        energy_matrix[i] = reduced_potential[:, i * n_states: int(i + 1) * n_states]
+
+    # remove unequilibrated data
+    sample_matrix = utils.remove_unequilibrated_data(energy_matrix, n_equilibration_iterations, -1)
+    sample_state_matrix = utils.remove_unequilibrated_data(state_indices, n_equilibration_iterations, -1)
+    # subsample using g_t
+    sample_matrix = utils.subsample_data_along_axis(sample_matrix, statistical_inefficiency, -1)
+    sample_state_matrix = utils.subsample_data_along_axis(sample_state_matrix, statistical_inefficiency, -1)
+
+    # Determine how many samples and which states they were drawn from.
+    unique_sampled_states, counts = np.unique(sample_state_matrix, return_counts=True)
+    # Assign those counts to the correct range of states.
+    samples_per_state = np.zeros([n_replicas], dtype=int)
+    samples_per_state[:][unique_sampled_states] = counts
+    sample_u_ln_matrix = analyzer.reformat_energies_for_mbar(sample_matrix)
+
+    mbar = MBAR(sample_u_ln_matrix, samples_per_state, solver_protocol="robust", n_bootstraps=1000, bootstrap_solver_protocol="robust")
     dg_data = mbar.compute_free_energy_differences(uncertainty_method="bootstrap", compute_uncertainty=True)
     overlap_matrix = mbar.compute_overlap()
     dg_data["overlap"] = get_smallest_off_diagonal(overlap_matrix["matrix"])
@@ -51,7 +98,7 @@ def get_edge_matrix(
     edge_name: str,
     archive: pathlib.Path,
     matrix_type: Literal[
-        "reduced_potential", "samples"
+        "reduced_potential", "samples", "state_index"
     ],
 ) -> np.array:
     """
@@ -73,9 +120,29 @@ def get_edge_matrix(
     types_to_files = {
         "reduced_potential": ("u_ln.txt", np.float64),
         "samples": ("N_l.txt", np.int16),
+        "state_index": ("replicas_state_indices.txt", np.int16)
     }
     file_name = archive.joinpath(edge_name, types_to_files[matrix_type][0])
     return np.loadtxt(file_name).astype(types_to_files[matrix_type][1])
+
+def get_subsample_data(edge_name: str, archive: pathlib.Path) -> tuple[int, float]:
+    """
+    Get the calculated number of equilibrium iterations to remove and the
+    statistical_inefficiency for this transformation.
+
+    Parameters
+    ----------
+    edge_name: str
+        The name of the edge of the format phase_ligandA_ligand_B_repeat_x
+    archive: pathlib.Path
+        The path to the extracted zenodo archive.
+
+    Returns
+    -------
+    A tuple of the number of iterations to remove and the statistical_inefficiency.
+    """
+    data = yaml.safe_load(archive.joinpath(edge_name, "simulation_real_time_analysis.yaml").read_text())
+    return data[-1]["mbar_analysis"]["n_equilibrium_iterations"], data[-1]["mbar_analysis"]["statistical_inefficiency"]
 
 
 def get_edge_data(edge_data: dict, dataset_path: pathlib.Path) -> dict[str, float]:
@@ -110,9 +177,18 @@ def get_edge_data(edge_data: dict, dataset_path: pathlib.Path) -> dict[str, floa
             samples = get_edge_matrix(
                 edge_name=repeat_name, archive=dataset_path, matrix_type="samples"
             )
+            state_indices = get_edge_matrix(
+                edge_name=repeat_name, archive=dataset_path, matrix_type="state_index"
+            )
+            n_equil, statistical_inefficiency = get_subsample_data(
+                edge_name=repeat_name, archive=dataset_path
+            )
             dg_data = compute_mabr_values(
                 reduced_potential=potential.T,
-                samples=samples
+                samples=samples,
+                state_indices=state_indices.T,
+                n_equilibration_iterations=n_equil,
+                statistical_inefficiency=statistical_inefficiency
             )
             # extract the DG, bootstrap error and smallest overlap
             DG, dDG = dg_data["Delta_f"][0, -1] * kt, dg_data["dDelta_f"][0, -1] * kt
