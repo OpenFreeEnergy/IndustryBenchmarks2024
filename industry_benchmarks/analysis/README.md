@@ -7,6 +7,12 @@ The scripts provided in this folder should be used to process the industry bench
 You should use the recommended openfe-1.0.1 environment to run the analysis, this can be installed following the 
 [guide](https://industrybenchmarks2024--157.org.readthedocs.build/en/157/installation.html#openfe-installation).
 
+### Pymbar4
+The Pymbar4 analysis script requires a seperate environment which can be created via:
+
+```bash
+mamba env craete -f pymbar4.yaml
+```
 
 ## Running the analysis
 
@@ -24,6 +30,11 @@ python 1_download_and_extract_data.py -z https://zenodo.org/records/14229113   \
                                       -p Merck -o merck_hif2a                  \
                                       -e  hif2a_automap_symbmcorr_out.csv
 ```
+
+`2_pymbar4.py`: This script will recalculate the DG, bootstrap error and overlap matrix for each edge in the extracted
+archive using `pymbar4` and report the values into a new CSV file (`pymbar4_edge_data.csv`).
+
+
 
 
 ## Analysis Metadata

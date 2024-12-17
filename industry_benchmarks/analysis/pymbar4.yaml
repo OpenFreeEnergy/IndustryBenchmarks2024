@@ -1,0 +1,12 @@
+name: pymbar4
+channels:
+- conda-forge
+dependencies:
+- python=3.10
+- pandas
+- numpy
+- pymbar>=4
+- click
+- tqdm
+- gufe
+- openmmtools
