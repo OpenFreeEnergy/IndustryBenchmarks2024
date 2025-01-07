@@ -719,8 +719,7 @@ The results directory should be organised as follows:
     │   └── time_ps.txt
     ...
 
-A zip archive of this data will also be created in the output folder called ``results_data.zip`` which should be shared
-with the OpenFE team, instructions on how to do this will be shared later.
+A zip archive of this data will also be created in the output folder called ``results_data.zip`` which should be uploaded to zenodo.
 
 .. _upload_of_results:
 
