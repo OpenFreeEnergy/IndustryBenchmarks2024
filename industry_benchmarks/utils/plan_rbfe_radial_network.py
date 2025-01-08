@@ -208,6 +208,12 @@ def run_inputs(ligands, pdb, cofactors, central_ligand_num, output):
     # Create the small molecule components of the ligands
     rdmols = [mol for mol in Chem.SDMolSupplier(str(ligands), removeHs=False)]
     smcs = [openfe.SmallMoleculeComponent.from_rdkit(mol) for mol in rdmols]
+
+    # Check that central_ligand_num is within range
+    if central_ligand_num > len(smcs) - 1:
+        msg = f"incorrect index passed for the central ligand: {central_ligand_num}"
+        raise ValueError(msg)
+
     # Generate the partial charges
     logger.info("Generating partial charges for ligands")
     smcs = [gen_charges(smc) for smc in smcs]
