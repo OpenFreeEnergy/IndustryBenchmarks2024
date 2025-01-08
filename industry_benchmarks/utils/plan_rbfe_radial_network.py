@@ -77,7 +77,7 @@ def gen_ligand_network(smcs, central_ligand_num):
     # scorer = openfe.lomap_scorers.default_lomap_score
     scorer = partial(openfe.lomap_scorers.default_lomap_score, charge_changes_score=0.1)
     ligand_network = openfe.ligand_network_planning.generate_radial_network(
-        molecules=smcs,
+        ligands=smcs,
         central_ligand=central_ligand_num,
         mappers=mapper,
         scorer=scorer
