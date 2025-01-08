@@ -66,7 +66,7 @@ class TestScript:
                 # Create a list of all .json files
                 output_files = list(output.glob("transformations/*.json"))
                 # Check if the output files are created
-                assert len(output_files) == 2
+                assert len(output_files) == 4
                 # Check that we have 4 json files with charge change settings,
                 # 2 json files with default settings
                 charge_change_json = []
@@ -81,5 +81,5 @@ class TestScript:
                         charge_change_json.append(f)
                     if lambda_windows == 11:
                         default_json.append(f)
-                assert len(charge_change_json) == 4
+                assert len(charge_change_json) == 2
                 assert len(default_json) == 2
