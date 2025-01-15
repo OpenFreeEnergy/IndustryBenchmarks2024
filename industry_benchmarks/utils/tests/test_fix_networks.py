@@ -237,7 +237,6 @@ class TestScript:
 
     def test_detect_failed_simulation(self, cmet_network, cmet_failure_results, capsys):
         """Make sure a message is printed when a simulation fails."""
-        print(cmet_failure_results)
         command = f"--input_alchem_network_file {cmet_network} --output_extra_transformations ./ --result_files {' '.join(cmet_failure_results)}"
         with pytest.raises(ValueError, match="Too few transformations found for solvent_lig_CHEMBL3402745_200_5_lig_CHEMBL3402744_300_4"):
             cli_fix_network(shlex.split(command))
