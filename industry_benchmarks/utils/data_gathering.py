@@ -654,6 +654,34 @@ def get_transform_name(result: dict, alchemical_network: gufe.AlchemicalNetwork)
     ligmap = mapping_look_up[mapping_key]
     return phase, ligmap.componentA.name, ligmap.componentB.name
 
+def get_transform_name_file(filename: str, result: dict, alchemical_network: gufe.AlchemicalNetwork) -> tuple[str, str, str]:
+    """
+    Get the name of this transformation, taking into account that the inputs might have accidentally been deleted.
+
+    Returns
+    -------
+    The name of the transformation as a tuple of (phase, ligand_a name, ligand_b name)
+    """
+    # work out which system this is in the alchemical network
+    # build the transform
+    if "solvent" in filename:
+        phase = "solvent"
+    elif "complex" in filename:
+        phase = "complex"
+    else:
+        raise ValueError("Can't guess simulation type")
+    list_of_pur = list(result["protocol_result"]["data"].values())[0]
+    pur = list_of_pur[0]
+    ligA = pur["inputs"]["stateA"]["components"]["ligand"]
+    ligB = pur["inputs"]["stateB"]["components"]["ligand"]
+    ligA_name = openfe.SmallMoleculeComponent.from_dict(ligA).name
+    ligB_name = openfe.SmallMoleculeComponent.from_dict(ligB).name
+    # Check that the transformation is present in the alchemical network
+    input_ligA_ligB = [(e.mapping.componentA.name, e.mapping.componentB.name) for e in alchemical_network.edges]
+    if not (ligA_name, ligB_name) in input_ligA_ligB:
+        raise KeyError
+    return phase, ligA_name, ligB_name
+
 def check_network_is_connected(results_data: dict[tuple[str, str, str], list[tuple[unit.Quantity, unit.Quantity, pathlib.Path]]], alchemical_network: gufe.AlchemicalNetwork, name_mapping: None | dict[str, str] = None) -> bool:
     """
     Build a network from the results and check the network is connected.
@@ -751,7 +779,7 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
                 # work out the name of the transform
                 # we use the tuple to avoid splitting on _ as ligands might have _ in the name
                 try:
-                    transformation_name = get_transform_name(result=result, alchemical_network=alchemical_network)
+                    transformation_name = get_transform_name_file(str(results_file), result=result, alchemical_network=alchemical_network)
                     if name_mapping is not None:
                         phase, ligand_a, ligand_b = transformation_name
                         transformation_name = (phase, name_mapping[ligand_a], name_mapping[ligand_b])
