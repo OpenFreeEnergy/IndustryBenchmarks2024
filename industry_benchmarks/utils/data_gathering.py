@@ -779,7 +779,8 @@ def process_results(results_folders: list[pathlib.Path], output_dir: pathlib.Pat
                 # work out the name of the transform
                 # we use the tuple to avoid splitting on _ as ligands might have _ in the name
                 try:
-                    transformation_name = get_transform_name_file(str(results_file), result=result, alchemical_network=alchemical_network)
+                    json_file = str(results_file).split('/')[-1]
+                    transformation_name = get_transform_name_file(json_file, result=result, alchemical_network=alchemical_network)
                     if name_mapping is not None:
                         phase, ligand_a, ligand_b = transformation_name
                         transformation_name = (phase, name_mapping[ligand_a], name_mapping[ligand_b])
