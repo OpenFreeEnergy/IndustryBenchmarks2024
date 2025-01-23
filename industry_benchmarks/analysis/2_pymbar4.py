@@ -167,34 +167,37 @@ def get_edge_data(edge_data: dict, dataset_path: pathlib.Path) -> dict[str, floa
     }
     for phase in ["solvent", "complex"]:
         for repeat in range(3):
-            repeat_name = f"{phase}_{edge_data['ligand_A']}_{edge_data['ligand_B']}_repeat_{repeat}"
-            phase_repeat_name = f"{phase}_repeat_{repeat}"
-            potential = get_edge_matrix(
-                edge_name=repeat_name,
-                archive=dataset_path,
-                matrix_type="reduced_potential",
-            )
-            samples = get_edge_matrix(
-                edge_name=repeat_name, archive=dataset_path, matrix_type="samples"
-            )
-            state_indices = get_edge_matrix(
-                edge_name=repeat_name, archive=dataset_path, matrix_type="state_index"
-            )
-            n_equil, statistical_inefficiency = get_subsample_data(
-                edge_name=repeat_name, archive=dataset_path
-            )
-            dg_data = compute_mabr_values(
-                reduced_potential=potential.T,
-                samples=samples,
-                state_indices=state_indices.T,
-                n_equilibration_iterations=n_equil,
-                statistical_inefficiency=statistical_inefficiency
-            )
-            # extract the DG, bootstrap error and smallest overlap
-            DG, dDG = dg_data["Delta_f"][0, -1] * kt, dg_data["dDelta_f"][0, -1] * kt
-            return_data[f"{phase_repeat_name}_DG (kcal/mol)"] = DG.to(unit.kilocalorie_per_mole).m
-            return_data[f"{phase_repeat_name}_dDG (kcal/mol)"] = dDG.to(unit.kilocalorie_per_mole).m
-            return_data[f"{phase_repeat_name}_smallest_overlap"] = dg_data["overlap"]
+            try:
+                repeat_name = f"{phase}_{edge_data['ligand_A']}_{edge_data['ligand_B']}_repeat_{repeat}"
+                phase_repeat_name = f"{phase}_repeat_{repeat}"
+                potential = get_edge_matrix(
+                    edge_name=repeat_name,
+                    archive=dataset_path,
+                    matrix_type="reduced_potential",
+                )
+                samples = get_edge_matrix(
+                    edge_name=repeat_name, archive=dataset_path, matrix_type="samples"
+                )
+                state_indices = get_edge_matrix(
+                    edge_name=repeat_name, archive=dataset_path, matrix_type="state_index"
+                )
+                n_equil, statistical_inefficiency = get_subsample_data(
+                    edge_name=repeat_name, archive=dataset_path
+                )
+                dg_data = compute_mabr_values(
+                    reduced_potential=potential.T,
+                    samples=samples,
+                    state_indices=state_indices.T,
+                    n_equilibration_iterations=n_equil,
+                    statistical_inefficiency=statistical_inefficiency
+                )
+                # extract the DG, bootstrap error and smallest overlap
+                DG, dDG = dg_data["Delta_f"][0, -1] * kt, dg_data["dDelta_f"][0, -1] * kt
+                return_data[f"{phase_repeat_name}_DG (kcal/mol)"] = DG.to(unit.kilocalorie_per_mole).m
+                return_data[f"{phase_repeat_name}_dDG (kcal/mol)"] = dDG.to(unit.kilocalorie_per_mole).m
+                return_data[f"{phase_repeat_name}_smallest_overlap"] = dg_data["overlap"]
+            except FileNotFoundError:
+                continue
 
     return return_data
 
@@ -229,7 +232,9 @@ def main(archive: pathlib.Path):
             all_edge_data = []
             for edge_data in tqdm.tqdm(all_properties["Edges"].values(), desc="Calculating pymbar4", total=len(all_properties["Edges"])):
                 result = get_edge_data(edge_data, dataset_name)
-                all_edge_data.append(result)
+                if len(result) == 20:
+                    all_edge_data.append(result)
+                # if not some results are missing so skip
 
             df = pd.DataFrame(all_edge_data)
 

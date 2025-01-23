@@ -78,12 +78,21 @@ def get_exp_ddg_fep_plus(
     -------
         The experimental DDG and error estimate for this transformation.
     """
-    ligand_a_dg = experimental_data[
-        experimental_data["Ligand name"] == ligand_a
-        ].iloc[0]["Exp. dG (kcal/mol)"]
-    ligand_b_dg = experimental_data[
-        experimental_data["Ligand name"] == ligand_b
-        ].iloc[0]["Exp. dG (kcal/mol)"]
+    # make it clear which result can not be found!
+    try:
+        ligand_a_dg = experimental_data[
+            experimental_data["Ligand name"] == ligand_a
+            ].iloc[0]["Exp. dG (kcal/mol)"]
+    except IndexError as e:
+        print(ligand_a, " not found!")
+        raise e
+    try:
+        ligand_b_dg = experimental_data[
+            experimental_data["Ligand name"] == ligand_b
+            ].iloc[0]["Exp. dG (kcal/mol)"]
+    except IndexError as e:
+        print(ligand_b, " not found!")
+        raise e
     ddg = ligand_b_dg - ligand_a_dg
     return ddg, 0.0
 
@@ -176,39 +185,43 @@ def _extract_edge_data(
         for repeat in range(3):
             repeat_name = f"{phase}_{edge_data['ligand_A']}_{edge_data['ligand_B']}_repeat_{repeat}"
             phase_repeat_name = f"{phase}_repeat_{repeat}"
-            dg, error = all_props_data["DDG_estimates"][repeat_name]
-            edge_data[f"{phase_repeat_name}_DG (kcal/mol)"] = dg.to(
-                unit.kilocalorie_per_mole
-            ).m
-            edge_data[f"{phase_repeat_name}_dDG (kcal/mol)"] = error.to(
-                unit.kilocalorie_per_mole
-            ).m
-            # extract maximum com drift and ligand RMSD values
-            com_drift_max = get_edge_matrix(
-                edge_name=repeat_name, archive=archive, matrix_type="com"
-            ).max()
-            rmsd_max = get_edge_matrix(
-                edge_name=repeat_name, archive=archive, matrix_type="ligand_rmsd"
-            ).max()
-            edge_data[f"{phase_repeat_name}_com_drift_max"] = com_drift_max
-            edge_data[f"{phase_repeat_name}_ligand_rmsd_max"] = rmsd_max
-            # extract the minimum off diagonal in the overlap matrix
-            potential = get_edge_matrix(
-                edge_name=repeat_name,
-                archive=archive,
-                matrix_type="reduced_potential",
-            )
-            samples = get_edge_matrix(
-                edge_name=repeat_name, archive=archive, matrix_type="samples"
-            )
-            # transpose the matrix as it was formated for readability
-            overlap_matrix = compute_overlap_matrix(
-                reduced_potential=potential.T, samples=samples
-            )
-            smallest_off_diagonal = get_smallest_off_diagonal(overlap_matrix)
-            edge_data[f"{phase_repeat_name}_smallest_overlap"] = (
-                smallest_off_diagonal
-            )
+            try:
+                dg, error = all_props_data["DDG_estimates"][repeat_name]
+                edge_data[f"{phase_repeat_name}_DG (kcal/mol)"] = dg.to(
+                    unit.kilocalorie_per_mole
+                ).m
+                edge_data[f"{phase_repeat_name}_dDG (kcal/mol)"] = error.to(
+                    unit.kilocalorie_per_mole
+                ).m
+                # extract maximum com drift and ligand RMSD values
+                com_drift_max = get_edge_matrix(
+                    edge_name=repeat_name, archive=archive, matrix_type="com"
+                ).max()
+                rmsd_max = get_edge_matrix(
+                    edge_name=repeat_name, archive=archive, matrix_type="ligand_rmsd"
+                ).max()
+                edge_data[f"{phase_repeat_name}_com_drift_max"] = com_drift_max
+                edge_data[f"{phase_repeat_name}_ligand_rmsd_max"] = rmsd_max
+                # extract the minimum off diagonal in the overlap matrix
+                potential = get_edge_matrix(
+                    edge_name=repeat_name,
+                    archive=archive,
+                    matrix_type="reduced_potential",
+                )
+                samples = get_edge_matrix(
+                    edge_name=repeat_name, archive=archive, matrix_type="samples"
+                )
+                # transpose the matrix as it was formated for readability
+                overlap_matrix = compute_overlap_matrix(
+                    reduced_potential=potential.T, samples=samples
+                )
+                smallest_off_diagonal = get_smallest_off_diagonal(overlap_matrix)
+                edge_data[f"{phase_repeat_name}_smallest_overlap"] = (
+                    smallest_off_diagonal
+                )
+            except KeyError:
+                # sometimes we have edges that are not simulated see merck cmet
+                continue
     return edge_data
 
 
@@ -276,12 +289,15 @@ def extract_general_edge_data(
 
         # unpack the work
         for job in tqdm.tqdm(as_completed(job_list), desc="Extracting edge data", total=len(job_list)):
-            all_data.append(job.result())
+            result = job.result()
+            if "solvent_repeat_0_DG (kcal/mol)" in result:
+                # make sure there was data for this edge
+                all_data.append(result)
 
     return pd.DataFrame(all_data)
 
 
-def download_zenodo_archive(address: str, output_folder: pathlib.Path) -> pathlib.Path:
+def download_zenodo_archive(address: str, output_folder: pathlib.Path) -> list[str]:
     """
     Download the zenodo archive to the local output folder.
 
@@ -294,7 +310,7 @@ def download_zenodo_archive(address: str, output_folder: pathlib.Path) -> pathli
 
     Returns
     -------
-    The path to the downloaded archive
+    The names of the files downloaded from the archive
     """
     import requests
     import wget
@@ -310,15 +326,13 @@ def download_zenodo_archive(address: str, output_folder: pathlib.Path) -> pathli
             record_json = record_data.json()
             # for each of the files in the folder download them to the output folder
             record_files = [f for f in record_json["files"]]
-            # should be a single folder
-            assert len(record_files) == 1, print("More than a single folder found!")
             files = []
             for f in record_files:
                 filename = f.get("filename") or f["key"]
                 file_address = f"https://zenodo.org/records/{record_id}/files/{filename}"
                 wget.download(file_address, output_folder.as_posix())
                 files.append(filename)
-            return output_folder.joinpath(files[0])
+            return files
         else:
             record_data.raise_for_status()
 
@@ -588,7 +602,9 @@ def extract_cumulative_dg_estimates(
             job_list.append(pool.submit(_get_cumulative_edge_estimate, edge_data, archive, industry_partner))
 
         for result in tqdm.tqdm(as_completed(job_list), desc="Calculating cumulative DGs", total=len(job_list)):
-            all_data.extend(result.result())
+            result = result.result()
+            if result:
+                all_data.extend(result)
 
     return pd.DataFrame(all_data)
 
@@ -603,35 +619,39 @@ def _get_cumulative_edge_estimate(
         for repeat in range(3):
             repeat_name = f"{phase}_{edge_data['ligand_A']}_{edge_data['ligand_B']}_repeat_{repeat}"
             # collect some general data
-            dg_data = {
-                "ligand_A": edge_data["ligand_A"],
-                "ligand_B": edge_data["ligand_B"],
-                "phase": phase,
-                "repeat": repeat,
-                "partner_id": partner_id
-            }
-            charge_change = False if edge_data["charge_score"] == 1.0 else True
-            potential = get_edge_matrix(
-                edge_name=repeat_name,
-                archive=archive,
-                matrix_type="reduced_potential",
-            )
-            samples = get_edge_matrix(
-                edge_name=repeat_name, archive=archive, matrix_type="samples"
-            )
-            state_indices = get_edge_matrix(
-                edge_name=repeat_name, archive=archive, matrix_type="state_index"
-            )
-            cumulative_dg = get_cumulative_dg(
-                reduced_potential=potential.T,
-                samples=samples,
-                charge_change=charge_change,
-                state_indices=state_indices.T
-            )
-            # merge the cumulative data
-            dg_data.update(cumulative_dg)
-            # save the data for this transformation
-            cumulative_data.append(dg_data)
+            try:
+                dg_data = {
+                    "ligand_A": edge_data["ligand_A"],
+                    "ligand_B": edge_data["ligand_B"],
+                    "phase": phase,
+                    "repeat": repeat,
+                    "partner_id": partner_id
+                }
+                charge_change = False if edge_data["charge_score"] == 1.0 else True
+                potential = get_edge_matrix(
+                    edge_name=repeat_name,
+                    archive=archive,
+                    matrix_type="reduced_potential",
+                )
+                samples = get_edge_matrix(
+                    edge_name=repeat_name, archive=archive, matrix_type="samples"
+                )
+                state_indices = get_edge_matrix(
+                    edge_name=repeat_name, archive=archive, matrix_type="state_index"
+                )
+                cumulative_dg = get_cumulative_dg(
+                    reduced_potential=potential.T,
+                    samples=samples,
+                    charge_change=charge_change,
+                    state_indices=state_indices.T
+                )
+                # merge the cumulative data
+                dg_data.update(cumulative_dg)
+                # save the data for this transformation
+                cumulative_data.append(dg_data)
+            except FileNotFoundError:
+                # some transforms have no results
+                continue
     return cumulative_data
 
 
@@ -769,15 +789,43 @@ def calculate_and_plot_dg(
             )
 
     fe_map.generate_absolute_values()
-    plot_DGs(
-        graph=fe_map.to_legacy_graph(),
-        title=dataset_name,
-        filename=output.joinpath("DG_vs_exp.svg").as_posix(),
-        figsize=4
-    )
+    try:
+        plot_DGs(
+            graph=fe_map.to_legacy_graph(),
+            title=dataset_name,
+            filename=output.joinpath("DG_vs_exp.svg").as_posix(),
+            figsize=4
+        )
+    except ValueError:
+        # if to few results to get a linear correlation plot without it
+        temp_graph = fe_map.to_legacy_graph()
+        x_data = np.asarray([node[1]["exp_DG"] for node in temp_graph.nodes(data=True)])
+        y_data = np.asarray([node[1]["calc_DG"] for node in temp_graph.nodes(data=True)])
+        xerr = np.asarray([node[1]["exp_dDG"] for node in temp_graph.nodes(data=True)])
+        yerr = np.asarray([node[1]["calc_dDG"] for node in temp_graph.nodes(data=True)])
+        # centralise
+        x_data = x_data - np.mean(x_data)
+        y_data = y_data - np.mean(y_data)
+        _master_plot(
+            x_data,
+            y_data,
+            xerr=xerr,
+            yerr=yerr,
+            origins=False,
+            statistics=["RMSE", "MUE", "rho"],
+            quantity=rf"$\Delta$ G",
+            title=dataset_name,
+            filename=output.joinpath("DG_vs_exp.svg").as_posix(),
+            figsize=4,
+            bootstrap_x_uncertainty=False,
+            bootstrap_y_uncertainty=False,
+            statistic_type="mle",
+        )
     # if we have a public result plot DG vs FEP+
     absolute_df = fe_map.get_absolute_dataframe()
-    abs_calc = absolute_df[absolute_df["computational"] == True]
+    abs_calc = absolute_df[absolute_df["computational"] == True].copy(deep=True)
+    exp_data = absolute_df[absolute_df["computational"] == False]
+
     if is_public:
         openfe, openfe_error, fep_plus, fep_plus_error = [], [], [], []
         for _, row in abs_calc.iterrows():
@@ -800,6 +848,18 @@ def calculate_and_plot_dg(
             filename=output.joinpath("openfe_vs_fep+.svg").as_posix()
         )
 
+    # make a new dataframe with the predicted and experimental DGs shifted by the mean of the experimental data
+    # shift the predicted results
+    mean_exp = exp_data["DG (kcal/mol)"].mean()
+    abs_calc["DG (kcal/mol)"] += mean_exp
+    # loop over and add the exp data
+    exp_values, exp_error = [], []
+    for _, row in abs_calc.iterrows():
+        exp_row = exp_data[exp_data["label"] == row["label"]].iloc[0]
+        exp_values.append(exp_row["DG (kcal/mol)"])
+        exp_error.append(exp_row["uncertainty (kcal/mol)"])
+    abs_calc["Exp DG (kcal/mol)"] = exp_values
+    abs_calc["Exp dDG (kcal/mol)"] = exp_error
     return abs_calc.drop(columns=["computational", "source"])
 
 
@@ -846,13 +906,20 @@ def calculate_and_plot_dg(
     type=click.INT,
     help="The number of workers to use to extract the edge data."
 )
+@click.option(
+    "--download-only",
+    default=False,
+    is_flag=True,
+    help="If the Zenodo archive should be downloaded and not processed, needed when multiple results are in a single archive. "
+)
 def main(
     zenodo: str | None,
     archive: pathlib.Path,
     partner_id: str,
     output: pathlib.Path,
     experimental_data: pathlib.Path | None,
-    workers: int
+    workers: int,
+    download_only: bool
 ):
     """
     Format the raw data extracted from the Zenodo archive into CSV files
@@ -870,11 +937,19 @@ def main(
     if zenodo is not None:
         click.echo("Downloading archive from zenodo")
         # get the name of the archive folder
-        archive_folder = download_zenodo_archive(address=zenodo, output_folder=output)
-        click.echo("Extracting archive locally")
-        shutil.unpack_archive(archive_folder, extract_dir=output)
-        # get the name of the unpacked archive
-        archive = archive_folder.with_suffix("")
+        archive_files = download_zenodo_archive(address=zenodo, output_folder=output)
+        # unpack each one
+        for file in archive_files:
+            shutil.unpack_archive(output.joinpath(file), extract_dir=output)
+
+        # Script can only do one archive at a time due to exp data, so quit if more than one
+        if len(archive_files) > 1:
+            exit()
+        else:
+            archive = output.joinpath(archive_files[0]).with_suffix("")
+
+    if download_only:
+        exit()
 
     click.echo(f"Loading local archive {archive}")
     # assume unzipped archive has folders named after each dataset
@@ -895,7 +970,7 @@ def main(
             # find the experimental data csv file if not provided
             if experimental_data is not None:
                 # assume it is a local FEP+ data file
-                exp_df = pd.read_csv(experimental_data.as_posix())
+                exp_df = pd.read_csv(experimental_data.as_posix(), dtype={"Ligand name": str})
                 public_set = True
             else:
                 exp_file =  list(dataset_name.glob("*.csv"))[0]
@@ -914,21 +989,24 @@ def main(
                 workers=workers
             )
             edge_data.to_csv(dataset_name.joinpath("pymbar3_edge_data.csv"))
+            # grab the non-failed edges
+            complete_df = edge_data[edge_data["failed"] != True].copy(deep=True)
+            complete_df.reset_index(inplace=True)
             # plot ddg vs exp
             click.echo("Plotting DDG vs Exp")
             plot_ddg_vs_experiment(
-                edge_dataframe=edge_data,
+                edge_dataframe=complete_df,
                 output=dataset_name,
                 dataset_name=dataset_name.parent
             )
             click.echo("Plotting DDG between repeats")
             plot_ddg_repeats(
-                edge_dataframe=edge_data,
+                edge_dataframe=complete_df,
                 output=dataset_name
             )
             click.echo("Plotting DG vs Exp")
             dg_dataframe = calculate_and_plot_dg(
-                edge_dataframe=edge_data,
+                edge_dataframe=complete_df,
                 output=dataset_name,
                 experimental_data=exp_df,
                 dataset_name=dataset_name.parent,
@@ -948,3 +1026,4 @@ def main(
 
 if __name__ == "__main__":
     main()
+
