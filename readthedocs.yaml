@@ -12,3 +12,4 @@ conda:
 
 sphinx:
    fail_on_warning: true
+   configuration: docs/source/conf.py
