@@ -52,7 +52,7 @@ def _get_check_results_json(filename: str) -> None | dict:
     if "unit_results" not in ru.keys():
         print(f"{filename} has no unit results - likely a failure")
         return None
-    if any('exception' in u for u in ru['unit_results'].values()):
+    if all('exception' in u for u in ru['unit_results'].values()):
         print(f"{filename} is a failed simulation")
         return None
 
