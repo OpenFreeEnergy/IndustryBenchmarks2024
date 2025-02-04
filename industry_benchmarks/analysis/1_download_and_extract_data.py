@@ -59,6 +59,8 @@ def load_exp_data(filename: pathlib.Path) -> pd.DataFrame:
             "There are repeated ligand names in the experimental data CSV file."
         )
     # do something to clean non-float values in the affinity or error columns
+    # we need to replace the -1 values which indicate the error was not supplied with 0.0
+    exp_data["Affinity Error (nM)"] = exp_data["Affinity Error (nM)"].mask(exp_data["Affinity Error (nM)"] == -1, 0.0)
     return exp_data
 
 def get_exp_ddg_fep_plus(
@@ -973,7 +975,7 @@ def main(
                 exp_df = pd.read_csv(experimental_data.as_posix(), dtype={"Ligand name": str})
                 public_set = True
             else:
-                exp_file =  list(dataset_name.glob("*.csv"))[0]
+                exp_file =  list(dataset_name.parent.glob("*.csv"))[0]
                 # load the experimental data
                 exp_df = load_exp_data(exp_file)
                 public_set = False
@@ -989,9 +991,12 @@ def main(
                 workers=workers
             )
             edge_data.to_csv(dataset_name.joinpath("pymbar3_edge_data.csv"))
-            # grab the non-failed edges
-            complete_df = edge_data[edge_data["failed"] != True].copy(deep=True)
-            complete_df.reset_index(inplace=True)
+            # grab the non-failed edges if we have failures
+            if "failed" in edge_data.columns:
+                complete_df = edge_data[edge_data["failed"] != True].copy(deep=True)
+                complete_df.reset_index(inplace=True)
+            else:
+                complete_df = edge_data.copy(deep=True)
             # plot ddg vs exp
             click.echo("Plotting DDG vs Exp")
             plot_ddg_vs_experiment(
