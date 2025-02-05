@@ -85,6 +85,12 @@ def get_exp_ddg_fep_plus(
         ligand_a_dg = experimental_data[
             experimental_data["Ligand name"] == ligand_a
             ].iloc[0]["Exp. dG (kcal/mol)"]
+        if "Exp. dG error (kcal/mol)" in experimental_data.columns:
+            ligand_a_ddg = experimental_data[
+                experimental_data["Ligand name"] == ligand_a
+                ].iloc[0]["Exp. dG error (kcal/mol)"]
+        else:
+            ligand_a_ddg = 0.0
     except IndexError as e:
         print(ligand_a, " not found!")
         raise e
@@ -92,11 +98,18 @@ def get_exp_ddg_fep_plus(
         ligand_b_dg = experimental_data[
             experimental_data["Ligand name"] == ligand_b
             ].iloc[0]["Exp. dG (kcal/mol)"]
+        if "Exp. dG error (kcal/mol)" in experimental_data.columns:
+            ligand_b_ddg = experimental_data[
+                experimental_data["Ligand name"] == ligand_b
+            ].iloc[0]["Exp. dG error (kcal/mol)"]
+        else:
+            ligand_b_ddg = 0.0
     except IndexError as e:
         print(ligand_b, " not found!")
         raise e
     ddg = ligand_b_dg - ligand_a_dg
-    return ddg, 0.0
+    ddg_error = (ligand_a_ddg ** 2 + ligand_b_ddg ** 2) ** 0.5
+    return ddg, ddg_error
 
 
 def get_exp_ddg(
