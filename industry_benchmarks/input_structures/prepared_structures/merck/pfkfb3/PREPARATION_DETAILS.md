@@ -1,3 +1,5 @@
+Prepared by Hendrik Geoddeke
+
 - Import original inputs from the repo in Maestro 2024-1
 - Check the sequence to see if it contains any non-natural amino acids
 - Check all caps to see if any need to be charged or not.
