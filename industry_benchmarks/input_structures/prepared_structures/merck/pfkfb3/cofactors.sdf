@@ -1,0 +1,562 @@
+pfkfb3_automap_cofactor1
+                    3D
+ Schrodinger Suite 2024-1.
+  6  5  0  0  1  0            999 V2000
+   94.0750   47.6780  260.4220 O   0  0  0  0  0  0
+   95.1040   48.4990  259.4870 P   0  0  0  0  0  0
+   95.6640   47.4570  258.4800 O   0  0  0  0  0  0
+   96.1780   48.8540  260.4530 O   0  5  0  0  0  0
+   94.4660   49.6720  258.8090 O   0  5  0  0  0  0
+   94.4213   46.7929  260.9758 H   0  0  0  0  0  0
+  1  2  1  0  0  0
+  1  6  1  0  0  0
+  2  3  2  0  0  0
+  2  4  1  0  0  0
+  2  5  1  0  0  0
+M  CHG  2   4  -1   5  -1
+M  END
+> <i_epik_Tot_Q>
+-2
+
+> <i_epik_Tot_abs_Q>
+2
+
+> <i_m_Source_File_Index>
+1
+
+> <i_m_stars>
+0
+
+> <i_pdb_PDB_CRYST1_z>
+12
+
+> <b_m_subgroup_collapsed>
+0
+
+> <b_ppw_added_hydrogens>
+1
+
+> <b_ppw_assigned_bond_orders>
+1
+
+> <b_ppw_created_disulfur>
+1
+
+> <b_ppw_prepared>
+1
+
+> <b_ppw_ran_protassign>
+1
+
+> <b_ppw_treated_metals>
+1
+
+> <r_epik_Charging_Adjusted_Penalty>
+0.00919192
+
+> <r_epik_Ionization_Penalty>
+0.0064
+
+> <r_epik_Ionization_Penalty_Charging>
+0.0049
+
+> <r_epik_Ionization_Penalty_Neutral>
+0.0014
+
+> <r_epik_State_Penalty>
+0.0043
+
+> <r_pdb_PDB_CRYST1_a>
+103.036
+
+> <r_pdb_PDB_CRYST1_alpha>
+90
+
+> <r_pdb_PDB_CRYST1_b>
+103.036
+
+> <r_pdb_PDB_CRYST1_beta>
+90
+
+> <r_pdb_PDB_CRYST1_c>
+255.012
+
+> <r_pdb_PDB_CRYST1_gamma>
+120
+
+> <r_pdb_PDB_EXPDTA_PH>
+7.5
+
+> <r_pdb_PDB_EXPDTA_TEMPERATURE>
+100
+
+> <r_pdb_PDB_R>
+0.186
+
+> <r_pdb_PDB_RESOLUTION>
+1.96
+
+> <r_pdb_PDB_Rfree>
+0.208
+
+> <s_epik_cmdline>
+J2VwaWtfYXBwJywgJy1pbWFlJywgJy9Vc2Vycy9yb3NzL1dvcmsvbWVyY2tfZGF0YV9zZXRzL2ZlcC1iZW5jaG1hcmsvcGZrZmIzL2VwaWtfcG9wL2VwaWtfcG9wLm1hZWd6JywgJy1vbWFlJywgJ2VwaWtfcG9wLW91dC5tYWVneicsICctcGgnLCAnOC4wMCcsICctcycsICd3YXRlcic=
+
+> <s_epik_input>
+W09IXVtQSF0oW09IXSkoW09IXSlbT0hd
+
+> <s_m_Source_File>
+6hvi.pdb
+
+> <s_m_Source_Path>
+/Users/ross/Work/merck_data_sets/fep-benchmark/pfkfb3
+
+> <s_m_entry_id>
+195
+
+> <s_m_entry_name>
+6HVI - hbond-opt with PO4_mol3
+
+> <s_m_job_name>
+epik_pop
+
+> <s_m_subgroup_title>
+proteinprep_21728885_only-protein-out->pfkfb3_automap_protein - prepared_split_by_structure->6HVI - hbond-opt with PO4_split_by_molecule
+
+> <s_m_subgroupid>
+proteinprep_21728885_only-protein-out1->pfkfb3_automap_protein - prepared_split_by_structure1->6HVI - hbond-opt with PO4_split_by_molecule
+
+> <s_pdb_PDB_CLASSIFICATION>
+TRANSFERASE
+
+> <s_pdb_PDB_CRYST1_Space_Group>
+P 65 2 2
+
+> <s_pdb_PDB_DEPOSITION_DATE>
+11-OCT-18
+
+> <s_pdb_PDB_EXPDTA>
+X-RAY DIFFRACTION
+
+> <s_pdb_PDB_ID>
+6HVI
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Chains>
+A
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Matrix_1>
+1.000000 0.000000 0.000000   0.000000;0.000000 1.000000 0.000000   0.000000;0.000000 0.000000 1.000000   0.000000
+
+> <s_pdb_PDB_TITLE>
+HUMAN PFKFB3 IN COMPLEX WITH A N-ARYL 6-AMINOQUINOXALINE INHIBITOR 2
+
+> <s_pdb_PDB_format_version>
+3.30
+
+> <s_ppw_entry_id_backup>
+204
+
+> <s_ppw_het_states>
+eJztWj1z1DAQ/Sse1zmjz9UudFS0DCWTIhNSERKKUDCZ/Hcsyfbz6WKOC/ehfFylPK+1q7dvJSvSfavb983X/me9DWeNOj9rYpPRlKnpFJoaTYOmRdOh6dEkNOHNwZuDNw9vHt48vHl48/Dm4c3Dm4c3D28e3gjeCN4I3gjeCN4I3ih5i+2By0yjHmhMQOxvHei7MuA8OzdgPpOu1wC8Ep/lAY2AThbwMgBUWES+RguTLCwsMoDQ47OcxRFwqY8AwCdg1geNwGgRyk7TaGO6zRyI6TXI/xpjPofuCyBmbnzFlRY5MAzfUxG6T4F5xOF5BEYLGb1oSCUnagRyHAQgUUgYPqXACIGRH18xUTKqU0r1L923kd2+InvgrGkjhf0fq+kvzo8e4hsi0ofafrm7uLtqfl7dXFzf/U5PVfP98uL63Y/b6w/Np9XH25tvzeXtr5u7943+0HzuTdrosjVT4ROKg1Ac1I97NYQbUB0B1RFQHQHVEdzsPT+rCcqKhwYGQAogIKEDAKpDojpAFCFRHWwJuBLwA9WuY+47ue851LbTWjY5jCbLHKpE4sq0aVib9I1j35m/ybhuAlVnrTUDg9IR0aMytHaZQpMpdHuncEGCffs4FJqtFOraKZyrUJ2Awg0VmlNRuDAPrvQuFG4pZLOVQr0HCk9WyE+mcIdCPgiF9RTyXlS4pZCPo8KTFfJ8LlRPpXDXFdkcgsIqVuSdKPyfFXkfFNZTyHtR4a4r8kFUWEUhv8Ctie6s0TQwGDoK7DYZjEbLDOYd3soea0Gu7JPmCAzueyasbC05nQZfyv64Ygafyfa4Ygafye74dPPgi6xifhKD5kAMPscqrovB51jFh2dwHxNhzVVMdX1R/zuD1XxRH4bBfW+Ma/6i/l8Gz+M54HRwF3DAHcBpgCoDKGVUNYNRBqOMpYVBKOOAm+GN4Y3hjeFN4E30LCUhnb8GnL+GTDhyFNL5a5ACYFUCOEzldCDLugSQNE4pYVsCSBq7stMM4FCXU+iM0DmFzgidc2BSAKJKQA/SkM46P0hDdeSdU/g98t+T3t4vqoTGw92hyioUx1iwMivvN3ksykN1ShNNZ9XC9pGZozdanjm4PKuuUBSzGWOuCXyMvRJRmK2i0K9HFPOZYraOvDpRbMwU6yp5E8Xb6rG0epjO23j/LWpCOkfO49tCb6qjN3eL6ghZHbpmdSysI2/qOKI6+o5bN21PBCkWpFiQYkGKBSkWpFhm20OZckwKOSalAZsZbAG7mQoksS9IxwBwCWBFlnT/VZAwSfkRXwK0DiTHGiPNca8DuO0rKceCHMdmHtM6YOd3RocMah2vg/odr4OGtW2lH/NGyoM7QjOgyWA0WWdDMzzNwDSSEeBhscrXWfOeR22GvPprzGq6wvrwB+2tXlc=
+
+> <s_ppw_prepared_with_version>
+2020-2
+
+$$$$
+pfkfb3_automap_cofactor2
+                    3D
+ Schrodinger Suite 2024-1.
+ 27 27  0  0  1  0            999 V2000
+   58.2200   68.3240  268.6980 O   0  0  0  0  0  0
+   59.1320   67.6530  269.5140 C   0  0  0  0  0  0
+   60.4630   68.4090  269.5420 C   0  0  2  0  0  0
+   61.3270   67.6800  270.4350 O   0  0  0  0  0  0
+   60.3350   69.8950  269.9350 C   0  0  1  0  0  0
+   60.2680   70.0630  271.3580 O   0  0  0  0  0  0
+   61.5040   70.5210  269.2010 C   0  0  2  0  0  0
+   61.3770   71.9250  268.9470 O   0  0  0  0  0  0
+   61.4370   69.7210  267.8960 C   0  0  2  0  0  0
+   60.9940   68.4050  268.2240 O   0  0  0  0  0  0
+   62.7350   69.6550  267.1120 C   0  0  0  0  0  0
+   62.5150   69.0690  265.8070 O   0  0  0  0  0  0
+   62.6630   69.9500  264.4910 P   0  0  0  0  0  0
+   62.2910   68.9470  263.3900 O   0  5  0  0  0  0
+   64.1470   70.2870  264.4810 O   0  5  0  0  0  0
+   61.7210   71.1060  264.6620 O   0  0  0  0  0  0
+   58.5698   68.3809  267.8058 H   0  0  0  0  0  0
+   59.2939   66.6470  269.1268 H   0  0  0  0  0  0
+   58.7320   67.5845  270.5256 H   0  0  0  0  0  0
+   62.1794   68.1188  270.4855 H   0  0  0  0  0  0
+   59.4132   70.2838  269.5022 H   0  0  0  0  0  0
+   60.8054   69.3922  271.7855 H   0  0  0  0  0  0
+   62.4365   70.3133  269.7258 H   0  0  0  0  0  0
+   61.8644   72.1522  268.1517 H   0  0  0  0  0  0
+   60.6820   70.1807  267.2582 H   0  0  0  0  0  0
+   63.4608   69.0554  267.6614 H   0  0  0  0  0  0
+   63.1398   70.6602  266.9949 H   0  0  0  0  0  0
+  1  2  1  0  0  0
+  1 17  1  0  0  0
+  2  3  1  0  0  0
+  2 18  1  0  0  0
+  2 19  1  0  0  0
+  3  4  1  0  0  0
+  3  5  1  0  0  0
+  3 10  1  0  0  0
+  4 20  1  0  0  0
+  5  6  1  0  0  0
+  5  7  1  0  0  0
+  5 21  1  0  0  0
+  6 22  1  0  0  0
+  7  8  1  0  0  0
+  7  9  1  0  0  0
+  7 23  1  0  0  0
+  8 24  1  0  0  0
+  9 10  1  0  0  0
+  9 11  1  0  0  0
+  9 25  1  0  0  0
+ 11 12  1  0  0  0
+ 11 26  1  0  0  0
+ 11 27  1  0  0  0
+ 12 13  1  0  0  0
+ 13 14  1  0  0  0
+ 13 15  1  0  0  0
+ 13 16  2  0  0  0
+M  CHG  2  14  -1  15  -1
+M  END
+> <i_epik_Tot_Q>
+-2
+
+> <i_epik_Tot_abs_Q>
+2
+
+> <i_m_Source_File_Index>
+1
+
+> <i_m_stars>
+0
+
+> <i_pdb_PDB_CRYST1_z>
+12
+
+> <b_m_subgroup_collapsed>
+0
+
+> <b_ppw_added_hydrogens>
+1
+
+> <b_ppw_assigned_bond_orders>
+1
+
+> <b_ppw_created_disulfur>
+1
+
+> <b_ppw_prepared>
+1
+
+> <b_ppw_ran_protassign>
+1
+
+> <b_ppw_treated_metals>
+1
+
+> <r_epik_Charging_Adjusted_Penalty>
+0.00919192
+
+> <r_epik_Ionization_Penalty>
+0.0064
+
+> <r_epik_Ionization_Penalty_Charging>
+0.0049
+
+> <r_epik_Ionization_Penalty_Neutral>
+0.0014
+
+> <r_epik_State_Penalty>
+0.0043
+
+> <r_pdb_PDB_CRYST1_a>
+103.036
+
+> <r_pdb_PDB_CRYST1_alpha>
+90
+
+> <r_pdb_PDB_CRYST1_b>
+103.036
+
+> <r_pdb_PDB_CRYST1_beta>
+90
+
+> <r_pdb_PDB_CRYST1_c>
+255.012
+
+> <r_pdb_PDB_CRYST1_gamma>
+120
+
+> <r_pdb_PDB_EXPDTA_PH>
+7.5
+
+> <r_pdb_PDB_EXPDTA_TEMPERATURE>
+100
+
+> <r_pdb_PDB_R>
+0.186
+
+> <r_pdb_PDB_RESOLUTION>
+1.96
+
+> <r_pdb_PDB_Rfree>
+0.208
+
+> <s_epik_cmdline>
+J2VwaWtfYXBwJywgJy1pbWFlJywgJy9Vc2Vycy9yb3NzL1dvcmsvbWVyY2tfZGF0YV9zZXRzL2ZlcC1iZW5jaG1hcmsvcGZrZmIzL2VwaWtfcG9wL2VwaWtfcG9wLm1hZWd6JywgJy1vbWFlJywgJ2VwaWtfcG9wLW91dC5tYWVneicsICctcGgnLCAnOC4wMCcsICctcycsICd3YXRlcic=
+
+> <s_epik_input>
+W09IXVtQSF0oW09IXSkoW09IXSlbT0hd
+
+> <s_m_Source_File>
+6hvi.pdb
+
+> <s_m_Source_Path>
+/Users/ross/Work/merck_data_sets/fep-benchmark/pfkfb3
+
+> <s_m_entry_id>
+193
+
+> <s_m_entry_name>
+6HVI - hbond-opt with PO4_mol1
+
+> <s_m_job_name>
+epik_pop
+
+> <s_m_subgroup_title>
+proteinprep_21728885_only-protein-out->pfkfb3_automap_protein - prepared_split_by_structure->6HVI - hbond-opt with PO4_split_by_molecule
+
+> <s_m_subgroupid>
+proteinprep_21728885_only-protein-out1->pfkfb3_automap_protein - prepared_split_by_structure1->6HVI - hbond-opt with PO4_split_by_molecule
+
+> <s_pdb_PDB_CLASSIFICATION>
+TRANSFERASE
+
+> <s_pdb_PDB_CRYST1_Space_Group>
+P 65 2 2
+
+> <s_pdb_PDB_DEPOSITION_DATE>
+11-OCT-18
+
+> <s_pdb_PDB_EXPDTA>
+X-RAY DIFFRACTION
+
+> <s_pdb_PDB_ID>
+6HVI
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Chains>
+A
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Matrix_1>
+1.000000 0.000000 0.000000   0.000000;0.000000 1.000000 0.000000   0.000000;0.000000 0.000000 1.000000   0.000000
+
+> <s_pdb_PDB_TITLE>
+HUMAN PFKFB3 IN COMPLEX WITH A N-ARYL 6-AMINOQUINOXALINE INHIBITOR 2
+
+> <s_pdb_PDB_format_version>
+3.30
+
+> <s_ppw_entry_id_backup>
+204
+
+> <s_ppw_het_states>
+eJztWj1z1DAQ/Sse1zmjz9UudFS0DCWTIhNSERKKUDCZ/Hcsyfbz6WKOC/ehfFylPK+1q7dvJSvSfavb983X/me9DWeNOj9rYpPRlKnpFJoaTYOmRdOh6dEkNOHNwZuDNw9vHt48vHl48/Dm4c3Dm4c3D28e3gjeCN4I3gjeCN4I3ih5i+2By0yjHmhMQOxvHei7MuA8OzdgPpOu1wC8Ep/lAY2AThbwMgBUWES+RguTLCwsMoDQ47OcxRFwqY8AwCdg1geNwGgRyk7TaGO6zRyI6TXI/xpjPofuCyBmbnzFlRY5MAzfUxG6T4F5xOF5BEYLGb1oSCUnagRyHAQgUUgYPqXACIGRH18xUTKqU0r1L923kd2+InvgrGkjhf0fq+kvzo8e4hsi0ofafrm7uLtqfl7dXFzf/U5PVfP98uL63Y/b6w/Np9XH25tvzeXtr5u7943+0HzuTdrosjVT4ROKg1Ac1I97NYQbUB0B1RFQHQHVEdzsPT+rCcqKhwYGQAogIKEDAKpDojpAFCFRHWwJuBLwA9WuY+47ue851LbTWjY5jCbLHKpE4sq0aVib9I1j35m/ybhuAlVnrTUDg9IR0aMytHaZQpMpdHuncEGCffs4FJqtFOraKZyrUJ2Awg0VmlNRuDAPrvQuFG4pZLOVQr0HCk9WyE+mcIdCPgiF9RTyXlS4pZCPo8KTFfJ8LlRPpXDXFdkcgsIqVuSdKPyfFXkfFNZTyHtR4a4r8kFUWEUhv8Ctie6s0TQwGDoK7DYZjEbLDOYd3soea0Gu7JPmCAzueyasbC05nQZfyv64Ygafyfa4Ygafye74dPPgi6xifhKD5kAMPscqrovB51jFh2dwHxNhzVVMdX1R/zuD1XxRH4bBfW+Ma/6i/l8Gz+M54HRwF3DAHcBpgCoDKGVUNYNRBqOMpYVBKOOAm+GN4Y3hjeFN4E30LCUhnb8GnL+GTDhyFNL5a5ACYFUCOEzldCDLugSQNE4pYVsCSBq7stMM4FCXU+iM0DmFzgidc2BSAKJKQA/SkM46P0hDdeSdU/g98t+T3t4vqoTGw92hyioUx1iwMivvN3ksykN1ShNNZ9XC9pGZozdanjm4PKuuUBSzGWOuCXyMvRJRmK2i0K9HFPOZYraOvDpRbMwU6yp5E8Xb6rG0epjO23j/LWpCOkfO49tCb6qjN3eL6ghZHbpmdSysI2/qOKI6+o5bN21PBCkWpFiQYkGKBSkWpFhm20OZckwKOSalAZsZbAG7mQoksS9IxwBwCWBFlnT/VZAwSfkRXwK0DiTHGiPNca8DuO0rKceCHMdmHtM6YOd3RocMah2vg/odr4OGtW2lH/NGyoM7QjOgyWA0WWdDMzzNwDSSEeBhscrXWfOeR22GvPprzGq6wvrwB+2tXlc=
+
+> <s_ppw_prepared_with_version>
+2020-2
+
+$$$$
+pfkfb3_automap_cofactor3
+                    3D
+ Schrodinger Suite 2024-1.
+ 18 17  0  0  1  0            999 V2000
+   97.8460   48.2900  250.2980 C   0  0  0  0  0  0
+   98.6800   48.6860  251.4680 C   0  0  0  0  0  0
+   99.5600   49.8750  251.2120 C   0  0  0  0  0  0
+  100.2720   50.1640  252.5380 C   0  0  0  0  0  0
+  100.5970   49.6720  250.1290 C   0  0  0  0  0  0
+  101.4590   50.9170  250.1680 C   0  0  0  0  0  0
+   98.2080   48.5050  249.1060 O   0  5  0  0  0  0
+   96.8030   47.7060  250.6410 O   0  0  0  0  0  0
+  101.3400   49.5560  252.8120 O   0  5  0  0  0  0
+   99.7380   50.9680  253.3390 O   0  0  0  0  0  0
+  102.6240   50.7590  249.8670 O   0  5  0  0  0  0
+  101.0350   52.0490  250.5430 O   0  0  0  0  0  0
+   98.8100   51.0280  250.8130 O   0  0  0  0  0  0
+   99.2952   47.8406  251.7761 H   0  0  0  0  0  0
+   98.0325   48.8923  252.3202 H   0  0  0  0  0  0
+  100.1005   49.6062  249.1609 H   0  0  0  0  0  0
+  101.2073   48.8020  250.3714 H   0  0  0  0  0  0
+   99.4127   51.7431  250.5963 H   0  0  0  0  0  0
+  1  2  1  0  0  0
+  1  7  1  0  0  0
+  1  8  2  0  0  0
+  2  3  1  0  0  0
+  2 14  1  0  0  0
+  2 15  1  0  0  0
+  3  4  1  0  0  0
+  3  5  1  0  0  0
+  3 13  1  0  0  0
+  4  9  1  0  0  0
+  4 10  2  0  0  0
+  5  6  1  0  0  0
+  5 16  1  0  0  0
+  5 17  1  0  0  0
+  6 11  1  0  0  0
+  6 12  2  0  0  0
+ 13 18  1  0  0  0
+M  CHG  3   7  -1   9  -1  11  -1
+M  END
+> <i_epik_Tot_Q>
+-2
+
+> <i_epik_Tot_abs_Q>
+2
+
+> <i_m_Source_File_Index>
+1
+
+> <i_m_stars>
+0
+
+> <i_pdb_PDB_CRYST1_z>
+12
+
+> <b_m_subgroup_collapsed>
+0
+
+> <b_ppw_added_hydrogens>
+1
+
+> <b_ppw_assigned_bond_orders>
+1
+
+> <b_ppw_created_disulfur>
+1
+
+> <b_ppw_prepared>
+1
+
+> <b_ppw_ran_protassign>
+1
+
+> <b_ppw_treated_metals>
+1
+
+> <r_epik_Charging_Adjusted_Penalty>
+0.00919192
+
+> <r_epik_Ionization_Penalty>
+0.0064
+
+> <r_epik_Ionization_Penalty_Charging>
+0.0049
+
+> <r_epik_Ionization_Penalty_Neutral>
+0.0014
+
+> <r_epik_State_Penalty>
+0.0043
+
+> <r_pdb_PDB_CRYST1_a>
+103.036
+
+> <r_pdb_PDB_CRYST1_alpha>
+90
+
+> <r_pdb_PDB_CRYST1_b>
+103.036
+
+> <r_pdb_PDB_CRYST1_beta>
+90
+
+> <r_pdb_PDB_CRYST1_c>
+255.012
+
+> <r_pdb_PDB_CRYST1_gamma>
+120
+
+> <r_pdb_PDB_EXPDTA_PH>
+7.5
+
+> <r_pdb_PDB_EXPDTA_TEMPERATURE>
+100
+
+> <r_pdb_PDB_R>
+0.186
+
+> <r_pdb_PDB_RESOLUTION>
+1.96
+
+> <r_pdb_PDB_Rfree>
+0.208
+
+> <s_epik_cmdline>
+J2VwaWtfYXBwJywgJy1pbWFlJywgJy9Vc2Vycy9yb3NzL1dvcmsvbWVyY2tfZGF0YV9zZXRzL2ZlcC1iZW5jaG1hcmsvcGZrZmIzL2VwaWtfcG9wL2VwaWtfcG9wLm1hZWd6JywgJy1vbWFlJywgJ2VwaWtfcG9wLW91dC5tYWVneicsICctcGgnLCAnOC4wMCcsICctcycsICd3YXRlcic=
+
+> <s_epik_input>
+W09IXVtQSF0oW09IXSkoW09IXSlbT0hd
+
+> <s_m_Source_File>
+6hvi.pdb
+
+> <s_m_Source_Path>
+/Users/ross/Work/merck_data_sets/fep-benchmark/pfkfb3
+
+> <s_m_entry_id>
+194
+
+> <s_m_entry_name>
+6HVI - hbond-opt with PO4_mol2
+
+> <s_m_job_name>
+epik_pop
+
+> <s_m_subgroup_title>
+proteinprep_21728885_only-protein-out->pfkfb3_automap_protein - prepared_split_by_structure->6HVI - hbond-opt with PO4_split_by_molecule
+
+> <s_m_subgroupid>
+proteinprep_21728885_only-protein-out1->pfkfb3_automap_protein - prepared_split_by_structure1->6HVI - hbond-opt with PO4_split_by_molecule
+
+> <s_pdb_PDB_CLASSIFICATION>
+TRANSFERASE
+
+> <s_pdb_PDB_CRYST1_Space_Group>
+P 65 2 2
+
+> <s_pdb_PDB_DEPOSITION_DATE>
+11-OCT-18
+
+> <s_pdb_PDB_EXPDTA>
+X-RAY DIFFRACTION
+
+> <s_pdb_PDB_ID>
+6HVI
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Chains>
+A
+
+> <s_pdb_PDB_REMARK_350_Biomolecule_1_Transform_1_Matrix_1>
+1.000000 0.000000 0.000000   0.000000;0.000000 1.000000 0.000000   0.000000;0.000000 0.000000 1.000000   0.000000
+
+> <s_pdb_PDB_TITLE>
+HUMAN PFKFB3 IN COMPLEX WITH A N-ARYL 6-AMINOQUINOXALINE INHIBITOR 2
+
+> <s_pdb_PDB_format_version>
+3.30
+
+> <s_ppw_entry_id_backup>
+204
+
+> <s_ppw_het_states>
+eJztWj1z1DAQ/Sse1zmjz9UudFS0DCWTIhNSERKKUDCZ/Hcsyfbz6WKOC/ehfFylPK+1q7dvJSvSfavb983X/me9DWeNOj9rYpPRlKnpFJoaTYOmRdOh6dEkNOHNwZuDNw9vHt48vHl48/Dm4c3Dm4c3D28e3gjeCN4I3gjeCN4I3ih5i+2By0yjHmhMQOxvHei7MuA8OzdgPpOu1wC8Ep/lAY2AThbwMgBUWES+RguTLCwsMoDQ47OcxRFwqY8AwCdg1geNwGgRyk7TaGO6zRyI6TXI/xpjPofuCyBmbnzFlRY5MAzfUxG6T4F5xOF5BEYLGb1oSCUnagRyHAQgUUgYPqXACIGRH18xUTKqU0r1L923kd2+InvgrGkjhf0fq+kvzo8e4hsi0ofafrm7uLtqfl7dXFzf/U5PVfP98uL63Y/b6w/Np9XH25tvzeXtr5u7943+0HzuTdrosjVT4ROKg1Ac1I97NYQbUB0B1RFQHQHVEdzsPT+rCcqKhwYGQAogIKEDAKpDojpAFCFRHWwJuBLwA9WuY+47ue851LbTWjY5jCbLHKpE4sq0aVib9I1j35m/ybhuAlVnrTUDg9IR0aMytHaZQpMpdHuncEGCffs4FJqtFOraKZyrUJ2Awg0VmlNRuDAPrvQuFG4pZLOVQr0HCk9WyE+mcIdCPgiF9RTyXlS4pZCPo8KTFfJ8LlRPpXDXFdkcgsIqVuSdKPyfFXkfFNZTyHtR4a4r8kFUWEUhv8Ctie6s0TQwGDoK7DYZjEbLDOYd3soea0Gu7JPmCAzueyasbC05nQZfyv64Ygafyfa4Ygafye74dPPgi6xifhKD5kAMPscqrovB51jFh2dwHxNhzVVMdX1R/zuD1XxRH4bBfW+Ma/6i/l8Gz+M54HRwF3DAHcBpgCoDKGVUNYNRBqOMpYVBKOOAm+GN4Y3hjeFN4E30LCUhnb8GnL+GTDhyFNL5a5ACYFUCOEzldCDLugSQNE4pYVsCSBq7stMM4FCXU+iM0DmFzgidc2BSAKJKQA/SkM46P0hDdeSdU/g98t+T3t4vqoTGw92hyioUx1iwMivvN3ksykN1ShNNZ9XC9pGZozdanjm4PKuuUBSzGWOuCXyMvRJRmK2i0K9HFPOZYraOvDpRbMwU6yp5E8Xb6rG0epjO23j/LWpCOkfO49tCb6qjN3eL6ghZHbpmdSysI2/qOKI6+o5bN21PBCkWpFiQYkGKBSkWpFhm20OZckwKOSalAZsZbAG7mQoksS9IxwBwCWBFlnT/VZAwSfkRXwK0DiTHGiPNca8DuO0rKceCHMdmHtM6YOd3RocMah2vg/odr4OGtW2lH/NGyoM7QjOgyWA0WWdDMzzNwDSSEeBhscrXWfOeR22GvPprzGq6wvrwB+2tXlc=
+
+> <s_ppw_prepared_with_version>
+2020-2
+
+$$$$
