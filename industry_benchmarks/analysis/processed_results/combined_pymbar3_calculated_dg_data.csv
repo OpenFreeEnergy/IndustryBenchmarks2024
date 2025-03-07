@@ -55,6 +55,19 @@ ejm_46,-10.973658847743776,0.062058887064108,-11.420000076293944,0.0,EliLilly,el
 jmc_31,-11.365503219704046,0.1205801006169641,-10.920000076293944,0.0,EliLilly,eli_lilly_charge/charge_annihilation_tyk2/results_data,charge_annihilation_set,tyk2
 ejm_52charg,-7.188040136243245,0.0734577376262899,-7.489999771118164,0.0,EliLilly,eli_lilly_charge/charge_annihilation_tyk2/results_data,charge_annihilation_set,tyk2
 jmc_32charg,-10.943107084271787,0.1374097174947497,-11.65999984741211,0.0,EliLilly,eli_lilly_charge/charge_annihilation_tyk2/results_data,charge_annihilation_set,tyk2
+18,-10.453510942846282,0.0399917936076153,-8.960000038146973,0.0,DeepOrigin,hsp90_2rings/hsp90_2rings/results_data,fragments,hsp90_2rings
+15,-9.048319897382232,0.0340611588692764,-9.880000114440918,0.0,DeepOrigin,hsp90_2rings/hsp90_2rings/results_data,fragments,hsp90_2rings
+19,-10.66933941488331,0.0414796820277113,-10.260000228881836,0.0,DeepOrigin,hsp90_2rings/hsp90_2rings/results_data,fragments,hsp90_2rings
+16,-6.587761143596211,0.0696446686828439,-8.119999885559082,0.0,DeepOrigin,hsp90_2rings/hsp90_2rings/results_data,fragments,hsp90_2rings
+14,-9.469705915977558,0.0901933007300069,-8.720000267028809,0.0,DeepOrigin,hsp90_2rings/hsp90_2rings/results_data,fragments,hsp90_2rings
+17,-9.63136329566596,0.0415844536013273,-9.920000076293944,0.0,DeepOrigin,hsp90_2rings/hsp90_2rings/results_data,fragments,hsp90_2rings
+9,-8.059999050311964,0.0354731705202275,-7.360000133514404,0.0,DeepOrigin,hsp90_single_ring/hsp90_single_ring/results_data,fragments,hsp90_single_ring
+2,-7.293669176210542,0.0350038415095667,-6.929999828338623,0.0,DeepOrigin,hsp90_single_ring/hsp90_single_ring/results_data,fragments,hsp90_single_ring
+8,-7.8929100366481535,0.0525242169726155,-8.029999732971191,0.0,DeepOrigin,hsp90_single_ring/hsp90_single_ring/results_data,fragments,hsp90_single_ring
+11,-8.75333528755331,0.0811260167378948,-8.119999885559082,0.0,DeepOrigin,hsp90_single_ring/hsp90_single_ring/results_data,fragments,hsp90_single_ring
+12,-8.099817939683236,0.0664131642623919,-8.59000015258789,0.0,DeepOrigin,hsp90_single_ring/hsp90_single_ring/results_data,fragments,hsp90_single_ring
+10,-8.063482295799899,0.0509765062622393,-8.3100004196167,0.0,DeepOrigin,hsp90_single_ring/hsp90_single_ring/results_data,fragments,hsp90_single_ring
+3,-7.486786785997484,0.0496453298888523,-8.3100004196167,0.0,DeepOrigin,hsp90_single_ring/hsp90_single_ring/results_data,fragments,hsp90_single_ring
 4a,-8.139645305065702,0.1758923127283235,-6.864231586456299,0.0,Genentech,jak2_set1_genentech/fragments_jak2_set1/results_data,fragments,jak2_set1
 7,-8.830732891368358,0.287975152234338,-8.860579490661621,0.0,Genentech,jak2_set1_genentech/fragments_jak2_set1/results_data,fragments,jak2_set1
 6,-6.437037209251109,0.4352467434765822,-6.198638439178467,0.0,Genentech,jak2_set1_genentech/fragments_jak2_set1/results_data,fragments,jak2_set1
@@ -102,6 +115,12 @@ ET,-6.645494823226029,0.094709335160237,-6.960000038146973,0.0,Roche,roche_mix/f
 SBT_S,-9.45216840011497,0.1033879624798043,-8.420000076293945,0.0,Roche,roche_mix/fragments_mup1/results_data,fragments,mup1
 IPT,-8.122548185053443,0.1040381336792662,-7.849999904632568,0.0,Roche,roche_mix/fragments_mup1/results_data,fragments,mup1
 MT,-5.094456409480001,0.1041633207120688,-5.639999866485596,0.0,Roche,roche_mix/fragments_mup1/results_data,fragments,mup1
+4,-6.885728833530257,0.2316786614135768,-5.400000095367432,0.0,DeepOrigin,P38/p38_fragments/results_data,fragments,p38
+1_1W7H,-3.604727419226744,0.2423617988899958,-3.940000057220459,0.0,DeepOrigin,P38/p38_fragments/results_data,fragments,p38
+7,-6.6820767363148,0.5167551190238162,-6.300000190734863,0.0,DeepOrigin,P38/p38_fragments/results_data,fragments,p38
+6,-6.728765601948229,0.3683606506925522,-5.039999961853027,0.0,DeepOrigin,P38/p38_fragments/results_data,fragments,p38
+3,-2.1683739717217287,0.2203250581725357,-4.090000152587891,0.0,DeepOrigin,P38/p38_fragments/results_data,fragments,p38
+5_1WBW,-4.640327952242369,0.2834388603553203,-5.940000057220459,0.0,DeepOrigin,P38/p38_fragments/results_data,fragments,p38
 meta methyl ethyl benzene,-4.983902731792804,0.0924584284601924,-5.079999923706055,0.0,Janssen,janssen_public/fragments_t4_lysozyme/results_data,fragments,t4_lysozyme
 ethyl benzene,-6.4705708788384015,0.0867047226681491,-5.71999979019165,0.0,Janssen,janssen_public/fragments_t4_lysozyme/results_data,fragments,t4_lysozyme
 m-xylene,-3.3794356654904,0.0984116392299177,-4.71999979019165,0.0,Janssen,janssen_public/fragments_t4_lysozyme/results_data,fragments,t4_lysozyme
