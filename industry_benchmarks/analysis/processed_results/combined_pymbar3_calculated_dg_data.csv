@@ -332,6 +332,36 @@ ejm_45,-9.557738605441164,0.1135398889014505,-9.5600004196167,0.0,Genentech,tyk2
 ejm_46,-11.022554899425682,0.0793784950381246,-11.3100004196167,0.0,Genentech,tyk2_genentech/jacs_set_tyk2/results_data,jacs_set,tyk2
 ejm_44,-6.446270841193229,0.1378193182100025,-7.420000076293945,0.0,Genentech,tyk2_genentech/jacs_set_tyk2/results_data,jacs_set,tyk2
 ejm_43,-7.617974083676883,0.1248661853577919,-8.260000228881836,0.0,Genentech,tyk2_genentech/jacs_set_tyk2/results_data,jacs_set,tyk2
+spiro3,-8.577065487545113,0.1059833823841879,-8.979999542236328,0.0,Biogen,biogen_public/BACE-ciordia-prospective/results_data,janssen_bace,bace_ciordia_prospective
+spiro15,-8.272637451834006,0.0851010562221076,-9.050000190734863,0.0,Biogen,biogen_public/BACE-ciordia-prospective/results_data,janssen_bace,bace_ciordia_prospective
+spiro6,-10.061084880479156,0.1187494679931071,-9.529999732971191,0.0,Biogen,biogen_public/BACE-ciordia-prospective/results_data,janssen_bace,bace_ciordia_prospective
+spiro10,-10.612766319910648,0.1258513917033862,-8.5,0.0,Biogen,biogen_public/BACE-ciordia-prospective/results_data,janssen_bace,bace_ciordia_prospective
+spiro5,-7.120320790069337,0.1097659313428427,-7.760000228881836,0.0,Biogen,biogen_public/BACE-ciordia-prospective/results_data,janssen_bace,bace_ciordia_prospective
+spiro2,-6.551054350607321,0.0836781159469438,-7.03000020980835,0.0,Biogen,biogen_public/BACE-ciordia-prospective/results_data,janssen_bace,bace_ciordia_prospective
+spiro4,-7.124316087353379,0.1027499549221059,-7.619999885559082,0.0,Biogen,biogen_public/BACE-ciordia-prospective/results_data,janssen_bace,bace_ciordia_prospective
+spiro1,-7.756554841218461,0.0862077637449381,-7.519999980926514,0.0,Biogen,biogen_public/BACE-ciordia-prospective/results_data,janssen_bace,bace_ciordia_prospective
+spiro16,-8.094199867276517,0.0863288571698865,-8.180000305175781,0.0,Biogen,biogen_public/BACE-ciordia-prospective/results_data,janssen_bace,bace_ciordia_prospective
+17e,-10.103988928262448,1.474162050987823,-11.95080280303955,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+17f,-11.258147199865377,1.5001406133620645,-11.637025833129885,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+8d,-8.271374168405558,1.2290669801269098,-8.349190711975098,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+8g,-10.095674593766272,1.3694577760998363,-10.35463523864746,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+8e,-8.911283343341836,1.301343380008862,-8.417403221130371,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+8b,-8.309003697790894,1.2277520771305783,-8.512900352478027,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+8c,-8.915262988502398,1.2279560297932983,-8.308263778686523,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+27b,-9.990616020945806,2.2839370620482065,-9.972644805908203,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+17b,-9.90900219575452,1.4501952622048973,-11.5824556350708,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+17d,-9.58520094262271,1.4519495093941337,-11.391462326049805,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+17c,-10.80965880546544,1.4526493109626448,-11.74616527557373,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+17g,-11.105035220727752,1.921974365617026,-11.118612289428713,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+27g,-12.555265522083172,2.335030193281702,-12.250936508178713,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+27c,-11.52809185751935,3.26202268984578,-10.013572692871094,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+27d,-9.662078486203038,2.284830647553849,-9.276880264282228,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+27e,-10.989628400721166,3.263478880952529,-9.358736038208008,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+8a,-7.374457569792536,1.234298061393376,-7.789851188659668,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+27a,-9.678055244709563,2.285183235685819,-9.154098510742188,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+17a,-9.243613756605644,1.461200959081412,-10.94126033782959,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+8f,-10.18690178045162,1.3515229477855089,-7.462430953979492,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
+27f,-10.206515401353784,2.3522043273327657,-9.099527359008787,0.0,Biogen,biogen_public/BACE-P3-Arg-in/results_data,janssen_bace,bace_p3_arg368_in
 24,-9.780895447858644,0.1653116682666706,-9.785843849182127,0.0,ASAP,asap_mix/ciordia_retro/results_data,janssen_bace,ciordia_retro
 27,-9.465890397294675,0.1261611805708548,-9.612375259399414,0.0,ASAP,asap_mix/ciordia_retro/results_data,janssen_bace,ciordia_retro
 35,-9.95679787792723,0.1675552595598861,-9.881757736206056,0.0,ASAP,asap_mix/ciordia_retro/results_data,janssen_bace,ciordia_retro
@@ -613,6 +643,50 @@ Example-3,-6.088834602171421,0.4748944063005544,-8.215871810913086,0.0,GSK,merck
 Example-4,-5.7475343565806245,0.4819791069603496,-8.201089859008789,0.0,GSK,merck_shp2_gsk/merck_shp2/results_data,merck,shp2
 Example-2,-8.554790573900656,0.3917569481829852,-8.27622127532959,0.0,GSK,merck_shp2_gsk/merck_shp2/results_data,merck,shp2
 Example-27,-9.71408079510573,1.70672418890455,-8.51852798461914,0.0,GSK,merck_shp2_gsk/merck_shp2/results_data,merck,shp2
+CHEMBL3265018,-11.609059145196568,0.2146473123897215,-11.187724113464355,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265016,-11.052075539008522,0.2101643123242221,-11.689735412597656,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265019,-12.262918205325354,0.2115480738271462,-10.777045249938965,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265017,-11.056640007152945,0.2067208346235145,-11.48725414276123,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265028,-11.108409145049638,0.2553105049429773,-11.010265350341797,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265037,-11.28094012969824,0.3461304306369969,-12.764640808105469,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265031,-10.677389941378287,0.3125814744341366,-12.078866958618164,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265030_n,-10.814228371906967,0.2669952584534537,-11.471863746643066,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+docked CHEMBL3264998,-13.17386197873862,0.6373306715237368,-11.712096214294434,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3264997,-11.845732888931954,0.4460019316524331,-10.983019828796388,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+docked CHEMBL3264994,-8.149994156213825,1.2585020398605309,-9.804960250854492,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3264995,-11.96526250142576,0.4008256120365183,-12.381524085998535,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+redocked CHEMBL3265000 ground state,-15.389011382646984,1.1221807723755275,-11.811073303222656,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265001,-12.338022456858509,0.4556461999834719,-12.03799057006836,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265012,-11.250022722465657,0.3101357136373681,-10.546293258666992,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265013,-11.010670142956622,0.2379390915027544,-9.81322193145752,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3259820,-11.25098793670579,0.236136745486832,-10.575678825378418,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265033,-11.852326085187473,0.303924983538708,-11.838635444641112,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265027,-10.129840388010413,0.2573700588027826,-10.329894065856934,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265032,-11.117703404557789,0.2711934402963185,-11.068829536437988,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265034,-11.089543780331816,0.2703610194775724,-11.48725414276123,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265035,-11.16003187322561,0.2952683120033109,-11.07657527923584,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265036,-11.281248682802678,0.2804478335407007,-10.417919158935549,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265014,-11.768935099466525,0.3244793298505302,-10.40023136138916,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265020,-10.264128731907013,0.2091711986547125,-11.003335952758787,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265023,-9.97741484444038,0.2166108144885874,-10.477216720581056,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265021,-10.143622217292508,0.202338642320672,-10.890737533569336,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+docked CHEMBL3265004,-12.3138748029027,0.4411903055151463,-10.857505798339844,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265003 tautomer 2,-11.999702137484766,0.4448051485187431,-10.820952415466309,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265026,-11.159392454817592,0.2466862087375136,-11.36131477355957,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265024,-11.769220936520362,0.2532302056860847,-11.784735679626465,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265029,-10.7516103599489,0.2098061971611509,-11.125299453735352,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265025 flip,-10.97397647831236,0.1897688059933437,-10.199455261230469,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265015 flip,-7.372698247782459,0.3037135209822005,-9.47731590270996,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265005,-9.799366621280196,0.2489612592290561,-10.323298454284668,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265010,-9.944443797464686,0.3589151375186412,-10.132436752319336,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265011 flip,-5.060145888268081,0.3748537648610893,-8.637885093688965,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+docked CHEMBL3264999 adjust,-11.483118642251108,0.396885342105731,-11.41401481628418,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265006,-9.013209807639528,0.2753629559688845,-9.95804214477539,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265002,-11.91440755415989,0.4340799382481231,-10.617273330688477,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265022,-10.674726441846854,0.2773301854182461,-10.791322708129885,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265008,-10.317101423778396,0.295893520936067,-9.784358024597168,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3265009,-10.988193161433449,0.6325434675886402,-10.297627449035645,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
+CHEMBL3264996,-11.64092534533613,0.4051509955792911,-10.665895462036133,0.0,DeepOrigin,deeporigin_public/syk/results_data,merck,syk
 5b,-12.625494956183244,0.0888837656027824,-10.474388122558594,0.0,AstraZeneca,merck_tnks2/merck_tnks2/results_data,merck,tnks2
 5j,-12.812462937755344,0.0802631592283998,-11.08442211151123,0.0,AstraZeneca,merck_tnks2/merck_tnks2/results_data,merck,tnks2
 5c,-11.890630555472276,0.0737443035893037,-9.960407257080078,0.0,AstraZeneca,merck_tnks2/merck_tnks2/results_data,merck,tnks2
@@ -656,6 +730,30 @@ Example-27,-9.71408079510573,1.70672418890455,-8.51852798461914,0.0,GSK,merck_sh
 17,-9.447088959043032,0.2394159958536987,-10.395273208618164,0.0,Genentech,genentech_mix/misc_cdk8/results_data,miscellaneous_set,cdk8
 21,-9.28113681707528,0.1658347673868311,-9.862342834472656,0.0,Genentech,genentech_mix/misc_cdk8/results_data,miscellaneous_set,cdk8
 19,-10.41385075845774,0.1214052222528098,-10.224825859069824,0.0,Genentech,genentech_mix/misc_cdk8/results_data,miscellaneous_set,cdk8
+31,-11.16346444556898,0.3092493009554719,-11.290130615234377,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+33 (Saha 2018),-11.990837644325824,0.3074901570256596,-9.73618984222412,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+39,-12.490315716417062,0.3161217112697657,-10.71462059020996,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+fig 3,-11.33502899280638,0.3434992841109155,-10.59958553314209,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+11,-10.431575620885493,0.2360594256172448,-12.122775077819824,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+9,-11.72637393285908,0.4784180717838214,-10.565720558166504,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+23,-12.342727631683228,0.3292207906427496,-10.67374324798584,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+27,-12.337003811912655,0.4622752947884462,-11.187724113464355,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+12,-11.77115197159765,0.323331451665393,-11.046184539794922,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+14,-7.584589227851938,0.3884865668967941,-7.842516899108887,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+24,-11.913619941186353,0.3667240630181625,-11.627310752868652,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+29,-11.46239373612586,0.2465948959977042,-10.805952072143556,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+19,-7.464449010145227,0.2778667877647792,-7.972322940826416,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+30,-10.199180014692278,0.4225784011122787,-9.903937339782717,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+20,-5.664812239792109,0.2368531191684385,-6.821234703063965,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+28,-12.57209784888826,0.5940859701091069,-11.589073181152344,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+25,-10.290198784217038,0.3489714674715076,-12.03799057006836,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+26,-10.60448005347034,0.3549565783460275,-10.67374324798584,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+6,-10.336128275929092,0.2146673460019638,-10.420489311218262,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+2,-7.460808479859712,0.146309034827663,-8.665205001831055,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+15,-9.28504200685843,0.2883746833024262,-8.590265274047852,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+4,-10.1193750010939,0.2153405639368026,-11.324654579162598,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+22,-7.547195076969088,0.3266885106558817,-9.97237777709961,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
+6MRG ligand,-8.378148822065286,0.5187855215244334,-10.287250518798828,0.0,Biogen,biogen_public/FAAH/results_data,miscellaneous_set,faah
 17e,-7.508707291029289,0.0648041458339186,-6.896974087,0.0,Odyssey,odyssey_pub/misc_galectin3/results_data,miscellaneous_set,galectin
 17k,-7.696343765619358,0.0954247466550949,-6.621879578,0.0,Odyssey,odyssey_pub/misc_galectin3/results_data,miscellaneous_set,galectin
 17d,-6.552987811705272,0.0698365116581383,-6.150896072,0.0,Odyssey,odyssey_pub/misc_galectin3/results_data,miscellaneous_set,galectin
