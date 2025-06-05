@@ -1,7 +1,4 @@
 ligand name,DG (kcal/mol),uncertainty (kcal/mol),Exp DG (kcal/mol),Exp dDG (kcal/mol),partner_id,dataset_name,system group,system name
-61a,-11.054388827525042,0.6939564096695221,-12.0,0.0,Bayer,bayer_mix/Bayer_macrocycles_BRD4/results_data,bayer_macrocycles,brd4
-11,-9.53208664774432,0.8344127934493514,-8.199999809265137,0.0,Bayer,bayer_mix/Bayer_macrocycles_BRD4/results_data,bayer_macrocycles,brd4
-25e,-10.913524524730638,0.6753330967554709,-11.300000190734863,0.0,Bayer,bayer_mix/Bayer_macrocycles_BRD4/results_data,bayer_macrocycles,brd4
 34,-10.172448819311189,0.1174213211041517,-9.880000114440918,0.0,EliLilly,eli_lilly_charge/charge_annihilation_cdk2/results_data,charge_annihilation_set,cdk2
 25,-9.867576324268414,0.1395600779510895,-9.829999923706056,0.0,EliLilly,eli_lilly_charge/charge_annihilation_cdk2/results_data,charge_annihilation_set,cdk2
 39charg,-7.297474713369249,0.1367371480547628,-8.369999885559082,0.0,EliLilly,eli_lilly_charge/charge_annihilation_cdk2/results_data,charge_annihilation_set,cdk2
