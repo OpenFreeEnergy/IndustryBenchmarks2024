@@ -25,14 +25,75 @@ def _get_statistics(
         statistics_out.append([statistic, s[statistic_type], s['low'], s['high']])
     return statistics_out
 
-# Only calculating statistics for approprietly large systems
-# According to Hahn et al. systems with a minimum dynamic range of 3 kcal/mol 
-# and a minimum of 16 ligands (https://doi.org/10.33011/livecoms.4.1.1497)
-min_dynamic_range = 3
-min_number_ligands = 16
 
-# Statistics to calculate for the datasets
-statistics = ["RAE", "RMSE", "MUE", "R2", "rho", "KTAU"]
+def _get_subset_dataframe(df, column_name, value):
+    df_sub = df[df[column_name] == value]
+    df_sub.reset_index(inplace=True, drop=True)
+    return df_sub
+
+
+def _get_statistics_dict(
+    df: pd.DataFrame,
+    statistics: list[str] = ["RAE", "RMSE", "MUE", "R2", "rho", "KTAU"],
+    min_dynamic_range: int = 3,
+    min_number_ligands: int = 16,
+):
+    """
+    Function to calculate statistics for all datasets.
+    Only calculating statistics for appropriately large systems
+    According to Hahn et al. systems with a minimum dynamic range of 3 kcal/mol
+    and a minimum of 16 ligands (https://doi.org/10.33011/livecoms.4.1.1497)
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+      DataFrame including data
+    statistics: list[str]
+      Statistics to calculate for the datasets
+    min_dynamic_range: int
+      minimum dynamic range (in kcal/mol)
+    min_number_ligands: int
+      minimum number of ligands per dataset
+
+    Returns
+    -------
+    results: dict[str, dict[str, list[list]]]
+      Results dictionary of the different sets and individual datasets within each set.
+      Contains the name of the static and a list of the value for that statistic,
+      the lower, and the upper confidence interval.
+
+    """
+
+    stats_openfe = {}
+    for s in df['system group'].unique():
+        df_s = _get_subset_dataframe(df, 'system group', s)
+        stats_dict = {}
+        for t in df_s['system name'].unique():
+            df_t = _get_subset_dataframe(df_s, 'system name', t)
+    
+            # Calculate the dynamic range of the dataset
+            dynamic_range = abs(max(df_t['Exp DG (kcal/mol)']) - min(df_t['Exp DG (kcal/mol)']))
+        
+            # Do not calculate statics for systems with few ligands (specified in min_number_ligands)
+            # or a small dynamic range (specified in min_dynamic_range)
+            if dynamic_range < min_dynamic_range or len(df_t) < min_number_ligands:
+                continue
+    
+            # Store statistics including the lower and higher 95% confidence interval        
+            stats_out = _get_statistics(
+                df_t['Exp DG (kcal/mol)'], 
+                df_t['DG (kcal/mol)'], 
+                df_t['Exp dDG (kcal/mol)'], 
+                df_t['uncertainty (kcal/mol)'],
+                statistics=statistics,
+            )
+            
+            stats_dict[t] = stats_out 
+        if stats_dict:
+            stats_openfe[s] = stats_dict
+
+    return stats_openfe
+
 
 url_all = 'https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/refs/heads/main/industry_benchmarks/analysis/processed_results/combined_pymbar3_calculated_dg_data.csv'
 # Results after rerunning two of the Merck set/PFKFB3 edges after fixing a bug in the Kartograf atom mapper
@@ -44,34 +105,4 @@ df_no_pfkfb3 = df[df["system name"] != 'pfkfb3']
 df = pd.concat([df_no_pfkfb3, df_rerun])
 df.reset_index(inplace=True, drop=True)
 
-stats_openfe = {}
-for s in df['system group'].unique():
-    df_s = df[df['system group'] == s]
-    df_s.reset_index(inplace=True, drop=True)
-    stats_dict = {}
-    for t in df_s['system name'].unique():
-        df_t = df_s[df_s['system name'] == t]
-        df_t.reset_index(inplace=True, drop=True)
-
-        # Calculate the dynamic range of the dataset
-        dynamic_range = abs(max(df_t['Exp DG (kcal/mol)']) - min(df_t['Exp DG (kcal/mol)']))
-    
-        # Do not calculate statics for systems with few ligands (specified in min_number_ligands)
-        # or a small dynamic range (specified in min_dynamic_range)
-        if dynamic_range < min_dynamic_range or len(df_t) < min_number_ligands:
-            continue
-
-        # Store statistics including the lower and higher 95% confidence interval        
-        stats_out = _get_statistics(
-            df_t['Exp DG (kcal/mol)'], 
-            df_t['DG (kcal/mol)'], 
-            df_t['Exp dDG (kcal/mol)'], 
-            df_t['uncertainty (kcal/mol)'],
-            statistics=statistics,
-        )
-        
-        stats_dict[t] = stats_out 
-    if stats_dict:
-        stats_openfe[s] = stats_dict
-
-print(stats_openfe)
+statistic_dict = _get_statistics_dict(df)
