@@ -28,7 +28,7 @@ def _get_statistics(
     bootstrap_y_uncertainty: bool = False,
     statistic_type: str = "mle",
 ):
-    statistics_out = []
+    statistics_out = {}
     for statistic in statistics:
         s = stats.bootstrap_statistic(x,
                                       y,
@@ -37,7 +37,9 @@ def _get_statistics(
                                       statistic=statistic,
                                       include_true_uncertainty=bootstrap_x_uncertainty,
                                       include_pred_uncertainty=bootstrap_y_uncertainty)
-        statistics_out.append([statistic, s[statistic_type], s['low'], s['high']])
+        statistics_out[statistic] = s[statistic_type]
+        statistics_out[f'{statistic}_low'] = abs(s[statistic_type] - s['low'])
+        statistics_out[f'{statistic}_high'] = abs(s[statistic_type] - s['high'])
     return statistics_out
 
 
@@ -72,7 +74,7 @@ def _get_statistics_dict(
 
     Returns
     -------
-    results: dict[str, dict[str, list[list]]]
+    results: dict[str, dict[str, dict[str, float]]]
       Results dictionary of the different sets and individual datasets within each set.
       Contains the name of the static and a list of the value for that statistic,
       the lower, and the upper confidence interval.
