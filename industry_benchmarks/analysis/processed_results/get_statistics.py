@@ -74,4 +74,3 @@ for s in df['system group'].unique():
     if stats_dict:
         stats_openfe[s] = stats_dict
 
-print(stats_openfe)
