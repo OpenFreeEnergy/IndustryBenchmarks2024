@@ -3,6 +3,21 @@ from cinnabar import stats
 import numpy as np
 from typing import Optional
 
+
+def _filter_ross_df(df_ross, df_openfe):
+    # Filter out systems and ligand variations that were not run by OpenFE
+    indxs = []
+    for inx, row in df_ross.iterrows():
+        df_s = df_openfe[df_openfe['system group'] == row['system group']]
+        if row['system name'] not in df_s['system name'].unique():
+            indxs.append(inx)
+        if row['ligand name'] not in df_s['ligand name'].unique():
+            indxs.append(inx)
+    df_ross_filtered = df_ross.drop(indxs)
+    df_ross_filtered.reset_index(inplace=True, drop=True)
+    return df_ross_filtered
+
+
 def _get_statistics(
     x: np.ndarray,
     y: np.ndarray,
@@ -98,11 +113,29 @@ def _get_statistics_dict(
 url_all = 'https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/refs/heads/main/industry_benchmarks/analysis/processed_results/combined_pymbar3_calculated_dg_data.csv'
 # Results after rerunning two of the Merck set/PFKFB3 edges after fixing a bug in the Kartograf atom mapper
 url_rerun = 'https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/refs/heads/main/industry_benchmarks/analysis/processed_results/reruns/rerun_pymbar3_calculated_dg_data.csv'
+# FEP+ results from Ross et al.
+url_ross = 'https://raw.githubusercontent.com/OpenFreeEnergy/IndustryBenchmarks2024/refs/heads/main/industry_benchmarks/analysis/schrodinger_21_4_results/combined_schrodinger_dg.csv'
 
+# Get the DataFrame for the OpenFE results
 df = pd.read_csv(url_all)
 df_rerun = pd.read_csv(url_rerun)
 df_no_pfkfb3 = df[df["system name"] != 'pfkfb3']
 df = pd.concat([df_no_pfkfb3, df_rerun])
 df.reset_index(inplace=True, drop=True)
 
-statistic_dict = _get_statistics_dict(df)
+# Get the DataFrame for the Ross et al (FEP+) results
+df_ross = pd.read_csv(url_ross)
+# Rename some columns to match OpenFE csv file
+df_ross = df_ross.rename(columns={
+    "Ligand name": "ligand name",
+    "Exp. dG (kcal/mol)": "Exp DG (kcal/mol)",
+    "Pred. dG (kcal/mol)": "DG (kcal/mol)",
+    "Exp. dG error (kcal/mol)": "Exp dDG (kcal/mol)",
+    "Pred. dG std. error (kcal/mol)": "uncertainty (kcal/mol)",
+})
+# Filter the Ross Dataframe to only include ligands run by OpenFE
+df_fep_filtered = _filter_ross_df(df_ross, df)
+
+# Get the statistics for all systems
+statistic_openfe = _get_statistics_dict(df)
+statistic_ross = _get_statistics_dict(df_ross)
