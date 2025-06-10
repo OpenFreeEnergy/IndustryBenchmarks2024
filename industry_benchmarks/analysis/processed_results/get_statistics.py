@@ -61,7 +61,7 @@ for s in df['system group'].unique():
         if dynamic_range < min_dynamic_range or len(df_t) < min_number_ligands:
             continue
 
-        # Store statistics including the lower and higher 95% confidence interval        
+        # Store statistics including the lower and upper 95% confidence interval        
         stats_out = _get_statistics(
             df_t['Exp DG (kcal/mol)'], 
             df_t['DG (kcal/mol)'], 
