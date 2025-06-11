@@ -136,8 +136,8 @@ df_ross = df_ross.rename(columns={
     "Pred. dG std. error (kcal/mol)": "uncertainty (kcal/mol)",
 })
 # Filter the Ross Dataframe to only include ligands run by OpenFE
-df_fep_filtered = _filter_ross_df(df_ross, df)
+df_ross_filtered = _filter_ross_df(df_ross, df)
 
 # Get the statistics for all systems
 statistic_openfe = _get_statistics_dict(df)
-statistic_ross = _get_statistics_dict(df_ross)
+statistic_ross = _get_statistics_dict(df_ross_filtered)
