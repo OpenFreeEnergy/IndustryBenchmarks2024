@@ -71,9 +71,6 @@ Allocation Benchmark Systems
 
 Each participating industry partner will be expected to select one or more system for benchmarking.
 
-Please see the :ref:`benchmark system overview <benchmark_systems>` for a list of all systems and which
-of these have already been allocated.
-
 At a very minimum, we aim to simulate these entirety of the following three datasets:
 
 * JACS
