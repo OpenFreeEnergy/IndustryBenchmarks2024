@@ -1,4 +1,6 @@
 [![Documentation Status](https://readthedocs.org/projects/industrybenchmarks2024/badge/?version=latest)](https://industrybenchmarks2024.readthedocs.io/en/latest/?badge=latest)
+[![DOI](https://zenodo.org/badge/792350377.svg)](https://doi.org/10.5281/zenodo.17245549)
+
 
 # OpenFE 2024 Industry Benchmarking Project
 
