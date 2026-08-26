@@ -77,4 +77,9 @@ The following table should be used to check the meaning of each of the column na
 | `Samples Xns (subsample) dDG`                   | The uncertainty in the DG prediction with subsampling calculated using Xns of simulation data.                           |
 | `Samples Xns (subsample_full) DG`               | The calculated DG for the transformation leg using Xns of simulation data with subsampling based on the full trajectory. |
 | `Samples Xns (subsample_full) dDG`              | The uncertainty in the DG prediction using Xns of simulation data with subsampling based on the full trajectory.         |                                                                                            
+## Extra notes on the datasets
 
+### ligand names are only unique within a dataset
+
+If you are comparing edges between datasets, be aware that the ligand names are not unique across datasets and clashes may happen between ligands with different chemistries.
+Analyses should always work around this by extracting data on a per system basis.
