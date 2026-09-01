@@ -153,6 +153,9 @@
  39 71  1  0  0  0
  40 72  1  0  0  0
 M  END
+> <r_exp_dg>
+-9.88
+
 > <i_fepmapper_affinity>
 1
 
@@ -370,6 +373,9 @@ $$$$
  69 72  1  0  0  0
 M  CHG  1  63   1
 M  END
+> <r_exp_dg>
+-9.94
+
 > <i_epik_Tot_Q>
 1
 
@@ -786,6 +792,9 @@ $$$$
  75 80  1  0  0  0
 M  CHG  1  42   1
 M  END
+> <r_exp_dg>
+-10.7
+
 > <i_fepmapper_affinity>
 1
 
@@ -1108,6 +1117,9 @@ $$$$
  71 74  1  0  0  0
 M  CHG  1  65   1
 M  END
+> <r_exp_dg>
+-10.46
+
 > <i_fepmapper_affinity>
 1
 
@@ -1421,6 +1433,9 @@ $$$$
  63 69  1  0  0  0
 M  CHG  1  63   1
 M  END
+> <r_exp_dg>
+-11.25
+
 > <i_epik_Tot_Q>
 1
 
